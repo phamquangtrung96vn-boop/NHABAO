@@ -322,9 +322,28 @@
         .squad-table th {
             background: #161b22;
             color: #8b949e;
-            padding: 6px;
+            padding: 4px;
             font-size: 13px;
             border: 1px solid var(--border-color);
+        }
+
+        .squad-table th input.col-name-input {
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            color: #58a6ff;
+            font-weight: bold;
+            padding: 4px 6px;
+            border-radius: 4px;
+            outline: none;
+            font-size: 13px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .squad-table th input.col-name-input:focus {
+            border-color: #58a6ff;
+            background: #161b22;
+            color: #fff;
         }
 
         .squad-table td {
@@ -588,9 +607,13 @@
                 <div class="group-sub-header">PT 1, 2, 3 đánh đoàn lớn | PT 4, 5 cơ động</div>
                 <table class="squad-table">
                     <thead>
-                        <tr>
+                        <tr id="headerRow1">
                             <th></th>
-                            <th>PT1</th><th>PT2</th><th>PT3</th><th>PT4</th><th>PT5</th>
+                            <th><input type="text" class="col-name-input" id="g1_col1" value="PT1" oninput="saveData()"></th>
+                            <th><input type="text" class="col-name-input" id="g1_col2" value="PT2" oninput="saveData()"></th>
+                            <th><input type="text" class="col-name-input" id="g1_col3" value="PT3" oninput="saveData()"></th>
+                            <th><input type="text" class="col-name-input" id="g1_col4" value="PT4" oninput="saveData()"></th>
+                            <th><input type="text" class="col-name-input" id="g1_col5" value="PT5" oninput="saveData()"></th>
                         </tr>
                     </thead>
                     <tbody id="group1Body"></tbody>
@@ -606,9 +629,13 @@
                 <div class="group-sub-header">Huyết Hà / Thiết Y lead phụ PT 4, 5</div>
                 <table class="squad-table">
                     <thead>
-                        <tr>
+                        <tr id="headerRow2">
                             <th></th>
-                            <th>PT1</th><th>PT2</th><th>PT3</th><th>PT4</th><th>PT5</th>
+                            <th><input type="text" class="col-name-input" id="g2_col1" value="PT1" oninput="saveData()"></th>
+                            <th><input type="text" class="col-name-input" id="g2_col2" value="PT2" oninput="saveData()"></th>
+                            <th><input type="text" class="col-name-input" id="g2_col3" value="PT3" oninput="saveData()"></th>
+                            <th><input type="text" class="col-name-input" id="g2_col4" value="PT4" oninput="saveData()"></th>
+                            <th><input type="text" class="col-name-input" id="g2_col5" value="PT5" oninput="saveData()"></th>
                         </tr>
                     </thead>
                     <tbody id="group2Body"></tbody>
@@ -706,6 +733,10 @@
         let notes = JSON.parse(localStorage.getItem('nth_notes')) || defaultNotes;
         let squadSelections = JSON.parse(localStorage.getItem('nth_squads')) || {};
         let commanders = JSON.parse(localStorage.getItem('nth_commanders')) || { c1: "Đạo Đạo", c2: "Minh Sói Trần" };
+        let columnNames = JSON.parse(localStorage.getItem('nth_col_names')) || {
+            g1_col1: "PT1", g1_col2: "PT2", g1_col3: "PT3", g1_col4: "PT4", g1_col5: "PT5",
+            g2_col1: "PT1", g2_col2: "PT2", g2_col3: "PT3", g2_col4: "PT4", g2_col5: "PT5"
+        };
         let draggedMemberName = null;
 
         function toggleSidebar() {
@@ -727,15 +758,26 @@
             commanders.c1 = document.getElementById('commander1Input').value;
             commanders.c2 = document.getElementById('commander2Input').value;
 
+            for (let i = 1; i <= 5; i++) {
+                columnNames[`g1_col${i}`] = document.getElementById(`g1_col${i}`).value;
+                columnNames[`g2_col${i}`] = document.getElementById(`g2_col${i}`).value;
+            }
+
             localStorage.setItem('nth_members', JSON.stringify(members));
             localStorage.setItem('nth_notes', JSON.stringify(notes));
             localStorage.setItem('nth_squads', JSON.stringify(squadSelections));
             localStorage.setItem('nth_commanders', JSON.stringify(commanders));
+            localStorage.setItem('nth_col_names', JSON.stringify(columnNames));
         }
 
-        function loadCommanders() {
+        function loadSavedInputs() {
             document.getElementById('commander1Input').value = commanders.c1 || "Đạo Đạo";
             document.getElementById('commander2Input').value = commanders.c2 || "Minh Sói Trần";
+
+            for (let i = 1; i <= 5; i++) {
+                if(columnNames[`g1_col${i}`]) document.getElementById(`g1_col${i}`).value = columnNames[`g1_col${i}`];
+                if(columnNames[`g2_col${i}`]) document.getElementById(`g2_col${i}`).value = columnNames[`g2_col${i}`];
+            }
         }
 
         function initTables() {
@@ -933,13 +975,11 @@
                 group2Counts[key] = 0;
             });
 
-            // Tổng số thành viên của từng môn phái
             members.forEach(m => {
                 const classKey = counts[m.classType] !== undefined ? m.classType : 'Khac';
                 counts[classKey]++;
             });
 
-            // Đếm số thành viên từng môn phái đang được xếp vào Đoàn 1 và Đoàn 2
             Object.entries(squadSelections).forEach(([slotId, memberName]) => {
                 const memberObj = members.find(m => m.name === memberName);
                 if (!memberObj) return;
@@ -1038,7 +1078,8 @@
                 members: members,
                 notes: notes,
                 squads: squadSelections,
-                commanders: commanders
+                commanders: commanders,
+                columnNames: columnNames
             }, null, 2));
             const dlAnchorElem = document.createElement('a');
             dlAnchorElem.setAttribute("href", dataStr);
@@ -1056,7 +1097,8 @@
                         notes = parsed.notes;
                         squadSelections = parsed.squads || {};
                         commanders = parsed.commanders || { c1: "Đạo Đạo", c2: "Minh Sói Trần" };
-                        loadCommanders();
+                        columnNames = parsed.columnNames || columnNames;
+                        loadSavedInputs();
                         renderAll();
                         renderNotes();
                         alert("Nhập dữ liệu thành công!");
@@ -1077,14 +1119,21 @@
                 notes = [...defaultNotes];
                 squadSelections = {};
                 commanders = { c1: "Đạo Đạo", c2: "Minh Sói Trần" };
-                loadCommanders();
+                columnNames = {
+                    g1_col1: "PT1", g1_col2: "PT2", g1_col3: "PT3", g1_col4: "PT4", g1_col5: "PT5",
+                    g2_col1: "PT1", g2_col2: "PT2", g2_col3: "PT3", g2_col4: "PT4", g2_col5: "PT5"
+                };
+                loadSavedInputs();
                 renderAll();
                 renderNotes();
             }
         }
 
         async function sendToDiscord() {
-            const webhookUrl = "https://discord.com/api/webhooks/1547208709627977809/HEbz1V-BtTIjKaQXppUQZ3XDqDe7b-0JxwX_NGsx5XwWA7CGIwBIyKDPm7yuznoURUgO";
+            const webhookUrls = [
+                "https://discord.com/api/webhooks/1547208709627977809/HEbz1V-BtTIjKaQXppUQZ3XDqDe7b-0JxwX_NGsx5XwWA7CGIwBIyKDPm7yuznoURUgO",
+                "https://discord.com/api/webhooks/1547283260923445381/pPkjiE_iYDWmoPQbZ5nX2XZKosSmNtTIeALYPZEORI6RWOnNMIswISpViRU0aPEw0K4f"
+            ];
             
             const btn = event.currentTarget;
             const originalText = btn.innerHTML;
@@ -1106,21 +1155,31 @@
                         return;
                     }
 
-                    const formData = new FormData();
                     const dateStr = new Date().toLocaleString('vi-VN');
-                    
-                    formData.append("content", `📸 **Cập nhật sơ đồ Đội Hình Bang Chiến**\n⏰ *Thời gian: ${dateStr}*`);
-                    formData.append("file", blob, `SoDoBangChien_${Date.now()}.png`);
+                    let successCount = 0;
 
-                    const response = await fetch(webhookUrl, {
-                        method: "POST",
-                        body: formData
-                    });
+                    for (const webhookUrl of webhookUrls) {
+                        const formData = new FormData();
+                        formData.append("content", `📸 **Cập nhật sơ đồ Đội Hình Bang Chiến**\n⏰ *Thời gian: ${dateStr}*`);
+                        formData.append("file", blob, `SoDoBangChien_${Date.now()}.png`);
 
-                    if (response.ok) {
-                        alert("✅ Đã tự động chụp và xuất sơ đồ vào kênh Discord thành công!");
+                        try {
+                            const response = await fetch(webhookUrl, {
+                                method: "POST",
+                                body: formData
+                            });
+                            if (response.ok) {
+                                successCount++;
+                            }
+                        } catch (err) {
+                            console.error("Lỗi gửi webhook:", err);
+                        }
+                    }
+
+                    if (successCount > 0) {
+                        alert(`✅ Đã chụp và gửi thành công đến ${successCount}/${webhookUrls.length} kênh Discord!`);
                     } else {
-                        alert("❌ Gửi thất bại! Lỗi HTTP: " + response.status);
+                        alert("❌ Gửi thất bại đến tất cả các kênh Discord!");
                     }
 
                     btn.innerHTML = originalText;
@@ -1143,7 +1202,7 @@
         });
 
         initTables();
-        loadCommanders();
+        loadSavedInputs();
         renderAll();
         renderNotes();
     </script>
