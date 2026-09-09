@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sơ Đồ Đội Hình Bang Chiến - Nghịch Thủy Hàn</title>
-    <!-- Thư viện FontAwesome chứa các Icon -->
+    <!-- FontAwesome Icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -31,16 +31,50 @@
         .title-banner {
             background: linear-gradient(90deg, #161b22, #21262d);
             color: #f0f6fc;
-            text-align: center;
-            padding: 15px;
-            font-size: 22px;
+            padding: 12px 20px;
+            font-size: 20px;
             font-weight: bold;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             border-radius: 6px;
             margin-bottom: 20px;
             border: 1px solid var(--border-color);
             text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+
+        .toolbar-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-action {
+            background: #21262d;
+            color: #c9d1d9;
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+
+        .btn-action:hover {
+            background: #30363d;
+            color: #fff;
+        }
+
+        .btn-reset {
+            background: #da3633;
+            color: #fff;
+            border: none;
+        }
+        .btn-reset:hover { background: #f85149; }
 
         .layout-container {
             display: grid;
@@ -54,7 +88,7 @@
             border: 1px solid var(--border-color);
             border-radius: 6px;
             padding: 15px;
-            height: calc(100vh - 120px);
+            height: calc(100vh - 110px);
             display: flex;
             flex-direction: column;
         }
@@ -70,19 +104,20 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             background: rgba(0,0,0,0.3);
             padding: 10px;
             border-radius: 4px;
         }
 
-        .input-box input, .input-box select {
+        .input-box input, .input-box select, .input-box textarea {
             padding: 6px 10px;
             background: #0d1117;
             border: 1px solid var(--border-color);
             color: #fff;
             border-radius: 4px;
             outline: none;
+            font-size: 13px;
         }
 
         .btn-add {
@@ -94,7 +129,6 @@
             cursor: pointer;
             font-weight: bold;
         }
-
         .btn-add:hover { background: #2ea043; }
 
         .member-list-scroll {
@@ -103,6 +137,7 @@
             display: flex;
             flex-direction: column;
             gap: 5px;
+            padding-right: 4px;
         }
 
         .member-item {
@@ -119,7 +154,7 @@
         .main-squads {
             display: flex;
             flex-direction: column;
-            gap: 25px;
+            gap: 20px;
         }
 
         .group-box {
@@ -238,7 +273,7 @@
             border: 1px solid var(--border-color);
         }
 
-        /* PHẦN GHI CHÚ TÙY BIẾN */
+        /* PHẦN GHI CHÚ */
         .note-box {
             background: #161b22;
             border: 1px dashed #388bfd;
@@ -257,18 +292,6 @@
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 5px;
         }
-
-        .btn-edit-note {
-            background: #388bfd;
-            color: white;
-            border: none;
-            padding: 3px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 11px;
-        }
-
-        .btn-edit-note:hover { background: #1f6feb; }
 
         .note-list {
             list-style: none;
@@ -329,16 +352,23 @@
 </head>
 <body>
 
-    <!-- BANNER TIÊU ĐỀ -->
+    <!-- BANNER TIÊU ĐỀ VA THANH CÔNG CỤ -->
     <div class="title-banner">
-        ĐỘI HÌNH BANG CHIẾN - NGHỊCH THỦY HÀN
+        <span><i class="fa-solid fa-shield-halved"></i> ĐỘI HÌNH BANG CHIẾN - NGHỊCH THỦY HÀN</span>
+        <div class="toolbar-btns">
+            <button class="btn-action" onclick="exportData()"><i class="fa-solid fa-download"></i> Xuất File</button>
+            <button class="btn-action" onclick="document.getElementById('importFileInput').click()"><i class="fa-solid fa-upload"></i> Nhập File</button>
+            <input type="file" id="importFileInput" style="display:none" accept=".json" onchange="importData(event)">
+            <button class="btn-action btn-reset" onclick="resetAllData()"><i class="fa-solid fa-rotate-right"></i> Reset</button>
+        </div>
     </div>
 
     <div class="layout-container">
         
         <!-- CỘT BÊN TRÁI: DANH SÁCH TỔNG MEMBERS -->
         <div class="sidebar-members">
-            <h3>Danh Sách Bang (80)</h3>
+            <h3 id="memberCountTitle">Danh Sách Bang (0)</h3>
+            
             <div class="input-box">
                 <input type="text" id="memberNameInput" placeholder="Tên Ingame (VD: VixKings)">
                 
@@ -356,7 +386,7 @@
                 
                 <button class="btn-add" onclick="addMember()"><i class="fa-solid fa-plus"></i> Thêm Thành Viên</button>
             </div>
-            
+
             <div class="member-list-scroll" id="memberListScroll">
                 <!-- Render danh sách -->
             </div>
@@ -409,7 +439,7 @@
 
         </div>
 
-        <!-- CỘT BÊN PHẢI: DỰ BỊ & GHI CHÚ TÙY BIẾN -->
+        <!-- CỘT BÊN PHẢI: DỰ BỊ & GHI CHÚ -->
         <div class="sidebar-right">
             
             <div class="sub-box">
@@ -421,14 +451,14 @@
                 </table>
             </div>
 
-            <!-- KHU VỰC GHI CHÚ CÓ THỂ SỬA/THÊM/XÓA -->
+            <!-- KHU VỰC GHI CHÚ -->
             <div class="note-box">
                 <div class="note-header">
                     <strong><i class="fa-solid fa-triangle-exclamation"></i> GHI CHÚ NHIỆM VỤ</strong>
                 </div>
                 
                 <ul class="note-list" id="noteListContainer">
-                    <!-- Các ghi chú sẽ render ở đây -->
+                    <!-- Các ghi chú -->
                 </ul>
 
                 <div class="note-input-group">
@@ -441,7 +471,7 @@
 
     </div>
 
-    <!-- JAVASCRIPT XỬ LÝ -->
+    <!-- JAVASCRIPT HỆ THỐNG LƯU TRỮ TRẠNG THÁI -->
     <script>
         const classIcons = {
             ThietY: "fa-shield-halved",
@@ -455,8 +485,7 @@
             Khac: "fa-user"
         };
 
-        // Danh sách thành viên mẫu
-        let members = [
+        const defaultMembers = [
             { name: "Đạo Đạo (31_7)", classType: "ThietY" },
             { name: "VixKings", classType: "ThanTuang" },
             { name: "Cậu Ba Khanh", classType: "HuyetHa" },
@@ -469,94 +498,32 @@
             { name: "Bạch Như Vân", classType: "ThanTuang" }
         ];
 
-        // Danh sách ghi chú mẫu
-        let notes = [
+        const defaultNotes = [
             "Tố Vấn chú ý duy trì Buff Máu toàn PT.",
             "Thiết Y gom quái / gom người để Thần Tương & Cửu Linh dồn sát thương.",
             "Toái Mộng bắt lẻ hàng sau của địch.",
             "AE BẬT DISCORD ĐỂ NGHE CALL CHIẾN THUẬT!"
         ];
 
-        // Render Ghi chú
-        function renderNotes() {
-            const container = document.getElementById('noteListContainer');
-            container.innerHTML = '';
+        // Lấy dữ liệu đã lưu từ LocalStorage nếu có
+        let members = JSON.parse(localStorage.getItem('nth_members')) || defaultMembers;
+        let notes = JSON.parse(localStorage.getItem('nth_notes')) || defaultNotes;
+        let squadSelections = JSON.parse(localStorage.getItem('nth_squads')) || {};
 
-            notes.forEach((noteText, index) => {
-                const li = document.createElement('li');
-                li.className = 'note-item';
-                li.innerHTML = `
-                    <span>• ${noteText}</span>
-                    <i class="fa-solid fa-trash btn-del-note" onclick="deleteNote(${index})" title="Xóa ghi chú"></i>
-                `;
-                container.appendChild(li);
-            });
-        }
-
-        // Thêm ghi chú mới
-        function addNote() {
-            const input = document.getElementById('newNoteInput');
-            const text = input.value.trim();
-            if (text) {
-                notes.push(text);
-                input.value = '';
-                renderNotes();
-            }
-        }
-
-        // Xóa ghi chú
-        function deleteNote(index) {
-            notes.splice(index, 1);
-            renderNotes();
-        }
-
-        function renderMemberList() {
-            const listEl = document.getElementById('memberListScroll');
-            listEl.innerHTML = '';
-
-            members.forEach((m, index) => {
-                const iconClass = classIcons[m.classType] || 'fa-user';
-                const item = document.createElement('div');
-                item.className = `member-item class-${m.classType}`;
-                item.innerHTML = `
-                    <span><i class="fa-solid ${iconClass}"></i> ${m.name}</span>
-                    <i class="fa-solid fa-xmark" style="cursor:pointer" onclick="removeMember(${index})"></i>
-                `;
-                listEl.appendChild(item);
-            });
-
-            updateAllDropdowns();
-        }
-
-        function addMember() {
-            const nameInput = document.getElementById('memberNameInput');
-            const classInput = document.getElementById('memberClassInput');
-
-            if (!nameInput.value.trim()) return alert("Vui lòng nhập tên Ingame!");
-
-            members.push({
-                name: nameInput.value.trim(),
-                classType: classInput.value
-            });
-
-            nameInput.value = '';
-            renderMemberList();
-        }
-
-        function removeMember(index) {
-            const removedName = members[index].name;
-            members.splice(index, 1);
+        // Hàm tự động lưu toàn bộ dữ liệu hiện tại
+        function saveData() {
+            localStorage.setItem('nth_members', JSON.stringify(members));
+            localStorage.setItem('nth_notes', JSON.stringify(notes));
             
             const selects = document.querySelectorAll('.select-member');
-            selects.forEach(select => {
-                if (select.value === removedName) {
-                    select.value = "";
-                }
+            const currentSquads = {};
+            selects.forEach(sel => {
+                if (sel.value) currentSquads[sel.id] = sel.value;
             });
-
-            renderMemberList();
+            localStorage.setItem('nth_squads', JSON.stringify(currentSquads));
         }
 
+        // Khởi tạo bảng trận đấu (Grid)
         function initTables() {
             createSquadRows('group1Body', 'g1');
             createSquadRows('group2Body', 'g2');
@@ -577,7 +544,8 @@
 
                 for (let col = 1; col <= 5; col++) {
                     const td = document.createElement('td');
-                    td.innerHTML = `<select class="select-member" id="${prefix}_r${row}_c${col}" onchange="onSelectChange(this)"></select>`;
+                    const id = `${prefix}_r${row}_c${col}`;
+                    td.innerHTML = `<select class="select-member" id="${id}" onchange="onSelectChange(this)"></select>`;
                     tr.appendChild(td);
                 }
                 tbody.appendChild(tr);
@@ -597,34 +565,74 @@
             }
         }
 
-        function getSelectedMembers() {
-            const selected = new Set();
-            const selects = document.querySelectorAll('.select-member');
-            selects.forEach(select => {
-                if (select.value) {
-                    selected.add(select.value);
-                }
+        // Render danh sách thành viên ở cột trái
+        function renderMemberList() {
+            const listEl = document.getElementById('memberListScroll');
+            listEl.innerHTML = '';
+
+            members.forEach((m, index) => {
+                const iconClass = classIcons[m.classType] || 'fa-user';
+                const item = document.createElement('div');
+                item.className = `member-item class-${m.classType}`;
+                item.innerHTML = `
+                    <span><i class="fa-solid ${iconClass}"></i> ${m.name}</span>
+                    <i class="fa-solid fa-xmark" style="cursor:pointer" onclick="removeMember(${index})"></i>
+                `;
+                listEl.appendChild(item);
             });
-            return selected;
+
+            document.getElementById('memberCountTitle').innerText = `Danh Sách Bang (${members.length})`;
+            updateAllDropdowns();
+            saveData();
         }
 
+        function addMember() {
+            const nameInput = document.getElementById('memberNameInput');
+            const classInput = document.getElementById('memberClassInput');
+            const val = nameInput.value.trim();
+
+            if (!val) return alert("Vui lòng nhập tên Ingame!");
+
+            if (members.some(m => m.name === val)) {
+                return alert("Tên thành viên đã tồn tại trong danh sách!");
+            }
+
+            members.push({ name: val, classType: classInput.value });
+            nameInput.value = '';
+            renderMemberList();
+        }
+
+        function removeMember(index) {
+            const removedName = members[index].name;
+            members.splice(index, 1);
+            
+            // Nếu người bị xóa đang ở trong sơ đồ, xóa vị trí đó
+            const selects = document.querySelectorAll('.select-member');
+            selects.forEach(select => {
+                if (select.value === removedName) {
+                    select.value = "";
+                    delete squadSelections[select.id];
+                }
+            });
+
+            renderMemberList();
+        }
+
+        // Cập nhật tùy chọn ở các ô Dropdown
         function updateAllDropdowns() {
             const selects = document.querySelectorAll('.select-member');
-            const selectedMembers = getSelectedMembers();
 
             selects.forEach(select => {
-                const currentValue = select.value;
+                const currentValue = select.value || squadSelections[select.id] || "";
 
                 select.innerHTML = '<option value="">-- Trống --</option>';
 
                 members.forEach(m => {
-                    if (!selectedMembers.has(m.name) || m.name === currentValue) {
-                        const opt = document.createElement('option');
-                        opt.value = m.name;
-                        opt.innerText = m.name;
-                        opt.setAttribute('data-class', m.classType);
-                        select.appendChild(opt);
-                    }
+                    const opt = document.createElement('option');
+                    opt.value = m.name;
+                    opt.innerText = m.name;
+                    opt.setAttribute('data-class', m.classType);
+                    select.appendChild(opt);
                 });
 
                 select.value = currentValue;
@@ -645,16 +653,104 @@
         }
 
         function onSelectChange(selectEl) {
-            updateAllDropdowns();
+            if (selectEl.value) {
+                squadSelections[selectEl.id] = selectEl.value;
+            } else {
+                delete squadSelections[selectEl.id];
+            }
+            applyColorToSelect(selectEl);
+            saveData();
         }
 
-        // Lắng nghe sự kiện nhấn Enter ở ô ghi chú
-        document.getElementById('newNoteInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                addNote();
+        // Render Ghi chú
+        function renderNotes() {
+            const container = document.getElementById('noteListContainer');
+            container.innerHTML = '';
+
+            notes.forEach((noteText, index) => {
+                const li = document.createElement('li');
+                li.className = 'note-item';
+                li.innerHTML = `
+                    <span>• ${noteText}</span>
+                    <i class="fa-solid fa-trash btn-del-note" onclick="deleteNote(${index})" title="Xóa"></i>
+                `;
+                container.appendChild(li);
+            });
+            saveData();
+        }
+
+        function addNote() {
+            const input = document.getElementById('newNoteInput');
+            const text = input.value.trim();
+            if (text) {
+                notes.push(text);
+                input.value = '';
+                renderNotes();
             }
+        }
+
+        function deleteNote(index) {
+            notes.splice(index, 1);
+            renderNotes();
+        }
+
+        // Xuất file cấu hình dự phòng (.JSON)
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+                members: members,
+                notes: notes,
+                squads: squadSelections
+            }, null, 2));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", `Doihinh_BangChien_${new Date().toISOString().slice(0,10)}.json`);
+            dlAnchorElem.click();
+        }
+
+        // Nhập file cấu hình từ máy tính (.JSON)
+        function importData(event) {
+            const fileReader = new FileReader();
+            fileReader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed.members && parsed.notes) {
+                        members = parsed.members;
+                        notes = parsed.notes;
+                        squadSelections = parsed.squads || {};
+                        renderMemberList();
+                        renderNotes();
+                        updateAllDropdowns();
+                        alert("Nhập dữ liệu thành công!");
+                    } else {
+                        alert("File không đúng định dạng sơ đồ Bang Chiến!");
+                    }
+                } catch (err) {
+                    alert("Lỗi đọc file JSON!");
+                }
+            };
+            fileReader.readAsText(event.target.files[0]);
+        }
+
+        function resetAllData() {
+            if (confirm("Bạn có chắc chắn muốn đặt lại sơ đồ về mặc định? Mọi thay đổi hiện tại sẽ bị xóa.")) {
+                localStorage.clear();
+                members = [...defaultMembers];
+                notes = [...defaultNotes];
+                squadSelections = {};
+                renderMemberList();
+                renderNotes();
+            }
+        }
+
+        // Phím tắt Enter
+        document.getElementById('newNoteInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') addNote();
+        });
+        document.getElementById('memberNameInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') addMember();
         });
 
+        // Chạy khởi tạo
         initTables();
         renderMemberList();
         renderNotes();
