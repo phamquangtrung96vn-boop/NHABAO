@@ -110,7 +110,7 @@
             border-radius: 4px;
         }
 
-        .input-box input, .input-box select, .input-box textarea {
+        .input-box input, .input-box select {
             padding: 6px 10px;
             background: #0d1117;
             border: 1px solid var(--border-color);
@@ -367,7 +367,7 @@
         
         <!-- CỘT BÊN TRÁI: DANH SÁCH TỔNG MEMBERS -->
         <div class="sidebar-members">
-            <h3 id="memberCountTitle">Danh Sách Bang (0)</h3>
+            <h3 id="memberCountTitle">Chờ Xếp Đội (0)</h3>
             
             <div class="input-box">
                 <input type="text" id="memberNameInput" placeholder="Tên Ingame (VD: VixKings)">
@@ -388,7 +388,7 @@
             </div>
 
             <div class="member-list-scroll" id="memberListScroll">
-                <!-- Render danh sách -->
+                <!-- Render danh sách chưa xếp -->
             </div>
         </div>
 
@@ -471,7 +471,7 @@
 
     </div>
 
-    <!-- JAVASCRIPT HỆ THỐNG LƯU TRỮ TRẠNG THÁI -->
+    <!-- JAVASCRIPT HỆ THỐNG LƯU TRẠNG THÁI -->
     <script>
         const classIcons = {
             ThietY: "fa-shield-halved",
@@ -505,25 +505,16 @@
             "AE BẬT DISCORD ĐỂ NGHE CALL CHIẾN THUẬT!"
         ];
 
-        // Lấy dữ liệu đã lưu từ LocalStorage nếu có
         let members = JSON.parse(localStorage.getItem('nth_members')) || defaultMembers;
         let notes = JSON.parse(localStorage.getItem('nth_notes')) || defaultNotes;
         let squadSelections = JSON.parse(localStorage.getItem('nth_squads')) || {};
 
-        // Hàm tự động lưu toàn bộ dữ liệu hiện tại
         function saveData() {
             localStorage.setItem('nth_members', JSON.stringify(members));
             localStorage.setItem('nth_notes', JSON.stringify(notes));
-            
-            const selects = document.querySelectorAll('.select-member');
-            const currentSquads = {};
-            selects.forEach(sel => {
-                if (sel.value) currentSquads[sel.id] = sel.value;
-            });
-            localStorage.setItem('nth_squads', JSON.stringify(currentSquads));
+            localStorage.setItem('nth_squads', JSON.stringify(squadSelections));
         }
 
-        // Khởi tạo bảng trận đấu (Grid)
         function initTables() {
             createSquadRows('group1Body', 'g1');
             createSquadRows('group2Body', 'g2');
@@ -565,23 +556,32 @@
             }
         }
 
-        // Render danh sách thành viên ở cột trái
+        // Lấy danh sách những tên đã xếp vào đội hình
+        function getAssignedMemberNames() {
+            return Object.values(squadSelections).filter(name => name !== "");
+        }
+
+        // Render danh sách thành viên CHƯA ĐƯỢC XẾP ở cột bên trái
         function renderMemberList() {
             const listEl = document.getElementById('memberListScroll');
             listEl.innerHTML = '';
 
-            members.forEach((m, index) => {
+            const assignedNames = getAssignedMemberNames();
+            // Lọc ra các thành viên chưa có mặt trong squad
+            const unassignedMembers = members.filter(m => !assignedNames.includes(m.name));
+
+            unassignedMembers.forEach((m) => {
                 const iconClass = classIcons[m.classType] || 'fa-user';
                 const item = document.createElement('div');
                 item.className = `member-item class-${m.classType}`;
                 item.innerHTML = `
                     <span><i class="fa-solid ${iconClass}"></i> ${m.name}</span>
-                    <i class="fa-solid fa-xmark" style="cursor:pointer" onclick="removeMember(${index})"></i>
+                    <i class="fa-solid fa-xmark" style="cursor:pointer" onclick="removeMemberByName('${m.name}')"></i>
                 `;
                 listEl.appendChild(item);
             });
 
-            document.getElementById('memberCountTitle').innerText = `Danh Sách Bang (${members.length})`;
+            document.getElementById('memberCountTitle').innerText = `Chờ Xếp Đội (${unassignedMembers.length}/${members.length})`;
             updateAllDropdowns();
             saveData();
         }
@@ -602,37 +602,31 @@
             renderMemberList();
         }
 
-        function removeMember(index) {
-            const removedName = members[index].name;
-            members.splice(index, 1);
-            
-            // Nếu người bị xóa đang ở trong sơ đồ, xóa vị trí đó
-            const selects = document.querySelectorAll('.select-member');
-            selects.forEach(select => {
-                if (select.value === removedName) {
-                    select.value = "";
-                    delete squadSelections[select.id];
-                }
-            });
-
+        function removeMemberByName(nameToRemove) {
+            members = members.filter(m => m.name !== nameToRemove);
             renderMemberList();
         }
 
         // Cập nhật tùy chọn ở các ô Dropdown
         function updateAllDropdowns() {
             const selects = document.querySelectorAll('.select-member');
+            const assignedNames = getAssignedMemberNames();
 
             selects.forEach(select => {
-                const currentValue = select.value || squadSelections[select.id] || "";
+                const currentValue = squadSelections[select.id] || "";
 
                 select.innerHTML = '<option value="">-- Trống --</option>';
 
                 members.forEach(m => {
-                    const opt = document.createElement('option');
-                    opt.value = m.name;
-                    opt.innerText = m.name;
-                    opt.setAttribute('data-class', m.classType);
-                    select.appendChild(opt);
+                    // Ô Dropdown chỉ hiển thị:
+                    // 1. Thành viên CHƯA ĐƯỢC XẾP ở ô nào
+                    // 2. HOẶC chính thành viên ĐANG ĐƯỢC CHỌN ở ô hiện tại này
+                    if (!assignedNames.includes(m.name) || m.name === currentValue) {
+                        const opt = document.createElement('option');
+                        opt.value = m.name;
+                        opt.innerText = m.name;
+                        select.appendChild(opt);
+                    }
                 });
 
                 select.value = currentValue;
@@ -658,8 +652,7 @@
             } else {
                 delete squadSelections[selectEl.id];
             }
-            applyColorToSelect(selectEl);
-            saveData();
+            renderMemberList(); // Render lại danh sách bên trái ngay khi chọn/bỏ chọn
         }
 
         // Render Ghi chú
@@ -694,7 +687,7 @@
             renderNotes();
         }
 
-        // Xuất file cấu hình dự phòng (.JSON)
+        // Xuất file cấu hình (.JSON)
         function exportData() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
                 members: members,
@@ -707,7 +700,7 @@
             dlAnchorElem.click();
         }
 
-        // Nhập file cấu hình từ máy tính (.JSON)
+        // Nhập file cấu hình (.JSON)
         function importData(event) {
             const fileReader = new FileReader();
             fileReader.onload = function(e) {
@@ -719,10 +712,9 @@
                         squadSelections = parsed.squads || {};
                         renderMemberList();
                         renderNotes();
-                        updateAllDropdowns();
                         alert("Nhập dữ liệu thành công!");
                     } else {
-                        alert("File không đúng định dạng sơ đồ Bang Chiến!");
+                        alert("File không đúng định dạng!");
                     }
                 } catch (err) {
                     alert("Lỗi đọc file JSON!");
