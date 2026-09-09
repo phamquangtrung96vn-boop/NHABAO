@@ -72,6 +72,13 @@
 
         .btn-action:hover { background: #30363d; color: #fff; }
 
+        .btn-save-cloud {
+            background-color: #238636;
+            color: #fff;
+            border: none;
+        }
+        .btn-save-cloud:hover { background-color: #2ea043; }
+
         .btn-discord {
             background-color: #5865F2;
             color: #fff;
@@ -249,7 +256,6 @@
             white-space: nowrap;
         }
 
-        /* CUSTOM ICON SPEAR FOR HUYET HA */
         .custom-spear-icon {
             width: 14px;
             height: 14px;
@@ -388,7 +394,6 @@
             font-weight: bold;
         }
 
-        /* CLASS MÀU MÔN PHÁI */
         .class-ThietY    { background-color: #facc15 !important; color: #111; }
         .class-HuyetHa   { background-color: #dc2626 !important; color: #fff; }
         .class-ToaiMong  { background-color: #7dd3fc !important; color: #111; }
@@ -561,9 +566,11 @@
     <div class="title-banner">
         <span><i class="fa-solid fa-shield-halved"></i> ĐỘI HÌNH BANG CHIẾN - NGHỊCH THỦY HÀN</span>
         <div class="toolbar-btns">
+            <!-- NÚT LƯU CLOUD THỦ CÔNG -->
+            <button class="btn-action btn-save-cloud" onclick="manualSaveToCloud()"><i class="fa-solid fa-cloud-arrow-up"></i> Lưu Lên Cloud</button>
             <button class="btn-action btn-discord" onclick="sendToDiscord()"><i class="fa-brands fa-discord"></i> Gửi Discord</button>
             <a href="https://phamquangtrung96vn-boop.github.io/NHABAO/ChienThuat.html" class="btn-action btn-strategy"><i class="fa-solid fa-chess-knight"></i> Chiến Thuật</a>
-            <button class="btn-action" onclick="exportData()"><i class="fa-solid fa-download"></i> Xuất File</button>
+            <button class="btn-action" onclick="exportData()"><i class="fa-solid fa-download"></i> Xuất File Máy</button>
             <button class="btn-action" onclick="document.getElementById('importFileInput').click()"><i class="fa-solid fa-upload"></i> Nhập File</button>
             <input type="file" id="importFileInput" style="display:none" accept=".json" onchange="importData(event)">
             <button class="btn-action btn-reset" onclick="resetAllData()"><i class="fa-solid fa-rotate-right"></i> Reset</button>
@@ -673,7 +680,6 @@
     </div>
 
     <script>
-        // --- KẾT NỐI SUPABASE ---
         const SUPABASE_URL = 'https://shblqenkrzjuklzrvoie.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYmxxZW5rcnpqdWtsenJ2b2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NzA4MjMsImV4cCI6MjEwNDU0NjgyM30.I8bsjcbR3dNYm99kHan8mLj9X7jcNuPEzFQTk9jUups'; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -746,7 +752,6 @@
         };
         let draggedMemberName = null;
 
-        // Tải dữ liệu từ đám mây Supabase
         async function loadDataFromCloud() {
             try {
                 let { data, error } = await supabaseClient
@@ -774,7 +779,6 @@
             }
         }
 
-        // Lưu dữ liệu tự động lên đám mây Supabase
         async function saveData() {
             commanders.c1 = document.getElementById('commander1Input').value;
             commanders.c2 = document.getElementById('commander2Input').value;
@@ -799,6 +803,24 @@
             if (error) {
                 console.error("Lỗi khi lưu dữ liệu lên cloud:", error);
             }
+        }
+
+        // Nút bấm thủ công lưu lên Cloud
+        async function manualSaveToCloud() {
+            const btn = event.currentTarget;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...`;
+            btn.disabled = true;
+
+            await saveData();
+
+            setTimeout(() => {
+                btn.innerHTML = `<i class="fa-solid fa-check"></i> Đã lưu Cloud!`;
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.disabled = false;
+                }, 1500);
+            }, 500);
         }
 
         function toggleSidebar() {
@@ -1141,6 +1163,7 @@
                     if (parsed.members && parsed.notes) {
                         members = parsed.members;
                         notes = parsed.notes;
+                        squadsSelections = parsed.squads || {};
                         squadSelections = parsed.squads || {};
                         commanders = parsed.commanders || { c1: "Đạo Đạo", c2: "Minh Sói Trần" };
                         columnNames = parsed.columnNames || columnNames;
@@ -1246,7 +1269,6 @@
             if (e.key === 'Enter') addMember();
         });
 
-        // Khởi chạy hệ thống và tải dữ liệu từ đám mây
         initTables();
         loadDataFromCloud();
     </script>
