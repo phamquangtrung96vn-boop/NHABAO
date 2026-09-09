@@ -6,6 +6,8 @@
     <title>Sơ Đồ Đội Hình Bang Chiến - Nghịch Thủy Hàn</title>
     <!-- FontAwesome Icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2canvas Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --bg-main: #0d1117;
@@ -67,6 +69,13 @@
         }
 
         .btn-action:hover { background: #30363d; color: #fff; }
+
+        .btn-discord {
+            background-color: #5865F2;
+            color: #fff;
+            border: none;
+        }
+        .btn-discord:hover { background-color: #4752C4; color: #fff; }
 
         .btn-strategy {
             background: #1f6beb;
@@ -358,16 +367,16 @@
             font-weight: bold;
         }
 
-        /* BẢNG MÀU MÔN PHÁI (ĐÃ ĐỔI MÀU TOÁI MỘNG VÀ THẦN TƯƠNG) */
-        .class-ThietY    { background-color: #d97706 !important; color: #fff; } /* Vàng */
-        .class-HuyetHa   { background-color: #dc2626 !important; color: #fff; } /* Đỏ */
-        .class-ToaiMong  { background-color: #0284c7 !important; color: #fff; } /* Xanh nhạt */
-        .class-ThanTuang { background-color: #2563eb !important; color: #fff; } /* Xanh dương */
-        .class-ToVan     { background-color: #ec4899 !important; color: #fff; } /* Hồng */
-        .class-CuuLinh   { background-color: #581c87 !important; color: #fff; } /* Tím đậm */
-        .class-LongNgam  { background-color: #14532d !important; color: #fff; } /* Xanh lá đậm */
-        .class-HuyenCo   { background-color: #4b5563 !important; color: #fff; } /* Xám */
-        .class-TrieuQuang{ background-color: #0891b2 !important; color: #fff; } /* Xanh ngọc */
+        /* CLASS MÀU MÔN PHÁI */
+        .class-ThietY    { background-color: #4a5568 !important; color: #fff; }
+        .class-HuyetHa   { background-color: #9b1c1c !important; color: #fff; }
+        .class-ToaiMong  { background-color: #6b21a8 !important; color: #fff; }
+        .class-ThanTuang { background-color: #1d4ed8 !important; color: #fff; }
+        .class-CuuLinh   { background-color: #831843 !important; color: #fff; }
+        .class-ToVan     { background-color: #db2777 !important; color: #fff; }
+        .class-LongNgam  { background-color: #d97706 !important; color: #fff; }
+        .class-HuyenCo   { background-color: #475569 !important; color: #fff; }
+        .class-TrieuQuang{ background-color: #0284c7 !important; color: #fff; }
         .class-Khac      { background-color: #374151 !important; color: #fff; }
 
         .sidebar-right {
@@ -522,6 +531,7 @@
     <div class="title-banner">
         <span><i class="fa-solid fa-shield-halved"></i> ĐỘI HÌNH BANG CHIẾN - NGHỊCH THỦY HÀN</span>
         <div class="toolbar-btns">
+            <button class="btn-action btn-discord" onclick="sendToDiscord()"><i class="fa-brands fa-discord"></i> Gửi Discord</button>
             <a href="https://phamquangtrung96vn-boop.github.io/NHABAO/ChienThuat.html" class="btn-action btn-strategy"><i class="fa-solid fa-chess-knight"></i> Chiến Thuật</a>
             <button class="btn-action" onclick="exportData()"><i class="fa-solid fa-download"></i> Xuất File</button>
             <button class="btn-action" onclick="document.getElementById('importFileInput').click()"><i class="fa-solid fa-upload"></i> Nhập File</button>
@@ -1033,6 +1043,58 @@
                 loadCommanders();
                 renderAll();
                 renderNotes();
+            }
+        }
+
+        async function sendToDiscord() {
+            const webhookUrl = "https://discord.com/api/webhooks/1547208709627977809/HEbz1V-BtTIjKaQXppUQZ3XDqDe7b-0JxwX_NGsx5XwWA7CGIwBIyKDPm7yuznoURUgO";
+            
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...`;
+            btn.disabled = true;
+
+            try {
+                const canvas = await html2canvas(document.body, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false
+                });
+
+                canvas.toBlob(async (blob) => {
+                    if (!blob) {
+                        alert("Lỗi khi chụp màn hình!");
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    const dateStr = new Date().toLocaleString('vi-VN');
+                    
+                    formData.append("content", `📸 **Cập nhật sơ đồ Đội Hình Bang Chiến**\n⏰ *Thời gian: ${dateStr}*`);
+                    formData.append("file", blob, `SoDoBangChien_${Date.now()}.png`);
+
+                    const response = await fetch(webhookUrl, {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        alert("✅ Đã tự động chụp và xuất sơ đồ vào kênh Discord thành công!");
+                    } else {
+                        alert("❌ Gửi thất bại! Lỗi HTTP: " + response.status);
+                    }
+
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }, "image/png");
+
+            } catch (error) {
+                console.error("Lỗi:", error);
+                alert("Có lỗi xảy ra trong quá trình chụp và gửi ảnh.");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
         }
 
