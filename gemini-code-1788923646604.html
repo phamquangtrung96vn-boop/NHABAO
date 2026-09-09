@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sơ Đồ Đội Hình Bang Chiến - Nghịch Thủy Hàn</title>
+    <!-- Thư viện FontAwesome chứa các Icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #0d1117;
+            --bg-card: #161b22;
+            --border-color: #30363d;
+            --header-bg: #1f242d;
+            --text-color: #c9d1d9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-color);
+            padding: 20px;
+        }
+
+        .title-banner {
+            background: linear-gradient(90deg, #161b22, #21262d);
+            color: #f0f6fc;
+            text-align: center;
+            padding: 15px;
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            text-transform: uppercase;
+        }
+
+        .layout-container {
+            display: grid;
+            grid-template-columns: 290px 1fr 310px;
+            gap: 20px;
+        }
+
+        /* BẢNG NHẬP DANH SÁCH MEMBERS */
+        .sidebar-members {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+            height: calc(100vh - 120px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-members h3 {
+            font-size: 15px;
+            color: #58a6ff;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .input-box {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .input-box input, .input-box select {
+            padding: 6px 10px;
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            color: #fff;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .btn-add {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-add:hover { background: #2ea043; }
+
+        .member-list-scroll {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .member-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        /* ĐỘI HÌNH TRUNG TÂM */
+        .main-squads {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .group-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .group-header {
+            background: #21262d;
+            color: #f0f6fc;
+            text-align: center;
+            padding: 8px;
+            font-weight: bold;
+            font-size: 15px;
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+        }
+
+        .group-sub-header {
+            background: rgba(255,255,255,0.03);
+            text-align: center;
+            padding: 4px;
+            font-size: 12px;
+            color: #8b949e;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* BẢNG GRID ĐỘI HÌNH */
+        .squad-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .squad-table th {
+            background: #161b22;
+            color: #8b949e;
+            padding: 6px;
+            font-size: 13px;
+            border: 1px solid var(--border-color);
+        }
+
+        .squad-table td {
+            border: 1px solid var(--border-color);
+            padding: 3px;
+            text-align: center;
+            width: 18%;
+        }
+
+        .squad-table td.stt {
+            width: 4%;
+            background: #0d1117;
+            color: #6e7681;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* SELECT CHỌN TÊN THÀNH VIÊN */
+        .select-member {
+            width: 100%;
+            padding: 6px 2px;
+            border: none;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            outline: none;
+            color: #fff;
+            text-align: center;
+            background-color: #21262d;
+        }
+
+        /* BẢNG MÀU MÔN PHÁI */
+        .class-ThietY    { background-color: #4a5568 !important; color: #fff; }
+        .class-HuyetHa   { background-color: #9b1c1c !important; color: #fff; }
+        .class-ToaiMong  { background-color: #6b21a8 !important; color: #fff; }
+        .class-ThanTuang { background-color: #1d4ed8 !important; color: #fff; }
+        .class-CuuLinh   { background-color: #831843 !important; color: #fff; }
+        .class-ToVan     { background-color: #db2777 !important; color: #fff; }
+        .class-LongNgam  { background-color: #d97706 !important; color: #fff; }
+        .class-TrieuQuang{ background-color: #0284c7 !important; color: #fff; }
+        .class-Khac      { background-color: #374151 !important; color: #fff; }
+
+        /* CỘT BÊN PHẢI (DỰ BỊ & GHI CHÚ) */
+        .sidebar-right {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sub-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+        }
+
+        .sub-box h4 {
+            color: #c9d1d9;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-align: center;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        .sub-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .sub-table td {
+            padding: 3px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* PHẦN GHI CHÚ TÙY BIẾN */
+        .note-box {
+            background: #161b22;
+            border: 1px dashed #388bfd;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #58a6ff;
+            line-height: 1.5;
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        .btn-edit-note {
+            background: #388bfd;
+            color: white;
+            border: none;
+            padding: 3px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .btn-edit-note:hover { background: #1f6feb; }
+
+        .note-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .note-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            background: rgba(255,255,255,0.03);
+            padding: 5px 8px;
+            border-radius: 4px;
+        }
+
+        .note-item span {
+            color: #c9d1d9;
+            word-break: break-word;
+        }
+
+        .btn-del-note {
+            color: #f85149;
+            cursor: pointer;
+            margin-left: 8px;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .note-input-group {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .note-input-group input {
+            flex-grow: 1;
+            padding: 5px;
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            color: #fff;
+            border-radius: 4px;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .btn-add-note {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BANNER TIÊU ĐỀ -->
+    <div class="title-banner">
+        ĐỘI HÌNH BANG CHIẾN - NGHỊCH THỦY HÀN
+    </div>
+
+    <div class="layout-container">
+        
+        <!-- CỘT BÊN TRÁI: DANH SÁCH TỔNG MEMBERS -->
+        <div class="sidebar-members">
+            <h3>Danh Sách Bang (80)</h3>
+            <div class="input-box">
+                <input type="text" id="memberNameInput" placeholder="Tên Ingame (VD: VixKings)">
+                
+                <select id="memberClassInput">
+                    <option value="ThietY">🛡️ Thiết Y (Tanker)</option>
+                    <option value="HuyetHa">💥 Huyết Hà (Thương / Đấu Sĩ)</option>
+                    <option value="ToaiMong">⚡ Toái Mộng (Đoản Đao / Sát Thủ)</option>
+                    <option value="ThanTuang">🪕 Thần Tương (Cổ Cầm / Băng Hỏa)</option>
+                    <option value="CuuLinh">🔮 Cửu Linh (Phù Trượng / Triệu Hồi)</option>
+                    <option value="ToVan">🪭 Tố Vấn (Dải Lụa / Buff Máu)</option>
+                    <option value="LongNgam">🗡️ Long Ngâm (Trường Kiếm / Cận Chiến)</option>
+                    <option value="TrieuQuang">🌊 Triều Quang (Song Kiếm / Thủy)</option>
+                    <option value="Khac">⚔️ Khác</option>
+                </select>
+                
+                <button class="btn-add" onclick="addMember()"><i class="fa-solid fa-plus"></i> Thêm Thành Viên</button>
+            </div>
+            
+            <div class="member-list-scroll" id="memberListScroll">
+                <!-- Render danh sách -->
+            </div>
+        </div>
+
+        <!-- KHU VỰC GIỮA: ĐOÀN 1 & ĐOÀN 2 -->
+        <div class="main-squads">
+
+            <!-- ĐOÀN 1 - THỦ -->
+            <div class="group-box">
+                <div class="group-header">ĐOÀN 1 - THỦ (Chỉ Huy: Đạo Đạo)</div>
+                <div class="group-sub-header">PT 1, 2, 3 đánh đoàn lớn | PT 4, 5 cơ động</div>
+                <table class="squad-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>PT1</th>
+                            <th>PT2</th>
+                            <th>PT3</th>
+                            <th>PT4</th>
+                            <th>PT5</th>
+                        </tr>
+                    </thead>
+                    <tbody id="group1Body">
+                        <!-- Render 6 hàng -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- ĐOÀN 2 - CÔNG -->
+            <div class="group-box">
+                <div class="group-header">ĐOÀN 2 - CÔNG (Chỉ Huy: Minh Sói Trần)</div>
+                <div class="group-sub-header">Huyết Hà / Thiết Y lead phụ PT 4, 5</div>
+                <table class="squad-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>PT1</th>
+                            <th>PT2</th>
+                            <th>PT3</th>
+                            <th>PT4</th>
+                            <th>PT5</th>
+                        </tr>
+                    </thead>
+                    <tbody id="group2Body">
+                        <!-- Render 6 hàng -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <!-- CỘT BÊN PHẢI: DỰ BỊ & GHI CHÚ TÙY BIẾN -->
+        <div class="sidebar-right">
+            
+            <div class="sub-box">
+                <h4>DỰ BỊ BANG CHIẾN</h4>
+                <table class="sub-table">
+                    <tbody id="reserveBody">
+                        <!-- Hàng dự bị -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- KHU VỰC GHI CHÚ CÓ THỂ SỬA/THÊM/XÓA -->
+            <div class="note-box">
+                <div class="note-header">
+                    <strong><i class="fa-solid fa-triangle-exclamation"></i> GHI CHÚ NHIỆM VỤ</strong>
+                </div>
+                
+                <ul class="note-list" id="noteListContainer">
+                    <!-- Các ghi chú sẽ render ở đây -->
+                </ul>
+
+                <div class="note-input-group">
+                    <input type="text" id="newNoteInput" placeholder="Nhập ghi chú mới...">
+                    <button class="btn-add-note" onclick="addNote()"><i class="fa-solid fa-plus"></i></button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- JAVASCRIPT XỬ LÝ -->
+    <script>
+        const classIcons = {
+            ThietY: "fa-shield-halved",
+            HuyetHa: "fa-burst",
+            ToaiMong: "fa-bolt",
+            ThanTuang: "fa-music",
+            CuuLinh: "fa-wand-magic-sparkles",
+            ToVan: "fa-fan",
+            LongNgam: "fa-khanda",
+            TrieuQuang: "fa-water",
+            Khac: "fa-user"
+        };
+
+        // Danh sách thành viên mẫu
+        let members = [
+            { name: "Đạo Đạo (31_7)", classType: "ThietY" },
+            { name: "VixKings", classType: "ThanTuang" },
+            { name: "Cậu Ba Khanh", classType: "HuyetHa" },
+            { name: "Moisier", classType: "ToaiMong" },
+            { name: "12 09", classType: "LongNgam" },
+            { name: "Trần Tracy", classType: "ToVan" },
+            { name: "Uhuyen", classType: "CuuLinh" },
+            { name: "D A N", classType: "TrieuQuang" },
+            { name: "Mạc Trường Cửu", classType: "ToVan" },
+            { name: "Bạch Như Vân", classType: "ThanTuang" }
+        ];
+
+        // Danh sách ghi chú mẫu
+        let notes = [
+            "Tố Vấn chú ý duy trì Buff Máu toàn PT.",
+            "Thiết Y gom quái / gom người để Thần Tương & Cửu Linh dồn sát thương.",
+            "Toái Mộng bắt lẻ hàng sau của địch.",
+            "AE BẬT DISCORD ĐỂ NGHE CALL CHIẾN THUẬT!"
+        ];
+
+        // Render Ghi chú
+        function renderNotes() {
+            const container = document.getElementById('noteListContainer');
+            container.innerHTML = '';
+
+            notes.forEach((noteText, index) => {
+                const li = document.createElement('li');
+                li.className = 'note-item';
+                li.innerHTML = `
+                    <span>• ${noteText}</span>
+                    <i class="fa-solid fa-trash btn-del-note" onclick="deleteNote(${index})" title="Xóa ghi chú"></i>
+                `;
+                container.appendChild(li);
+            });
+        }
+
+        // Thêm ghi chú mới
+        function addNote() {
+            const input = document.getElementById('newNoteInput');
+            const text = input.value.trim();
+            if (text) {
+                notes.push(text);
+                input.value = '';
+                renderNotes();
+            }
+        }
+
+        // Xóa ghi chú
+        function deleteNote(index) {
+            notes.splice(index, 1);
+            renderNotes();
+        }
+
+        function renderMemberList() {
+            const listEl = document.getElementById('memberListScroll');
+            listEl.innerHTML = '';
+
+            members.forEach((m, index) => {
+                const iconClass = classIcons[m.classType] || 'fa-user';
+                const item = document.createElement('div');
+                item.className = `member-item class-${m.classType}`;
+                item.innerHTML = `
+                    <span><i class="fa-solid ${iconClass}"></i> ${m.name}</span>
+                    <i class="fa-solid fa-xmark" style="cursor:pointer" onclick="removeMember(${index})"></i>
+                `;
+                listEl.appendChild(item);
+            });
+
+            updateAllDropdowns();
+        }
+
+        function addMember() {
+            const nameInput = document.getElementById('memberNameInput');
+            const classInput = document.getElementById('memberClassInput');
+
+            if (!nameInput.value.trim()) return alert("Vui lòng nhập tên Ingame!");
+
+            members.push({
+                name: nameInput.value.trim(),
+                classType: classInput.value
+            });
+
+            nameInput.value = '';
+            renderMemberList();
+        }
+
+        function removeMember(index) {
+            const removedName = members[index].name;
+            members.splice(index, 1);
+            
+            const selects = document.querySelectorAll('.select-member');
+            selects.forEach(select => {
+                if (select.value === removedName) {
+                    select.value = "";
+                }
+            });
+
+            renderMemberList();
+        }
+
+        function initTables() {
+            createSquadRows('group1Body', 'g1');
+            createSquadRows('group2Body', 'g2');
+            createReserveRows('reserveBody');
+        }
+
+        function createSquadRows(containerId, prefix) {
+            const tbody = document.getElementById(containerId);
+            tbody.innerHTML = '';
+
+            for (let row = 1; row <= 6; row++) {
+                const tr = document.createElement('tr');
+                
+                const tdStt = document.createElement('td');
+                tdStt.className = 'stt';
+                tdStt.innerText = row;
+                tr.appendChild(tdStt);
+
+                for (let col = 1; col <= 5; col++) {
+                    const td = document.createElement('td');
+                    td.innerHTML = `<select class="select-member" id="${prefix}_r${row}_c${col}" onchange="onSelectChange(this)"></select>`;
+                    tr.appendChild(td);
+                }
+                tbody.appendChild(tr);
+            }
+        }
+
+        function createReserveRows(containerId) {
+            const tbody = document.getElementById(containerId);
+            tbody.innerHTML = '';
+            for (let row = 1; row <= 4; row++) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><select class="select-member" id="res_r${row}_c1" onchange="onSelectChange(this)"></select></td>
+                    <td><select class="select-member" id="res_r${row}_c2" onchange="onSelectChange(this)"></select></td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+
+        function getSelectedMembers() {
+            const selected = new Set();
+            const selects = document.querySelectorAll('.select-member');
+            selects.forEach(select => {
+                if (select.value) {
+                    selected.add(select.value);
+                }
+            });
+            return selected;
+        }
+
+        function updateAllDropdowns() {
+            const selects = document.querySelectorAll('.select-member');
+            const selectedMembers = getSelectedMembers();
+
+            selects.forEach(select => {
+                const currentValue = select.value;
+
+                select.innerHTML = '<option value="">-- Trống --</option>';
+
+                members.forEach(m => {
+                    if (!selectedMembers.has(m.name) || m.name === currentValue) {
+                        const opt = document.createElement('option');
+                        opt.value = m.name;
+                        opt.innerText = m.name;
+                        opt.setAttribute('data-class', m.classType);
+                        select.appendChild(opt);
+                    }
+                });
+
+                select.value = currentValue;
+                applyColorToSelect(select);
+            });
+        }
+
+        function applyColorToSelect(selectEl) {
+            const selectedName = selectEl.value;
+            selectEl.className = 'select-member';
+
+            if (selectedName) {
+                const memberObj = members.find(m => m.name === selectedName);
+                if (memberObj) {
+                    selectEl.classList.add(`class-${memberObj.classType}`);
+                }
+            }
+        }
+
+        function onSelectChange(selectEl) {
+            updateAllDropdowns();
+        }
+
+        // Lắng nghe sự kiện nhấn Enter ở ô ghi chú
+        document.getElementById('newNoteInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                addNote();
+            }
+        });
+
+        initTables();
+        renderMemberList();
+        renderNotes();
+    </script>
+</body>
+</html>
