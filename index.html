@@ -20,6 +20,7 @@
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', Arial, sans-serif;
+            user-select: none;
         }
 
         body {
@@ -64,25 +65,24 @@
             transition: 0.2s;
         }
 
-        .btn-action:hover {
-            background: #30363d;
-            color: #fff;
-        }
+        .btn-action:hover { background: #30363d; color: #fff; }
 
-        .btn-reset {
-            background: #da3633;
-            color: #fff;
-            border: none;
-        }
+        .btn-reset { background: #da3633; color: #fff; border: none; }
         .btn-reset:hover { background: #f85149; }
 
         .layout-container {
             display: grid;
             grid-template-columns: 290px 1fr 310px;
             gap: 20px;
+            transition: grid-template-columns 0.3s ease;
         }
 
-        /* BẢNG NHẬP DANH SÁCH MEMBERS */
+        /* TRẠNG THÁI THU GỌN BẢNG BÊN TRÁI */
+        .layout-container.collapsed-left {
+            grid-template-columns: 50px 1fr 310px;
+        }
+
+        /* SIDEBAR MEMBERS */
         .sidebar-members {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -91,13 +91,43 @@
             height: calc(100vh - 110px);
             display: flex;
             flex-direction: column;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
         }
 
         .sidebar-members h3 {
             font-size: 15px;
             color: #58a6ff;
-            margin-bottom: 10px;
             text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .btn-toggle-sidebar {
+            background: #21262d;
+            color: #58a6ff;
+            border: 1px solid var(--border-color);
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+
+        .btn-toggle-sidebar:hover {
+            background: #30363d;
+            color: #fff;
         }
 
         .input-box {
@@ -108,6 +138,7 @@
             background: rgba(0,0,0,0.3);
             padding: 10px;
             border-radius: 4px;
+            transition: opacity 0.2s;
         }
 
         .input-box input, .input-box select {
@@ -134,13 +165,48 @@
         .member-list-scroll {
             flex-grow: 1;
             overflow-y: auto;
+            overflow-x: hidden;
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 6px;
             padding-right: 4px;
+            min-height: 100px;
+            border: 2px dashed transparent;
+            transition: border 0.2s;
         }
 
-        .member-item {
+        .member-list-scroll.drag-over {
+            border-color: #58a6ff;
+            background: rgba(88, 166, 255, 0.05);
+        }
+
+        /* STYLE KHI THU GỌN SIDEBAR LEF T */
+        .sidebar-members.collapsed {
+            padding: 10px 5px;
+        }
+
+        .sidebar-members.collapsed h3,
+        .sidebar-members.collapsed .input-box {
+            display: none;
+        }
+
+        .sidebar-members.collapsed .sidebar-header {
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .sidebar-members.collapsed .member-card {
+            justify-content: center;
+            padding: 8px 0;
+        }
+
+        .sidebar-members.collapsed .member-card .member-name-text,
+        .sidebar-members.collapsed .member-card .btn-del-member {
+            display: none;
+        }
+
+        /* THẺ THÀNH VIÊN (DRAGGABLE) */
+        .member-card {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -148,9 +214,27 @@
             border-radius: 4px;
             font-size: 13px;
             font-weight: bold;
+            cursor: grab;
+            transition: transform 0.1s, opacity 0.2s;
         }
 
-        /* ĐỘI HÌNH TRUNG TÂM */
+        .member-card:active {
+            cursor: grabbing;
+        }
+
+        .member-card.dragging {
+            opacity: 0.4;
+        }
+
+        .member-card span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        /* MAIN SQUADS & TABLES */
         .main-squads {
             display: flex;
             flex-direction: column;
@@ -173,6 +257,29 @@
             font-size: 15px;
             border-bottom: 1px solid var(--border-color);
             text-transform: uppercase;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .commander-input {
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            color: #58a6ff;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            outline: none;
+            font-size: 14px;
+            width: 150px;
+            text-align: center;
+        }
+
+        .commander-input:focus {
+            border-color: #58a6ff;
+            background: #161b22;
         }
 
         .group-sub-header {
@@ -184,7 +291,6 @@
             border-bottom: 1px solid var(--border-color);
         }
 
-        /* BẢNG GRID ĐỘI HÌNH */
         .squad-table {
             width: 100%;
             border-collapse: collapse;
@@ -203,6 +309,7 @@
             padding: 3px;
             text-align: center;
             width: 18%;
+            height: 38px;
         }
 
         .squad-table td.stt {
@@ -213,22 +320,32 @@
             font-weight: bold;
         }
 
-        /* SELECT CHỌN TÊN THÀNH VIÊN */
-        .select-member {
+        /* Ô THẢ TRONG BẢNG */
+        .drop-zone {
             width: 100%;
-            padding: 6px 2px;
-            border: none;
+            height: 100%;
+            min-height: 32px;
             border-radius: 3px;
-            font-weight: bold;
-            font-size: 13px;
-            cursor: pointer;
-            outline: none;
-            color: #fff;
-            text-align: center;
-            background-color: #21262d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed transparent;
+            transition: all 0.2s;
         }
 
-        /* BẢNG MÀU MÔN PHÁI */
+        .drop-zone.drag-over {
+            border-color: #58a6ff;
+            background: rgba(88, 166, 255, 0.15);
+        }
+
+        .drop-zone .empty-text {
+            color: #484f58;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* CLASS MÀU MÔN PHÁI */
         .class-ThietY    { background-color: #4a5568 !important; color: #fff; }
         .class-HuyetHa   { background-color: #9b1c1c !important; color: #fff; }
         .class-ToaiMong  { background-color: #6b21a8 !important; color: #fff; }
@@ -236,10 +353,11 @@
         .class-CuuLinh   { background-color: #831843 !important; color: #fff; }
         .class-ToVan     { background-color: #db2777 !important; color: #fff; }
         .class-LongNgam  { background-color: #d97706 !important; color: #fff; }
+        .class-HuyenCo   { background-color: #475569 !important; color: #fff; }
         .class-TrieuQuang{ background-color: #0284c7 !important; color: #fff; }
         .class-Khac      { background-color: #374151 !important; color: #fff; }
 
-        /* CỘT BÊN PHẢI (DỰ BỊ & GHI CHÚ) */
+        /* SIDEBAR RIGHT */
         .sidebar-right {
             display: flex;
             flex-direction: column;
@@ -271,9 +389,9 @@
         .sub-table td {
             padding: 3px;
             border: 1px solid var(--border-color);
+            height: 38px;
         }
 
-        /* PHẦN GHI CHÚ */
         .note-box {
             background: #161b22;
             border: 1px dashed #388bfd;
@@ -309,10 +427,7 @@
             border-radius: 4px;
         }
 
-        .note-item span {
-            color: #c9d1d9;
-            word-break: break-word;
-        }
+        .note-item span { color: #c9d1d9; word-break: break-word; }
 
         .btn-del-note {
             color: #f85149;
@@ -348,11 +463,51 @@
             cursor: pointer;
             font-size: 12px;
         }
+
+        /* KHUNG THỐNG KÊ MÔN PHÁI */
+        .stats-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px;
+        }
+
+        .stats-box h4 {
+            color: #58a6ff;
+            font-size: 13px;
+            margin-bottom: 10px;
+            text-align: center;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .stat-count {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 1px 6px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
     </style>
 </head>
 <body>
 
-    <!-- BANNER TIÊU ĐỀ VA THANH CÔNG CỤ -->
     <div class="title-banner">
         <span><i class="fa-solid fa-shield-halved"></i> ĐỘI HÌNH BANG CHIẾN - NGHỊCH THỦY HÀN</span>
         <div class="toolbar-btns">
@@ -363,127 +518,134 @@
         </div>
     </div>
 
-    <div class="layout-container">
-        
-        <!-- CỘT BÊN TRÁI: DANH SÁCH TỔNG MEMBERS -->
-        <div class="sidebar-members">
-            <h3 id="memberCountTitle">Chờ Xếp Đội (0)</h3>
-            
+    <div class="layout-container" id="layoutContainer">
+        <!-- CỘT BÊN TRÁI -->
+        <div class="sidebar-members" id="sidebarMembers">
+            <div class="sidebar-header">
+                <h3 id="memberCountTitle">Chờ Xếp Đội (0)</h3>
+                <button class="btn-toggle-sidebar" onclick="toggleSidebar()" id="toggleSidebarBtn" title="Thu / Mở Sidebar">
+                    <i class="fa-solid fa-chevron-left" id="toggleIcon"></i>
+                </button>
+            </div>
             <div class="input-box">
                 <input type="text" id="memberNameInput" placeholder="Tên Ingame (VD: VixKings)">
-                
                 <select id="memberClassInput">
-                    <option value="ThietY">🛡️ Thiết Y (Tanker)</option>
-                    <option value="HuyetHa">💥 Huyết Hà (Thương / Đấu Sĩ)</option>
-                    <option value="ToaiMong">⚡ Toái Mộng (Đoản Đao / Sát Thủ)</option>
-                    <option value="ThanTuang">🪕 Thần Tương (Cổ Cầm / Băng Hỏa)</option>
-                    <option value="CuuLinh">🔮 Cửu Linh (Phù Trượng / Triệu Hồi)</option>
-                    <option value="ToVan">🪭 Tố Vấn (Dải Lụa / Buff Máu)</option>
-                    <option value="LongNgam">🗡️ Long Ngâm (Trường Kiếm / Cận Chiến)</option>
-                    <option value="TrieuQuang">🌊 Triều Quang (Song Kiếm / Thủy)</option>
+                    <option value="ThietY">✊ Thiết Y (Nắm đấm)</option>
+                    <option value="HuyetHa">🛡️ Huyết Hà (Khiên/Thương)</option>
+                    <option value="ToaiMong">🗡️ Toái Mộng (Đao/Kiếm)</option>
+                    <option value="ThanTuang">🎸 Thần Tương (Đàn)</option>
+                    <option value="ToVan">🎗️ Tố Vấn (Dải lụa)</option>
+                    <option value="CuuLinh">💀 Cửu Linh (Sọ)</option>
+                    <option value="LongNgam">⚔️ Long Ngâm (Song kiếm)</option>
+                    <option value="HuyenCo">⚙️ Huyền Cơ (Cơ quan)</option>
+                    <option value="TrieuQuang">💧 Triều Quang (Tộc Sương)</option>
                     <option value="Khac">⚔️ Khác</option>
                 </select>
-                
                 <button class="btn-add" onclick="addMember()"><i class="fa-solid fa-plus"></i> Thêm Thành Viên</button>
             </div>
-
-            <div class="member-list-scroll" id="memberListScroll">
-                <!-- Render danh sách chưa xếp -->
-            </div>
+            <!-- VÙNG THẢ ĐỂ TRẢ VỀ CHỜ XẾP -->
+            <div class="member-list-scroll" id="memberListScroll" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropToUnassigned(event)"></div>
         </div>
 
-        <!-- KHU VỰC GIỮA: ĐOÀN 1 & ĐOÀN 2 -->
+        <!-- BẢNG GIỮA -->
         <div class="main-squads">
-
-            <!-- ĐOÀN 1 - THỦ -->
             <div class="group-box">
-                <div class="group-header">ĐOÀN 1 - THỦ (Chỉ Huy: Đạo Đạo)</div>
+                <div class="group-header">
+                    <span>ĐOÀN 1 - THỦ (Chỉ Huy:</span>
+                    <input type="text" id="commander1Input" class="commander-input" value="Đạo Đạo" oninput="saveData()">
+                    <span>)</span>
+                </div>
                 <div class="group-sub-header">PT 1, 2, 3 đánh đoàn lớn | PT 4, 5 cơ động</div>
                 <table class="squad-table">
                     <thead>
                         <tr>
                             <th></th>
-                            <th>PT1</th>
-                            <th>PT2</th>
-                            <th>PT3</th>
-                            <th>PT4</th>
-                            <th>PT5</th>
+                            <th>PT1</th><th>PT2</th><th>PT3</th><th>PT4</th><th>PT5</th>
                         </tr>
                     </thead>
-                    <tbody id="group1Body">
-                        <!-- Render 6 hàng -->
-                    </tbody>
+                    <tbody id="group1Body"></tbody>
                 </table>
             </div>
 
-            <!-- ĐOÀN 2 - CÔNG -->
             <div class="group-box">
-                <div class="group-header">ĐOÀN 2 - CÔNG (Chỉ Huy: Minh Sói Trần)</div>
+                <div class="group-header">
+                    <span>ĐOÀN 2 - CÔNG (Chỉ Huy:</span>
+                    <input type="text" id="commander2Input" class="commander-input" value="Minh Sói Trần" oninput="saveData()">
+                    <span>)</span>
+                </div>
                 <div class="group-sub-header">Huyết Hà / Thiết Y lead phụ PT 4, 5</div>
                 <table class="squad-table">
                     <thead>
                         <tr>
                             <th></th>
-                            <th>PT1</th>
-                            <th>PT2</th>
-                            <th>PT3</th>
-                            <th>PT4</th>
-                            <th>PT5</th>
+                            <th>PT1</th><th>PT2</th><th>PT3</th><th>PT4</th><th>PT5</th>
                         </tr>
                     </thead>
-                    <tbody id="group2Body">
-                        <!-- Render 6 hàng -->
-                    </tbody>
+                    <tbody id="group2Body"></tbody>
                 </table>
             </div>
-
         </div>
 
-        <!-- CỘT BÊN PHẢI: DỰ BỊ & GHI CHÚ -->
+        <!-- CỘT BÊN PHẢI -->
         <div class="sidebar-right">
-            
             <div class="sub-box">
                 <h4>DỰ BỊ BANG CHIẾN</h4>
                 <table class="sub-table">
-                    <tbody id="reserveBody">
-                        <!-- Hàng dự bị -->
-                    </tbody>
+                    <tbody id="reserveBody"></tbody>
                 </table>
             </div>
 
-            <!-- KHU VỰC GHI CHÚ -->
             <div class="note-box">
                 <div class="note-header">
                     <strong><i class="fa-solid fa-triangle-exclamation"></i> GHI CHÚ NHIỆM VỤ</strong>
                 </div>
-                
-                <ul class="note-list" id="noteListContainer">
-                    <!-- Các ghi chú -->
-                </ul>
-
+                <ul class="note-list" id="noteListContainer"></ul>
                 <div class="note-input-group">
                     <input type="text" id="newNoteInput" placeholder="Nhập ghi chú mới...">
                     <button class="btn-add-note" onclick="addNote()"><i class="fa-solid fa-plus"></i></button>
                 </div>
             </div>
 
+            <!-- KHUNG THỐNG KÊ MÔN PHÁI -->
+            <div class="stats-box">
+                <h4><i class="fa-solid fa-chart-pie"></i> THỐNG KÊ MÔN PHÁI</h4>
+                <div class="stats-grid" id="statsGridContainer"></div>
+            </div>
         </div>
-
     </div>
 
-    <!-- JAVASCRIPT HỆ THỐNG LƯU TRẠNG THÁI -->
     <script>
+        const classNames = {
+            ThietY: "Thiết Y",
+            HuyetHa: "Huyết Hà",
+            ToaiMong: "Toái Mộng",
+            ThanTuang: "Thần Tương",
+            ToVan: "Tố Vấn",
+            CuuLinh: "Cửu Linh",
+            LongNgam: "Long Ngâm",
+            HuyenCo: "Huyền Cơ",
+            TrieuQuang: "Triều Quang",
+            Khac: "Khác"
+        };
+
         const classIcons = {
-            ThietY: "fa-shield-halved",
-            HuyetHa: "fa-burst",
-            ToaiMong: "fa-bolt",
-            ThanTuang: "fa-music",
-            CuuLinh: "fa-wand-magic-sparkles",
-            ToVan: "fa-fan",
-            LongNgam: "fa-khanda",
-            TrieuQuang: "fa-water",
+            ThietY: "fa-hand-fist",
+            HuyetHa: "fa-shield-halved",
+            ToaiMong: "fa-khanda",
+            ThanTuang: "fa-guitar",
+            ToVan: "fa-ribbon",
+            CuuLinh: "fa-skull",
+            LongNgam: "fa-cross-swords",
+            HuyenCo: "fa-gear",
+            TrieuQuang: "fa-droplet",
             Khac: "fa-user"
         };
+
+        // Thứ tự sắp xếp ưu tiên cho danh sách môn phái
+        const classOrder = [
+            "ThietY", "HuyetHa", "ToaiMong", "ThanTuang", 
+            "ToVan", "CuuLinh", "LongNgam", "HuyenCo", "TrieuQuang", "Khac"
+        ];
 
         const defaultMembers = [
             { name: "Đạo Đạo (31_7)", classType: "ThietY" },
@@ -495,7 +657,7 @@
             { name: "Uhuyen", classType: "CuuLinh" },
             { name: "D A N", classType: "TrieuQuang" },
             { name: "Mạc Trường Cửu", classType: "ToVan" },
-            { name: "Bạch Như Vân", classType: "ThanTuang" }
+            { name: "Bạch Như Vân", classType: "HuyenCo" }
         ];
 
         const defaultNotes = [
@@ -508,11 +670,37 @@
         let members = JSON.parse(localStorage.getItem('nth_members')) || defaultMembers;
         let notes = JSON.parse(localStorage.getItem('nth_notes')) || defaultNotes;
         let squadSelections = JSON.parse(localStorage.getItem('nth_squads')) || {};
+        let commanders = JSON.parse(localStorage.getItem('nth_commanders')) || { c1: "Đạo Đạo", c2: "Minh Sói Trần" };
+        let draggedMemberName = null;
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebarMembers');
+            const layout = document.getElementById('layoutContainer');
+            const icon = document.getElementById('toggleIcon');
+
+            sidebar.classList.toggle('collapsed');
+            layout.classList.toggle('collapsed-left');
+
+            if (sidebar.classList.contains('collapsed')) {
+                icon.className = 'fa-solid fa-chevron-right';
+            } else {
+                icon.className = 'fa-solid fa-chevron-left';
+            }
+        }
 
         function saveData() {
+            commanders.c1 = document.getElementById('commander1Input').value;
+            commanders.c2 = document.getElementById('commander2Input').value;
+
             localStorage.setItem('nth_members', JSON.stringify(members));
             localStorage.setItem('nth_notes', JSON.stringify(notes));
             localStorage.setItem('nth_squads', JSON.stringify(squadSelections));
+            localStorage.setItem('nth_commanders', JSON.stringify(commanders));
+        }
+
+        function loadCommanders() {
+            document.getElementById('commander1Input').value = commanders.c1 || "Đạo Đạo";
+            document.getElementById('commander2Input').value = commanders.c2 || "Minh Sói Trần";
         }
 
         function initTables() {
@@ -524,10 +712,8 @@
         function createSquadRows(containerId, prefix) {
             const tbody = document.getElementById(containerId);
             tbody.innerHTML = '';
-
             for (let row = 1; row <= 6; row++) {
                 const tr = document.createElement('tr');
-                
                 const tdStt = document.createElement('td');
                 tdStt.className = 'stt';
                 tdStt.innerText = row;
@@ -535,8 +721,13 @@
 
                 for (let col = 1; col <= 5; col++) {
                     const td = document.createElement('td');
-                    const id = `${prefix}_r${row}_c${col}`;
-                    td.innerHTML = `<select class="select-member" id="${id}" onchange="onSelectChange(this)"></select>`;
+                    const slotId = `${prefix}_r${row}_c${col}`;
+                    td.innerHTML = `
+                        <div class="drop-zone" id="zone_${slotId}" 
+                             ondragover="handleDragOver(event)" 
+                             ondragleave="handleDragLeave(event)" 
+                             ondrop="handleDropSlot(event, '${slotId}')">
+                        </div>`;
                     tr.appendChild(td);
                 }
                 tbody.appendChild(tr);
@@ -549,41 +740,180 @@
             for (let row = 1; row <= 4; row++) {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><select class="select-member" id="res_r${row}_c1" onchange="onSelectChange(this)"></select></td>
-                    <td><select class="select-member" id="res_r${row}_c2" onchange="onSelectChange(this)"></select></td>
+                    <td>
+                        <div class="drop-zone" id="zone_res_r${row}_c1" 
+                             ondragover="handleDragOver(event)" 
+                             ondragleave="handleDragLeave(event)" 
+                             ondrop="handleDropSlot(event, 'res_r${row}_c1')">
+                        </div>
+                    </td>
+                    <td>
+                        <div class="drop-zone" id="zone_res_r${row}_c2" 
+                             ondragover="handleDragOver(event)" 
+                             ondragleave="handleDragLeave(event)" 
+                             ondrop="handleDropSlot(event, 'res_r${row}_c2')">
+                        </div>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             }
         }
 
-        // Lấy danh sách những tên đã xếp vào đội hình
-        function getAssignedMemberNames() {
-            return Object.values(squadSelections).filter(name => name !== "");
+        /* DRAG & DROP LOGIC */
+        function handleDragStart(e, memberName) {
+            draggedMemberName = memberName;
+            e.target.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', memberName);
         }
 
-        // Render danh sách thành viên CHƯA ĐƯỢC XẾP ở cột bên trái
-        function renderMemberList() {
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            draggedMemberName = null;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDropSlot(e, slotId) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+
+            if (!draggedMemberName) return;
+
+            for (const key in squadSelections) {
+                if (squadSelections[key] === draggedMemberName) {
+                    delete squadSelections[key];
+                }
+            }
+
+            squadSelections[slotId] = draggedMemberName;
+            renderAll();
+        }
+
+        function handleDropToUnassigned(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+
+            if (!draggedMemberName) return;
+
+            for (const key in squadSelections) {
+                if (squadSelections[key] === draggedMemberName) {
+                    delete squadSelections[key];
+                }
+            }
+            renderAll();
+        }
+
+        function removeFromSlot(slotId) {
+            delete squadSelections[slotId];
+            renderAll();
+        }
+
+        function getAssignedMemberNames() {
+            return Object.values(squadSelections);
+        }
+
+        function renderAll() {
+            renderUnassignedList();
+            renderSlots();
+            renderClassStats();
+            saveData();
+        }
+
+        function renderUnassignedList() {
             const listEl = document.getElementById('memberListScroll');
             listEl.innerHTML = '';
 
             const assignedNames = getAssignedMemberNames();
-            // Lọc ra các thành viên chưa có mặt trong squad
             const unassignedMembers = members.filter(m => !assignedNames.includes(m.name));
+
+            // SẮP XẾP CÁC THÀNH VIÊN CÙNG MÔN PHÁI LẠI GẦN NHAU
+            unassignedMembers.sort((a, b) => {
+                const indexA = classOrder.indexOf(a.classType) !== -1 ? classOrder.indexOf(a.classType) : 999;
+                const indexB = classOrder.indexOf(b.classType) !== -1 ? classOrder.indexOf(b.classType) : 999;
+                if (indexA !== indexB) {
+                    return indexA - indexB;
+                }
+                return a.name.localeCompare(b.name);
+            });
 
             unassignedMembers.forEach((m) => {
                 const iconClass = classIcons[m.classType] || 'fa-user';
-                const item = document.createElement('div');
-                item.className = `member-item class-${m.classType}`;
-                item.innerHTML = `
-                    <span><i class="fa-solid ${iconClass}"></i> ${m.name}</span>
-                    <i class="fa-solid fa-xmark" style="cursor:pointer" onclick="removeMemberByName('${m.name}')"></i>
+                const card = document.createElement('div');
+                card.className = `member-card class-${m.classType}`;
+                card.draggable = true;
+                card.title = `${m.name} (${classNames[m.classType]})`;
+                card.ondragstart = (e) => handleDragStart(e, m.name);
+                card.ondragend = handleDragEnd;
+                card.innerHTML = `
+                    <span><i class="fa-solid ${iconClass}"></i> <span class="member-name-text">${m.name}</span></span>
+                    <i class="fa-solid fa-xmark btn-del-member" style="cursor:pointer" title="Xóa hẳn" onclick="removeMemberByName('${m.name}')"></i>
                 `;
-                listEl.appendChild(item);
+                listEl.appendChild(card);
             });
 
             document.getElementById('memberCountTitle').innerText = `Chờ Xếp Đội (${unassignedMembers.length}/${members.length})`;
-            updateAllDropdowns();
-            saveData();
+        }
+
+        function renderSlots() {
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                const slotId = zone.id.replace('zone_', '');
+                const memberName = squadSelections[slotId];
+
+                if (memberName) {
+                    const memberObj = members.find(m => m.name === memberName);
+                    if (memberObj) {
+                        const iconClass = classIcons[memberObj.classType] || 'fa-user';
+                        zone.innerHTML = `
+                            <div class="member-card class-${memberObj.classType}" 
+                                 draggable="true" 
+                                 style="width: 100%; height: 100%;"
+                                 ondragstart="handleDragStart(event, '${memberObj.name}')" 
+                                 ondragend="handleDragEnd(event)">
+                                <span><i class="fa-solid ${iconClass}"></i> ${memberObj.name}</span>
+                                <i class="fa-solid fa-xmark" style="cursor:pointer" title="Bỏ khỏi đội" onclick="removeFromSlot('${slotId}')"></i>
+                            </div>
+                        `;
+                    } else {
+                        zone.innerHTML = `<span class="empty-text">-- Trống --</span>`;
+                    }
+                } else {
+                    zone.innerHTML = `<span class="empty-text">-- Trống --</span>`;
+                }
+            });
+        }
+
+        /* TÍNH TOÁN VÀ HIỂN THỊ THỐNG KÊ MÔN PHÁI */
+        function renderClassStats() {
+            const counts = {};
+            Object.keys(classIcons).forEach(key => counts[key] = 0);
+
+            members.forEach(m => {
+                if (counts[m.classType] !== undefined) {
+                    counts[m.classType]++;
+                } else {
+                    counts.Khac++;
+                }
+            });
+
+            const container = document.getElementById('statsGridContainer');
+            container.innerHTML = '';
+
+            Object.keys(classIcons).forEach(classKey => {
+                const item = document.createElement('div');
+                item.className = `stat-item class-${classKey}`;
+                item.innerHTML = `
+                    <span><i class="fa-solid ${classIcons[classKey]}"></i> ${classNames[classKey]}</span>
+                    <span class="stat-count">${counts[classKey]}</span>
+                `;
+                container.appendChild(item);
+            });
         }
 
         function addMember() {
@@ -594,68 +924,24 @@
             if (!val) return alert("Vui lòng nhập tên Ingame!");
 
             if (members.some(m => m.name === val)) {
-                return alert("Tên thành viên đã tồn tại trong danh sách!");
+                return alert("Tên thành viên đã tồn tại!");
             }
 
             members.push({ name: val, classType: classInput.value });
             nameInput.value = '';
-            renderMemberList();
+            renderAll();
         }
 
         function removeMemberByName(nameToRemove) {
             members = members.filter(m => m.name !== nameToRemove);
-            renderMemberList();
-        }
-
-        // Cập nhật tùy chọn ở các ô Dropdown
-        function updateAllDropdowns() {
-            const selects = document.querySelectorAll('.select-member');
-            const assignedNames = getAssignedMemberNames();
-
-            selects.forEach(select => {
-                const currentValue = squadSelections[select.id] || "";
-
-                select.innerHTML = '<option value="">-- Trống --</option>';
-
-                members.forEach(m => {
-                    // Ô Dropdown chỉ hiển thị:
-                    // 1. Thành viên CHƯA ĐƯỢC XẾP ở ô nào
-                    // 2. HOẶC chính thành viên ĐANG ĐƯỢC CHỌN ở ô hiện tại này
-                    if (!assignedNames.includes(m.name) || m.name === currentValue) {
-                        const opt = document.createElement('option');
-                        opt.value = m.name;
-                        opt.innerText = m.name;
-                        select.appendChild(opt);
-                    }
-                });
-
-                select.value = currentValue;
-                applyColorToSelect(select);
-            });
-        }
-
-        function applyColorToSelect(selectEl) {
-            const selectedName = selectEl.value;
-            selectEl.className = 'select-member';
-
-            if (selectedName) {
-                const memberObj = members.find(m => m.name === selectedName);
-                if (memberObj) {
-                    selectEl.classList.add(`class-${memberObj.classType}`);
+            for (const key in squadSelections) {
+                if (squadSelections[key] === nameToRemove) {
+                    delete squadSelections[key];
                 }
             }
+            renderAll();
         }
 
-        function onSelectChange(selectEl) {
-            if (selectEl.value) {
-                squadSelections[selectEl.id] = selectEl.value;
-            } else {
-                delete squadSelections[selectEl.id];
-            }
-            renderMemberList(); // Render lại danh sách bên trái ngay khi chọn/bỏ chọn
-        }
-
-        // Render Ghi chú
         function renderNotes() {
             const container = document.getElementById('noteListContainer');
             container.innerHTML = '';
@@ -687,12 +973,12 @@
             renderNotes();
         }
 
-        // Xuất file cấu hình (.JSON)
         function exportData() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
                 members: members,
                 notes: notes,
-                squads: squadSelections
+                squads: squadSelections,
+                commanders: commanders
             }, null, 2));
             const dlAnchorElem = document.createElement('a');
             dlAnchorElem.setAttribute("href", dataStr);
@@ -700,7 +986,6 @@
             dlAnchorElem.click();
         }
 
-        // Nhập file cấu hình (.JSON)
         function importData(event) {
             const fileReader = new FileReader();
             fileReader.onload = function(e) {
@@ -710,7 +995,9 @@
                         members = parsed.members;
                         notes = parsed.notes;
                         squadSelections = parsed.squads || {};
-                        renderMemberList();
+                        commanders = parsed.commanders || { c1: "Đạo Đạo", c2: "Minh Sói Trần" };
+                        loadCommanders();
+                        renderAll();
                         renderNotes();
                         alert("Nhập dữ liệu thành công!");
                     } else {
@@ -729,12 +1016,13 @@
                 members = [...defaultMembers];
                 notes = [...defaultNotes];
                 squadSelections = {};
-                renderMemberList();
+                commanders = { c1: "Đạo Đạo", c2: "Minh Sói Trần" };
+                loadCommanders();
+                renderAll();
                 renderNotes();
             }
         }
 
-        // Phím tắt Enter
         document.getElementById('newNoteInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') addNote();
         });
@@ -742,9 +1030,9 @@
             if (e.key === 'Enter') addMember();
         });
 
-        // Chạy khởi tạo
         initTables();
-        renderMemberList();
+        loadCommanders();
+        renderAll();
         renderNotes();
     </script>
 </body>
