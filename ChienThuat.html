@@ -278,7 +278,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 15px 0 40px; /* Thêm padding-left để không đè lên nút toggle */
+            padding: 0 15px 0 40px;
             z-index: 5;
         }
 
@@ -351,7 +351,6 @@
             justify-content: center;
         }
 
-        /* CONTAINER CHO ZOOM */
         .zoom-wrapper {
             transform-origin: center center;
             transition: transform 0.1s ease-out;
@@ -394,6 +393,15 @@
         .placed-icon i {
             font-size: 26px;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+            padding: 2px;
+            border-radius: 4px;
+            box-sizing: content-box;
+        }
+
+        /* KHUNG VIỀN KHI CHỌN ICON VẼ LỘ TRÌNH (CHỈ ÔM ICON) */
+        .placed-icon.selected i {
+            outline: 2px dashed var(--accent-gold);
+            outline-offset: 2px;
         }
 
         .placed-icon span {
@@ -406,7 +414,6 @@
             border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* KHỐI NÚT ZOOM TRÊN SA BÀN */
         .zoom-controls {
             position: absolute;
             bottom: 20px;
@@ -455,7 +462,6 @@
 
     <!-- SIDEBAR BÊN TRÁI -->
     <div class="sidebar" id="sidebar">
-        <!-- Nút đóng mở thanh công cụ -->
         <button class="toggle-sidebar-btn" id="toggleSidebarBtn" onclick="toggleSidebar()" title="Thu gọn / Mở rộng thanh công cụ">
             <i class="fa-solid fa-chevron-left" id="toggleSidebarIcon"></i>
         </button>
@@ -464,7 +470,6 @@
             <h2>SA BÀN CHIẾN THUẬT</h2>
         </div>
 
-        <!-- BỘ CÔNG CỤ VẼ & GHI CHÚ -->
         <div class="draw-mode-box">
             <div class="draw-mode-header">
                 <span style="font-size: 12px; font-weight: bold; color: var(--accent-gold);">🎨 CÔNG CỤ VẼ SA BÀN</span>
@@ -506,7 +511,6 @@
             </button>
         </div>
 
-        <!-- CÔNG CỤ TẠO LỘ TRÌNH ICON -->
         <div class="draw-mode-box">
             <div class="draw-mode-header">
                 <span style="font-size: 12px; font-weight: bold;">🏹 VẼ LỘ TRÌNH ICON</span>
@@ -516,7 +520,6 @@
             </div>
         </div>
 
-        <!-- FORM TẠO ICON -->
         <div class="add-icon-form">
             <div class="form-title">Tạo Icon Mới</div>
             <div class="form-group">
@@ -543,7 +546,6 @@
             <button class="btn-add-icon" onclick="addNewIconToList()"><i class="fa-solid fa-plus"></i> THÊM VÀO DANH SÁCH</button>
         </div>
 
-        <!-- DANH SÁCH ICON -->
         <div class="icon-section">
             <div class="form-title">Danh Sách Icon Kéo Thả</div>
             <div id="iconContainer"></div>
@@ -552,7 +554,6 @@
 
     <!-- KHU VỰC BẢN ĐỒ CHÍNH -->
     <div class="main-container">
-        <!-- TOOLBAR TRÊN CÙNG -->
         <div class="top-toolbar">
             <div class="tool-btn-group">
                 <button class="btn btn-upload" onclick="document.getElementById('mapFileInput').click()">
@@ -573,7 +574,6 @@
                 </button>
             </div>
 
-            <!-- ĐỒNG HỒ ĐẾM NGƯỢC 23 PHÚT -->
             <div class="timer-box">
                 <i class="fa-solid fa-clock" style="color: var(--accent-gold);"></i>
                 <div class="timer-display" id="timerDisplay">23:00</div>
@@ -587,16 +587,13 @@
             </div>
         </div>
 
-        <!-- CONTAINER MAP -->
         <div class="map-viewport" id="mapViewport">
-            <!-- WRAPPER ĐỂ XỬ LÝ ZOOM -->
             <div class="zoom-wrapper" id="zoomWrapper">
                 <div class="map-canvas" id="mapCanvas">
                     <canvas id="arrowCanvas" width="1000" height="650"></canvas>
                 </div>
             </div>
 
-            <!-- KHỐI NÚT ZOOM BÊN GÓC DƯỚI -->
             <div class="zoom-controls">
                 <button class="zoom-btn" onclick="zoomIn()" title="Phóng to"><i class="fa-solid fa-plus"></i></button>
                 <div class="zoom-level" id="zoomDisplay">100%</div>
@@ -606,7 +603,6 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT XỬ LÝ TOÀN BỘ -->
     <script>
         let iconList = [
             { id: 1, name: "Đội Thủ", symbol: "fa-shield-halved", color: "#4d94ff" },
@@ -627,7 +623,6 @@
         let selectedIconForDrawing = null;
         let animationId = null;
 
-        /* XỬ LÝ BẬT TẮT SIDEBAR BÊN TRÁI */
         function toggleSidebar() {
             sidebar.classList.toggle('collapsed');
             if (sidebar.classList.contains('collapsed')) {
@@ -637,7 +632,6 @@
             }
         }
 
-        /* XỬ LÝ ZOOM SA BÀN */
         let currentScale = 1.0;
         const MIN_SCALE = 0.5;
         const MAX_SCALE = 2.5;
@@ -666,7 +660,6 @@
             updateZoom();
         }
 
-        // Zoom bằng con lăn chuột trên khu vực sa bàn
         mapViewport.addEventListener('wheel', (e) => {
             if (e.ctrlKey || e.metaKey || true) {
                 e.preventDefault();
@@ -678,12 +671,10 @@
             }
         }, { passive: false });
 
-        /* TRẠNG THÁI VẼ LỘ TRÌNH ICON */
         let isPathDrawingMode = false;
         let isPathDrawing = false;
         let startX = 0, startY = 0;
 
-        /* TRẠNG THÁI BỘ CÔNG CỤ VẼ TỰ DO & KHOANH VÙNG */
         let isPaintActive = false;
         let currentTool = 'brush'; 
         let paintColor = '#ff4d4d';
@@ -692,7 +683,6 @@
         let startPaintX = 0, startPaintY = 0;
         let snapshotData = null;
 
-        /* ĐỒNG HỒ ĐẾM NGƯỢC */
         let totalSeconds = 23 * 60;
         let timerInterval = null;
         let isTimerRunning = false;
@@ -710,7 +700,6 @@
             currentTool = tool;
         }
 
-        /* CHUYỂN ĐỔI CHẾ ĐỘ VẼ TỰ DO */
         function togglePaintMode() {
             isPaintActive = !isPaintActive;
             const btn = document.getElementById('togglePaintBtn');
@@ -727,7 +716,6 @@
             }
         }
 
-        /* CHUYỂN ĐỔI CHẾ ĐỘ VẼ LỘ TRÌNH ICON */
         function toggleDrawPathMode() {
             isPathDrawingMode = !isPathDrawingMode;
             const btn = document.getElementById('drawToggleBtn');
@@ -742,13 +730,12 @@
                 btn.innerHTML = '<i class="fa-solid fa-route"></i> VẼ ĐƯỜNG ĐI';
                 arrowCanvas.classList.remove('active');
                 if (selectedIconForDrawing) {
-                    selectedIconForDrawing.style.outline = 'none';
+                    selectedIconForDrawing.classList.remove('selected');
                     selectedIconForDrawing = null;
                 }
             }
         }
 
-        /* XỬ LÝ SỰ KIỆN VẼ VÀ TƯƠNG TÁC CHUỘT TRÊN CANVAS */
         arrowCanvas.addEventListener('mousedown', (e) => {
             const rect = arrowCanvas.getBoundingClientRect();
             const scaleX = arrowCanvas.width / rect.width;
@@ -903,7 +890,6 @@
             document.querySelectorAll('.placed-icon').forEach(icon => { icon.waypoints = []; });
         }
 
-        /* TẠO VÀ QUẢN LÝ ICON TRÊN SA BÀN */
         function createIconOnMap(name, symbol, color, x, y) {
             const el = document.createElement('div');
             el.className = 'placed-icon';
@@ -920,10 +906,9 @@
             el.addEventListener('click', (e) => {
                 if (isPathDrawingMode) {
                     e.stopPropagation();
-                    if (selectedIconForDrawing) selectedIconForDrawing.style.outline = 'none';
+                    if (selectedIconForDrawing) selectedIconForDrawing.classList.remove('selected');
                     selectedIconForDrawing = el;
-                    el.style.outline = '2px dashed var(--accent-gold)';
-                    el.style.outlineOffset = '4px';
+                    el.classList.add('selected');
                 }
             });
 
@@ -979,6 +964,8 @@
                     icon.style.top = `${icon.initialY}px`;
                 }
             });
+
+            resetTimer();
         }
 
         function startMovementAnimation() {
@@ -989,6 +976,10 @@
             if (icons.length === 0) {
                 alert("Chưa có icon nào được vẽ đường đi!");
                 return;
+            }
+
+            if (!isTimerRunning) {
+                startTimer();
             }
 
             const runners = icons.map(icon => ({
@@ -1032,30 +1023,36 @@
             animationId = requestAnimationFrame(step);
         }
 
-        /* ĐỒNG HỒ ĐẾM NGƯỢC */
         function updateTimerDisplay() {
             const minutes = Math.floor(totalSeconds / 60);
             const seconds = totalSeconds % 60;
             document.getElementById('timerDisplay').innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         }
 
+        function startTimer() {
+            const btn = document.getElementById('startTimerBtn');
+            if (totalSeconds <= 0) totalSeconds = 23 * 60;
+            isTimerRunning = true;
+            btn.innerHTML = '<i class="fa-solid fa-pause"></i> Dừng';
+            
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (totalSeconds > 0) {
+                    totalSeconds--;
+                    updateTimerDisplay();
+                } else {
+                    clearInterval(timerInterval);
+                    isTimerRunning = false;
+                    btn.innerHTML = '<i class="fa-solid fa-play"></i> Chạy';
+                    alert("Hết thời gian chiến thuật!");
+                }
+            }, 1000);
+        }
+
         function toggleTimer() {
             const btn = document.getElementById('startTimerBtn');
             if (!isTimerRunning) {
-                if (totalSeconds <= 0) totalSeconds = 23 * 60;
-                isTimerRunning = true;
-                btn.innerHTML = '<i class="fa-solid fa-pause"></i> Dừng';
-                timerInterval = setInterval(() => {
-                    if (totalSeconds > 0) {
-                        totalSeconds--;
-                        updateTimerDisplay();
-                    } else {
-                        clearInterval(timerInterval);
-                        isTimerRunning = false;
-                        btn.innerHTML = '<i class="fa-solid fa-play"></i> Chạy';
-                        alert("Hết thời gian chiến thuật!");
-                    }
-                }, 1000);
+                startTimer();
             } else {
                 clearInterval(timerInterval);
                 isTimerRunning = false;
@@ -1071,7 +1068,6 @@
             document.getElementById('startTimerBtn').innerHTML = '<i class="fa-solid fa-play"></i> Chạy';
         }
 
-        /* TẢI BẢN ĐỒ & XUẤT ẢNH */
         function renderIconList() {
             iconContainer.innerHTML = '';
             iconList.forEach(item => {
@@ -1149,6 +1145,7 @@
             if(confirm('Xóa toàn bộ icon và nét vẽ trên bản đồ?')) {
                 document.querySelectorAll('.placed-icon').forEach(el => el.remove());
                 clearCanvas();
+                resetTimer();
             }
         }
 
