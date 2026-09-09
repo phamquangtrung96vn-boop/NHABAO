@@ -760,7 +760,7 @@
                     .eq('id', 'main_config')
                     .single();
 
-                if (data && data.content) {
+                if (data && data.content && data.content.members) {
                     const saved = data.content;
                     members = saved.members || defaultMembers;
                     notes = saved.notes || defaultNotes;
@@ -1163,7 +1163,6 @@
                     if (parsed.members && parsed.notes) {
                         members = parsed.members;
                         notes = parsed.notes;
-                        squadsSelections = parsed.squads || {};
                         squadSelections = parsed.squads || {};
                         commanders = parsed.commanders || { c1: "Đạo Đạo", c2: "Minh Sói Trần" };
                         columnNames = parsed.columnNames || columnNames;
@@ -1269,8 +1268,10 @@
             if (e.key === 'Enter') addMember();
         });
 
-        initTables();
-        loadDataFromCloud();
+        // QUAN TRỌNG: Tải dữ liệu từ Cloud hoàn tất trước, sau đó mới dựng khung bảng giao diện
+        loadDataFromCloud().then(() => {
+            initTables();
+        });
     </script>
 </body>
 </html>
