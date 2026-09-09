@@ -523,6 +523,15 @@
             padding: 1px 6px;
             border-radius: 10px;
             font-size: 11px;
+            white-space: nowrap;
+        }
+
+        .stat-count .group-count {
+            font-weight: bold;
+        }
+
+        .stat-count .total-count {
+            opacity: 0.95;
         }
     </style>
 </head>
@@ -915,13 +924,34 @@
 
         function renderClassStats() {
             const counts = {};
-            Object.keys(classNames).forEach(key => counts[key] = 0);
+            const group1Counts = {};
+            const group2Counts = {};
 
+            Object.keys(classNames).forEach(key => {
+                counts[key] = 0;
+                group1Counts[key] = 0;
+                group2Counts[key] = 0;
+            });
+
+            // Tổng số thành viên của từng môn phái
             members.forEach(m => {
-                if (counts[m.classType] !== undefined) {
-                    counts[m.classType]++;
-                } else {
-                    counts.Khac++;
+                const classKey = counts[m.classType] !== undefined ? m.classType : 'Khac';
+                counts[classKey]++;
+            });
+
+            // Đếm số thành viên từng môn phái đang được xếp vào Đoàn 1 và Đoàn 2
+            Object.entries(squadSelections).forEach(([slotId, memberName]) => {
+                const memberObj = members.find(m => m.name === memberName);
+                if (!memberObj) return;
+
+                const classKey = counts[memberObj.classType] !== undefined
+                    ? memberObj.classType
+                    : 'Khac';
+
+                if (slotId.startsWith('g1_')) {
+                    group1Counts[classKey]++;
+                } else if (slotId.startsWith('g2_')) {
+                    group2Counts[classKey]++;
                 }
             });
 
@@ -929,11 +959,18 @@
             container.innerHTML = '';
 
             Object.keys(classNames).forEach(classKey => {
+                const assignedTotal = group1Counts[classKey] + group2Counts[classKey];
+                const total = counts[classKey];
+
                 const item = document.createElement('div');
                 item.className = `stat-item class-${classKey}`;
                 item.innerHTML = `
                     <span>${getIconHTML(classKey)} ${classNames[classKey]}</span>
-                    <span class="stat-count">${counts[classKey]}</span>
+                    <span class="stat-count" title="Đoàn 1: ${group1Counts[classKey]} | Đoàn 2: ${group2Counts[classKey]} | Tổng: ${total}">
+                        <span class="group-count">Đ1: ${group1Counts[classKey]}</span>
+                        <span class="group-count">Đ2: ${group2Counts[classKey]}</span>
+                        <span class="total-count">| ${assignedTotal}/${total}</span>
+                    </span>
                 `;
                 container.appendChild(item);
             });
