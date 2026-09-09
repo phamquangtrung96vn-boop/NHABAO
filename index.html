@@ -566,7 +566,6 @@
     <div class="title-banner">
         <span><i class="fa-solid fa-shield-halved"></i> ĐỘI HÌNH BANG CHIẾN - NGHỊCH THỦY HÀN</span>
         <div class="toolbar-btns">
-            <!-- NÚT LƯU CLOUD THỦ CÔNG -->
             <button class="btn-action btn-save-cloud" onclick="manualSaveToCloud()"><i class="fa-solid fa-cloud-arrow-up"></i> Lưu Lên Cloud</button>
             <button class="btn-action btn-discord" onclick="sendToDiscord()"><i class="fa-brands fa-discord"></i> Gửi Discord</button>
             <a href="https://phamquangtrung96vn-boop.github.io/NHABAO/ChienThuat.html" class="btn-action btn-strategy"><i class="fa-solid fa-chess-knight"></i> Chiến Thuật</a>
@@ -752,30 +751,34 @@
         };
         let draggedMemberName = null;
 
+        async function initApp() {
+            await loadDataFromCloud();
+            initTables();
+            loadSavedInputs();
+            renderAll();
+            renderNotes();
+        }
+
         async function loadDataFromCloud() {
             try {
                 let { data, error } = await supabaseClient
                     .from('squad_data')
                     .select('*')
                     .eq('id', 'main_config')
-                    .single();
+                    .maybeSingle();
 
-                if (data && data.content && data.content.members) {
+                if (data && data.content) {
                     const saved = data.content;
                     members = saved.members || defaultMembers;
                     notes = saved.notes || defaultNotes;
                     squadSelections = saved.squads || {};
                     commanders = saved.commanders || { c1: "Đạo Đạo", c2: "Minh Sói Trần" };
                     columnNames = saved.columnNames || columnNames;
-                    
-                    loadSavedInputs();
-                    renderAll();
-                    renderNotes();
                 } else {
-                    saveData();
+                    await saveData();
                 }
             } catch (err) {
-                console.log("Lỗi tải dữ liệu từ cloud, dùng mặc định:", err);
+                console.log("Lỗi tải dữ liệu từ cloud:", err);
             }
         }
 
@@ -796,13 +799,9 @@
                 columnNames: columnNames
             };
 
-            const { error } = await supabaseClient
+            await supabaseClient
                 .from('squad_data')
                 .upsert({ id: 'main_config', content: payload });
-
-            if (error) {
-                console.error("Lỗi khi lưu dữ liệu lên cloud:", error);
-            }
         }
 
         async function manualSaveToCloud() {
@@ -1162,7 +1161,7 @@
                     if (parsed.members && parsed.notes) {
                         members = parsed.members;
                         notes = parsed.notes;
-                        squadSelections = parsed.squads || {};
+                        squads = parsed.squads || {};
                         commanders = parsed.commanders || { c1: "Đạo Đạo", c2: "Minh Sói Trần" };
                         columnNames = parsed.columnNames || columnNames;
                         loadSavedInputs();
@@ -1267,10 +1266,8 @@
             if (e.key === 'Enter') addMember();
         });
 
-        // QUAN TRỌNG: Tải dữ liệu từ Cloud hoàn tất trước, sau đó mới dựng khung bảng giao diện
-        loadDataFromCloud().then(() => {
-            initTables();
-        });
+        // Khởi chạy ứng dụng
+        initApp();
     </script>
 </body>
 </html>
