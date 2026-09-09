@@ -333,6 +333,28 @@
             padding: 4px;
             font-size: 13px;
             border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .pt-header-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: grab;
+            padding: 2px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .pt-header-cell:active {
+            cursor: grabbing;
+        }
+        .pt-header-cell.dragging-col {
+            opacity: 0.4;
+        }
+        .squad-table th.col-drag-over {
+            background: rgba(88, 166, 255, 0.2);
+            border: 1px dashed #58a6ff;
         }
 
         .squad-table th input.col-name-input {
@@ -344,7 +366,7 @@
             border-radius: 4px;
             outline: none;
             font-size: 13px;
-            width: 100%;
+            width: 75px;
             text-align: center;
         }
 
@@ -617,11 +639,36 @@
                     <thead>
                         <tr id="headerRow1">
                             <th></th>
-                            <th><input type="text" class="col-name-input" id="g1_col1" value="PT1" oninput="saveData()"></th>
-                            <th><input type="text" class="col-name-input" id="g1_col2" value="PT2" oninput="saveData()"></th>
-                            <th><input type="text" class="col-name-input" id="g1_col3" value="PT3" oninput="saveData()"></th>
-                            <th><input type="text" class="col-name-input" id="g1_col4" value="PT4" oninput="saveData()"></th>
-                            <th><input type="text" class="col-name-input" id="g1_col5" value="PT5" oninput="saveData()"></th>
+                            <th id="th_g1_col1" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g1', 1)">
+                                <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g1', 1)" ondragend="handleColDragEnd(event)">
+                                    <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 11px;"></i>
+                                    <input type="text" class="col-name-input" id="g1_col1" value="PT1" oninput="saveData()" onclick="event.stopPropagation()">
+                                </div>
+                            </th>
+                            <th id="th_g1_col2" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g1', 2)">
+                                <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g1', 2)" ondragend="handleColDragEnd(event)">
+                                    <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 11px;"></i>
+                                    <input type="text" class="col-name-input" id="g1_col2" value="PT2" oninput="saveData()" onclick="event.stopPropagation()">
+                                </div>
+                            </th>
+                            <th id="th_g1_col3" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g1', 3)">
+                                <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g1', 3)" ondragend="handleColDragEnd(event)">
+                                    <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 11px;"></i>
+                                    <input type="text" class="col-name-input" id="g1_col3" value="PT3" oninput="saveData()" onclick="event.stopPropagation()">
+                                </div>
+                            </th>
+                            <th id="th_g1_col4" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g1', 4)">
+                                <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g1', 4)" ondragend="handleColDragEnd(event)">
+                                    <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 11px;"></i>
+                                    <input type="text" class="col-name-input" id="g1_col4" value="PT4" oninput="saveData()" onclick="event.stopPropagation()">
+                                </div>
+                            </th>
+                            <th id="th_g1_col5" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g1', 5)">
+                                <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g1', 5)" ondragend="handleColDragEnd(event)">
+                                    <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 11px;"></i>
+                                    <input type="text" class="col-name-input" id="g1_col5" value="PT5" oninput="saveData()" onclick="event.stopPropagation()">
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="group1Body"></tbody>
@@ -639,11 +686,36 @@
                     <thead>
                         <tr id="headerRow2">
                             <th></th>
-                            <th><input type="text" class="col-name-input" id="g2_col1" value="PT1" oninput="saveData()"></th>
-                            <th><input type="text" class="col-name-input" id="g2_col2" value="PT2" oninput="saveData()"></th>
-                            <th><input type="text" class="col-name-input" id="g2_col3" value="PT3" oninput="saveData()"></th>
-                            <th><input type="text" class="col-name-input" id="g2_col4" value="PT4" oninput="saveData()"></th>
-                            <th><input type="text" class="col-name-input" id="g2_col5" value="PT5" oninput="saveData()"></th>
+                            <th id="th_g2_col1" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g2', 1)">
+                                <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g2', 1)" ondragend="handleColDragEnd(event)">
+                                    <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 11px;"></i>
+                                    <input type="text" class="col-name-input" id="g2_col1" value="PT1" oninput="saveData()" onclick="event.stopPropagation()">
+                                </div>
+                            </th>
+                            <th id="th_g2_col2" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g2', 2)">
+                                <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g2', 2)" ondragend="handleColDragEnd(event)">
+                                    <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 11px;"></i>
+                                    <input type="text" class="col-name-input" id="g2_col2" value="PT2" oninput="saveData()" onclick="event.stopPropagation()">
+                                </div>
+                            </th>
+                            <th id="th_g2_col3" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g2', 3)">
+                                <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g2', 3)" ondragend="handleColDragEnd(event)">
+                                    <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 11px;"></i>
+                                    <input type="text" class="col-name-input" id="g2_col3" value="PT3" oninput="saveData()" onclick="event.stopPropagation()">
+                                </div>
+                            </th>
+                            <th id="th_g2_col4" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g2', 4)">
+                                <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g2', 4)" ondragend="handleColDragEnd(event)">
+                                    <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 11px;"></i>
+                                    <input type="text" class="col-name-input" id="g2_col4" value="PT4" oninput="saveData()" onclick="event.stopPropagation()">
+                                </div>
+                            </th>
+                            <th id="th_g2_col5" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g2', 5)">
+                                <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g2', 5)" ondragend="handleColDragEnd(event)">
+                                    <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 11px;"></i>
+                                    <input type="text" class="col-name-input" id="g2_col5" value="PT5" oninput="saveData()" onclick="event.stopPropagation()">
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="group2Body"></tbody>
@@ -750,6 +822,7 @@
             g2_col1: "PT1", g2_col2: "PT2", g2_col3: "PT3", g2_col4: "PT4", g2_col5: "PT5"
         };
         let draggedMemberName = null;
+        let draggedColInfo = null;
 
         async function initApp() {
             await loadDataFromCloud();
@@ -902,6 +975,75 @@
             }
         }
 
+        // --- XỬ LÝ KÉO THẢ CỘT (PT) GIỮA MỌI ĐOÀN ---
+        function handleColDragStart(e, groupPrefix, colIndex) {
+            draggedColInfo = { groupPrefix, colIndex };
+            e.currentTarget.classList.add('dragging-col');
+            e.dataTransfer.setData('text/plain', `col_${groupPrefix}_${colIndex}`);
+        }
+
+        function handleColDragEnd(e) {
+            e.currentTarget.classList.remove('dragging-col');
+            draggedColInfo = null;
+            document.querySelectorAll('.squad-table th').forEach(th => th.classList.remove('col-drag-over'));
+        }
+
+        function handleColDragOver(e) {
+            e.preventDefault();
+            const th = e.currentTarget;
+            th.classList.add('col-drag-over');
+        }
+
+        function handleColDragLeave(e) {
+            e.currentTarget.classList.remove('col-drag-over');
+        }
+
+        function handleColDrop(e, targetGroupPrefix, targetColIndex) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('col-drag-over');
+
+            if (!draggedColInfo) return;
+            const sourceGroup = draggedColInfo.groupPrefix;
+            const sourceCol = draggedColInfo.colIndex;
+
+            if (sourceGroup === targetGroupPrefix && sourceCol === targetColIndex) return;
+
+            // 1. Hoán đổi tên cột (tên hiển thị PT)
+            const sourceColKey = `${sourceGroup}_col${sourceCol}`;
+            const targetColKey = `${targetGroupPrefix}_col${targetColIndex}`;
+            const tempName = columnNames[sourceColKey];
+            columnNames[sourceColKey] = columnNames[targetColKey];
+            columnNames[targetColKey] = tempName;
+
+            // Cập nhật lại giá trị input header ngay lập tức
+            document.getElementById(sourceColKey).value = columnNames[sourceColKey];
+            document.getElementById(targetColKey).value = columnNames[targetColKey];
+
+            // 2. Hoán đổi toàn bộ thành viên trong 6 hàng giữa 2 cột (dù khác đoàn hay cùng đoàn)
+            for (let row = 1; row <= 6; row++) {
+                const sourceSlotId = `${sourceGroup}_r${row}_c${sourceCol}`;
+                const targetSlotId = `${targetGroupPrefix}_r${row}_c${targetColIndex}`;
+
+                const valSource = squadSelections[sourceSlotId];
+                const valTarget = squadSelections[targetSlotId];
+
+                if (valTarget !== undefined) {
+                    squadSelections[sourceSlotId] = valTarget;
+                } else {
+                    delete squadSelections[sourceSlotId];
+                }
+
+                if (valSource !== undefined) {
+                    squadSelections[targetSlotId] = valSource;
+                } else {
+                    delete squadSelections[targetSlotId];
+                }
+            }
+
+            renderAll();
+        }
+
+        // --- XỬ LÝ KÉO THẢ THÀNH VIÊN ---
         function handleDragStart(e, memberName) {
             draggedMemberName = memberName;
             e.target.classList.add('dragging');
@@ -1161,7 +1303,7 @@
                     if (parsed.members && parsed.notes) {
                         members = parsed.members;
                         notes = parsed.notes;
-                        squads = parsed.squads || {};
+                        squadSelections = parsed.squads || {};
                         commanders = parsed.commanders || { c1: "Đạo Đạo", c2: "Minh Sói Trần" };
                         columnNames = parsed.columnNames || columnNames;
                         loadSavedInputs();
