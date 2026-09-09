@@ -231,7 +231,7 @@
             position: relative;
             width: 1000px;
             height: 650px;
-            background: url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
+            background: url('bc.jpg') center/cover no-repeat;
             box-shadow: 0 0 30px rgba(0,0,0,0.8);
             border: 2px solid var(--border-color);
         }
@@ -244,11 +244,11 @@
             width: 100%;
             height: 100%;
             z-index: 5;
-            pointer-events: none; /* Mặc định cho phép click xuyên qua */
+            pointer-events: none;
         }
 
         #arrowCanvas.active {
-            pointer-events: auto; /* Kích hoạt nhận thao tác chuột khi bật chế độ vẽ */
+            pointer-events: auto;
             cursor: crosshair;
         }
 
@@ -339,7 +339,6 @@
                 </button>
                 <input type="file" id="mapFileInput" accept="image/*" style="display: none;" onchange="uploadMapImage(event)">
 
-                <!-- NÚT XUẤT BẢN ĐỒ THÀNH FILE ẢNH -->
                 <button class="btn btn-export" onclick="exportMapToImage()">
                     <i class="fa-solid fa-download"></i> Tải Ảnh Sa Bàn (PNG)
                 </button>
@@ -354,7 +353,6 @@
         <!-- CONTAINER MAP -->
         <div class="map-viewport">
             <div class="map-canvas" id="mapCanvas">
-                <!-- Canvas phủ lên để vẽ mũi tên -->
                 <canvas id="arrowCanvas" width="1000" height="650"></canvas>
             </div>
         </div>
@@ -377,9 +375,8 @@
         let isDrawingMode = false;
         let isDrawing = false;
         let startX = 0, startY = 0;
-        let arrows = []; // Lưu danh sách các mũi tên đã vẽ
+        let arrows = [];
 
-        // 1. HIỂN THỊ DANH SÁCH ICON
         function renderIconList() {
             iconContainer.innerHTML = '';
             iconList.forEach(item => {
@@ -399,7 +396,6 @@
             });
         }
 
-        // 2. TÍNH NĂNG VẼ MŨI TÊN
         function toggleDrawMode() {
             isDrawingMode = !isDrawingMode;
             const btn = document.getElementById('drawToggleBtn');
@@ -428,8 +424,8 @@
             const currentX = e.clientX - rect.left;
             const currentY = e.clientY - rect.top;
 
-            redrawAllCanvas(); // Vẽ lại các mũi tên cũ
-            drawArrow(startX, startY, currentX, currentY, '#ff4d4d'); // Vẽ mũi tên đang kéo
+            redrawAllCanvas();
+            drawArrow(startX, startY, currentX, currentY, '#ff4d4d');
         });
 
         arrowCanvas.addEventListener('mouseup', (e) => {
@@ -439,14 +435,12 @@
             const endX = e.clientX - rect.left;
             const endY = e.clientY - rect.top;
 
-            // Lưu mũi tên mới vào danh sách
             arrows.push({ fromX: startX, fromY: startY, toX: endX, toY: endY, color: '#ff4d4d' });
             redrawAllCanvas();
         });
 
-        // Hàm vẽ Mũi tên lên Canvas
         function drawArrow(fromx, fromy, tox, toy, color) {
-            const headlen = 12; // Độ dài đầu mũi tên
+            const headlen = 12;
             const dx = tox - fromx;
             const dy = toy - fromy;
             const angle = Math.atan2(dy, dx);
@@ -456,12 +450,10 @@
             ctx.fillStyle = color;
             ctx.lineWidth = 3;
 
-            // Vẽ thân mũi tên
             ctx.moveTo(fromx, fromy);
             ctx.lineTo(tox, toy);
             ctx.stroke();
 
-            // Vẽ đầu mũi tên
             ctx.beginPath();
             ctx.moveTo(tox, toy);
             ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
@@ -480,16 +472,14 @@
             redrawAllCanvas();
         }
 
-        // 3. TÍNH NĂNG XUẤT BẢN ĐỒ RA FILE ẢNH PNG
         function exportMapToImage() {
-            // Tắt chế độ vẽ nếu đang bật
             if (isDrawingMode) toggleDrawMode();
 
             alert('Đang tạo ảnh sơ đồ chiến thuật, vui lòng chờ trong giây lát...');
             
             html2canvas(mapCanvas, {
                 useCORS: true,
-                scale: 2 // Tăng chất lượng ảnh sắc nét
+                scale: 2
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = 'So-Do-Chien-Thuat-Bang.png';
@@ -498,7 +488,6 @@
             });
         }
 
-        // 4. KÉO THẢ ICON & UPLOAD ẢNH
         mapCanvas.addEventListener('dragover', (e) => e.preventDefault());
         mapCanvas.addEventListener('drop', (e) => {
             e.preventDefault();
