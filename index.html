@@ -63,9 +63,17 @@
             align-items: center;
             gap: 6px;
             transition: 0.2s;
+            text-decoration: none;
         }
 
         .btn-action:hover { background: #30363d; color: #fff; }
+
+        .btn-strategy {
+            background: #1f6beb;
+            color: #fff;
+            border: none;
+        }
+        .btn-strategy:hover { background: #388bfd; }
 
         .btn-reset { background: #da3633; color: #fff; border: none; }
         .btn-reset:hover { background: #f85149; }
@@ -77,12 +85,10 @@
             transition: grid-template-columns 0.3s ease;
         }
 
-        /* TRẠNG THÁI THU GỌN BẢNG BÊN TRÁI */
         .layout-container.collapsed-left {
             grid-template-columns: 50px 1fr 310px;
         }
 
-        /* SIDEBAR MEMBERS */
         .sidebar-members {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -180,7 +186,6 @@
             background: rgba(88, 166, 255, 0.05);
         }
 
-        /* STYLE KHI THU GỌN SIDEBAR LEF T */
         .sidebar-members.collapsed {
             padding: 10px 5px;
         }
@@ -205,7 +210,6 @@
             display: none;
         }
 
-        /* THẺ THÀNH VIÊN (DRAGGABLE) */
         .member-card {
             display: flex;
             justify-content: space-between;
@@ -234,7 +238,17 @@
             white-space: nowrap;
         }
 
-        /* MAIN SQUADS & TABLES */
+        /* CUSTOM ICON SPEAR FOR HUYET HA */
+        .custom-spear-icon {
+            width: 14px;
+            height: 14px;
+            display: inline-block;
+            vertical-align: middle;
+            background-color: currentColor;
+            -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 250"><path d="M50 0 L85 45 L70 105 L60 115 L60 215 L70 225 L50 250 L30 225 L40 215 L40 115 L30 105 L15 45 Z M50 20 L35 55 L50 95 L65 55 Z"/></svg>') no-repeat center / contain;
+            mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 250"><path d="M50 0 L85 45 L70 105 L60 115 L60 215 L70 225 L50 250 L30 225 L40 215 L40 115 L30 105 L15 45 Z M50 20 L35 55 L50 95 L65 55 Z"/></svg>') no-repeat center / contain;
+        }
+
         .main-squads {
             display: flex;
             flex-direction: column;
@@ -320,7 +334,6 @@
             font-weight: bold;
         }
 
-        /* Ô THẢ TRONG BẢNG */
         .drop-zone {
             width: 100%;
             height: 100%;
@@ -345,19 +358,18 @@
             font-weight: bold;
         }
 
-        /* CLASS MÀU MÔN PHÁI */
-        .class-ThietY    { background-color: #4a5568 !important; color: #fff; }
-        .class-HuyetHa   { background-color: #9b1c1c !important; color: #fff; }
-        .class-ToaiMong  { background-color: #6b21a8 !important; color: #fff; }
-        .class-ThanTuang { background-color: #1d4ed8 !important; color: #fff; }
-        .class-CuuLinh   { background-color: #831843 !important; color: #fff; }
-        .class-ToVan     { background-color: #db2777 !important; color: #fff; }
-        .class-LongNgam  { background-color: #d97706 !important; color: #fff; }
-        .class-HuyenCo   { background-color: #475569 !important; color: #fff; }
-        .class-TrieuQuang{ background-color: #0284c7 !important; color: #fff; }
+        /* BẢNG MÀU MÔN PHÁI (ĐÃ ĐỔI MÀU TOÁI MỘNG VÀ THẦN TƯƠNG) */
+        .class-ThietY    { background-color: #d97706 !important; color: #fff; } /* Vàng */
+        .class-HuyetHa   { background-color: #dc2626 !important; color: #fff; } /* Đỏ */
+        .class-ToaiMong  { background-color: #0284c7 !important; color: #fff; } /* Xanh nhạt */
+        .class-ThanTuang { background-color: #2563eb !important; color: #fff; } /* Xanh dương */
+        .class-ToVan     { background-color: #ec4899 !important; color: #fff; } /* Hồng */
+        .class-CuuLinh   { background-color: #581c87 !important; color: #fff; } /* Tím đậm */
+        .class-LongNgam  { background-color: #14532d !important; color: #fff; } /* Xanh lá đậm */
+        .class-HuyenCo   { background-color: #4b5563 !important; color: #fff; } /* Xám */
+        .class-TrieuQuang{ background-color: #0891b2 !important; color: #fff; } /* Xanh ngọc */
         .class-Khac      { background-color: #374151 !important; color: #fff; }
 
-        /* SIDEBAR RIGHT */
         .sidebar-right {
             display: flex;
             flex-direction: column;
@@ -464,7 +476,6 @@
             font-size: 12px;
         }
 
-        /* KHUNG THỐNG KÊ MÔN PHÁI */
         .stats-box {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -511,6 +522,7 @@
     <div class="title-banner">
         <span><i class="fa-solid fa-shield-halved"></i> ĐỘI HÌNH BANG CHIẾN - NGHỊCH THỦY HÀN</span>
         <div class="toolbar-btns">
+            <a href="https://phamquangtrung96vn-boop.github.io/NHABAO/ChienThuat.html" class="btn-action btn-strategy"><i class="fa-solid fa-chess-knight"></i> Chiến Thuật</a>
             <button class="btn-action" onclick="exportData()"><i class="fa-solid fa-download"></i> Xuất File</button>
             <button class="btn-action" onclick="document.getElementById('importFileInput').click()"><i class="fa-solid fa-upload"></i> Nhập File</button>
             <input type="file" id="importFileInput" style="display:none" accept=".json" onchange="importData(event)">
@@ -530,20 +542,19 @@
             <div class="input-box">
                 <input type="text" id="memberNameInput" placeholder="Tên Ingame (VD: VixKings)">
                 <select id="memberClassInput">
-                    <option value="ThietY">✊ Thiết Y (Nắm đấm)</option>
-                    <option value="HuyetHa">🛡️ Huyết Hà (Khiên/Thương)</option>
-                    <option value="ToaiMong">🗡️ Toái Mộng (Đao/Kiếm)</option>
-                    <option value="ThanTuang">🎸 Thần Tương (Đàn)</option>
-                    <option value="ToVan">🎗️ Tố Vấn (Dải lụa)</option>
-                    <option value="CuuLinh">💀 Cửu Linh (Sọ)</option>
-                    <option value="LongNgam">⚔️ Long Ngâm (Song kiếm)</option>
-                    <option value="HuyenCo">⚙️ Huyền Cơ (Cơ quan)</option>
-                    <option value="TrieuQuang">💧 Triều Quang (Tộc Sương)</option>
-                    <option value="Khac">⚔️ Khác</option>
+                    <option value="ThietY">Thiết Y (Nắm đấm)</option>
+                    <option value="HuyetHa">Huyết Hà (Cây Thương)</option>
+                    <option value="ToaiMong">Toái Mộng (Đao)</option>
+                    <option value="ThanTuang">Thần Tương (Đàn)</option>
+                    <option value="ToVan">Tố Vấn (Trị liệu)</option>
+                    <option value="CuuLinh">Cửu Linh (Sọ)</option>
+                    <option value="LongNgam">Long Ngâm (Song kiếm)</option>
+                    <option value="HuyenCo">Huyền Cơ (Cơ quan)</option>
+                    <option value="TrieuQuang">Triều Quang (Nước)</option>
+                    <option value="Khac">Khác</option>
                 </select>
                 <button class="btn-add" onclick="addMember()"><i class="fa-solid fa-plus"></i> Thêm Thành Viên</button>
             </div>
-            <!-- VÙNG THẢ ĐỂ TRẢ VỀ CHỜ XẾP -->
             <div class="member-list-scroll" id="memberListScroll" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropToUnassigned(event)"></div>
         </div>
 
@@ -606,7 +617,6 @@
                 </div>
             </div>
 
-            <!-- KHUNG THỐNG KÊ MÔN PHÁI -->
             <div class="stats-box">
                 <h4><i class="fa-solid fa-chart-pie"></i> THỐNG KÊ MÔN PHÁI</h4>
                 <div class="stats-grid" id="statsGridContainer"></div>
@@ -629,19 +639,25 @@
         };
 
         const classIcons = {
-            ThietY: "fa-hand-fist",
-            HuyetHa: "fa-shield-halved",
-            ToaiMong: "fa-khanda",
-            ThanTuang: "fa-guitar",
-            ToVan: "fa-ribbon",
-            CuuLinh: "fa-skull",
-            LongNgam: "fa-cross-swords",
-            HuyenCo: "fa-gear",
-            TrieuQuang: "fa-droplet",
-            Khac: "fa-user"
+            ThietY: "fa-solid fa-hand-fist",
+            HuyetHa: "custom-spear-icon",
+            ToaiMong: "fa-solid fa-burst",
+            ThanTuang: "fa-solid fa-guitar",
+            ToVan: "fa-solid fa-heart-pulse",
+            CuuLinh: "fa-solid fa-skull",
+            LongNgam: "fa-solid fa-bolt",
+            HuyenCo: "fa-solid fa-gear",
+            TrieuQuang: "fa-solid fa-droplet",
+            Khac: "fa-solid fa-user"
         };
 
-        // Thứ tự sắp xếp ưu tiên cho danh sách môn phái
+        function getIconHTML(classType) {
+            if (classType === 'HuyetHa') {
+                return `<i class="custom-spear-icon"></i>`;
+            }
+            return `<i class="${classIcons[classType] || 'fa-solid fa-user'}"></i>`;
+        }
+
         const classOrder = [
             "ThietY", "HuyetHa", "ToaiMong", "ThanTuang", 
             "ToVan", "CuuLinh", "LongNgam", "HuyenCo", "TrieuQuang", "Khac"
@@ -759,7 +775,6 @@
             }
         }
 
-        /* DRAG & DROP LOGIC */
         function handleDragStart(e, memberName) {
             draggedMemberName = memberName;
             e.target.classList.add('dragging');
@@ -833,7 +848,6 @@
             const assignedNames = getAssignedMemberNames();
             const unassignedMembers = members.filter(m => !assignedNames.includes(m.name));
 
-            // SẮP XẾP CÁC THÀNH VIÊN CÙNG MÔN PHÁI LẠI GẦN NHAU
             unassignedMembers.sort((a, b) => {
                 const indexA = classOrder.indexOf(a.classType) !== -1 ? classOrder.indexOf(a.classType) : 999;
                 const indexB = classOrder.indexOf(b.classType) !== -1 ? classOrder.indexOf(b.classType) : 999;
@@ -844,7 +858,7 @@
             });
 
             unassignedMembers.forEach((m) => {
-                const iconClass = classIcons[m.classType] || 'fa-user';
+                const iconHtml = getIconHTML(m.classType);
                 const card = document.createElement('div');
                 card.className = `member-card class-${m.classType}`;
                 card.draggable = true;
@@ -852,7 +866,7 @@
                 card.ondragstart = (e) => handleDragStart(e, m.name);
                 card.ondragend = handleDragEnd;
                 card.innerHTML = `
-                    <span><i class="fa-solid ${iconClass}"></i> <span class="member-name-text">${m.name}</span></span>
+                    <span>${iconHtml} <span class="member-name-text">${m.name}</span></span>
                     <i class="fa-solid fa-xmark btn-del-member" style="cursor:pointer" title="Xóa hẳn" onclick="removeMemberByName('${m.name}')"></i>
                 `;
                 listEl.appendChild(card);
@@ -869,14 +883,14 @@
                 if (memberName) {
                     const memberObj = members.find(m => m.name === memberName);
                     if (memberObj) {
-                        const iconClass = classIcons[memberObj.classType] || 'fa-user';
+                        const iconHtml = getIconHTML(memberObj.classType);
                         zone.innerHTML = `
                             <div class="member-card class-${memberObj.classType}" 
                                  draggable="true" 
                                  style="width: 100%; height: 100%;"
                                  ondragstart="handleDragStart(event, '${memberObj.name}')" 
                                  ondragend="handleDragEnd(event)">
-                                <span><i class="fa-solid ${iconClass}"></i> ${memberObj.name}</span>
+                                <span>${iconHtml} ${memberObj.name}</span>
                                 <i class="fa-solid fa-xmark" style="cursor:pointer" title="Bỏ khỏi đội" onclick="removeFromSlot('${slotId}')"></i>
                             </div>
                         `;
@@ -889,10 +903,9 @@
             });
         }
 
-        /* TÍNH TOÁN VÀ HIỂN THỊ THỐNG KÊ MÔN PHÁI */
         function renderClassStats() {
             const counts = {};
-            Object.keys(classIcons).forEach(key => counts[key] = 0);
+            Object.keys(classNames).forEach(key => counts[key] = 0);
 
             members.forEach(m => {
                 if (counts[m.classType] !== undefined) {
@@ -905,11 +918,11 @@
             const container = document.getElementById('statsGridContainer');
             container.innerHTML = '';
 
-            Object.keys(classIcons).forEach(classKey => {
+            Object.keys(classNames).forEach(classKey => {
                 const item = document.createElement('div');
                 item.className = `stat-item class-${classKey}`;
                 item.innerHTML = `
-                    <span><i class="fa-solid ${classIcons[classKey]}"></i> ${classNames[classKey]}</span>
+                    <span>${getIconHTML(classKey)} ${classNames[classKey]}</span>
                     <span class="stat-count">${counts[classKey]}</span>
                 `;
                 container.appendChild(item);
