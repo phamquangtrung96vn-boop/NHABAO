@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- html2canvas Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Supabase Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --bg-main: #0d1117;
@@ -671,6 +673,11 @@
     </div>
 
     <script>
+        // --- KẾT NỐI SUPABASE ---
+        const SUPABASE_URL = 'https://shblqenkrzjuklzrvoie.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYmxxZW5rcnpqdWtsenJ2b2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NzA4MjMsImV4cCI6MjEwNDU0NjgyM30.I8bsjcbR3dNYm99kHan8mLj9X7jcNuPEzFQTk9jUups'; 
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         const classNames = {
             ThietY: "Thiết Y",
             HuyetHa: "Huyết Hà",
@@ -729,15 +736,70 @@
             "AE BẬT DISCORD ĐỂ NGHE CALL CHIẾN THUẬT!"
         ];
 
-        let members = JSON.parse(localStorage.getItem('nth_members')) || defaultMembers;
-        let notes = JSON.parse(localStorage.getItem('nth_notes')) || defaultNotes;
-        let squadSelections = JSON.parse(localStorage.getItem('nth_squads')) || {};
-        let commanders = JSON.parse(localStorage.getItem('nth_commanders')) || { c1: "Đạo Đạo", c2: "Minh Sói Trần" };
-        let columnNames = JSON.parse(localStorage.getItem('nth_col_names')) || {
+        let members = [...defaultMembers];
+        let notes = [...defaultNotes];
+        let squadSelections = {};
+        let commanders = { c1: "Đạo Đạo", c2: "Minh Sói Trần" };
+        let columnNames = {
             g1_col1: "PT1", g1_col2: "PT2", g1_col3: "PT3", g1_col4: "PT4", g1_col5: "PT5",
             g2_col1: "PT1", g2_col2: "PT2", g2_col3: "PT3", g2_col4: "PT4", g2_col5: "PT5"
         };
         let draggedMemberName = null;
+
+        // Tải dữ liệu từ đám mây Supabase
+        async function loadDataFromCloud() {
+            try {
+                let { data, error } = await supabaseClient
+                    .from('squad_data')
+                    .select('*')
+                    .eq('id', 'main_config')
+                    .single();
+
+                if (data && data.content) {
+                    const saved = data.content;
+                    members = saved.members || defaultMembers;
+                    notes = saved.notes || defaultNotes;
+                    squadSelections = saved.squads || {};
+                    commanders = saved.commanders || { c1: "Đạo Đạo", c2: "Minh Sói Trần" };
+                    columnNames = saved.columnNames || columnNames;
+                    
+                    loadSavedInputs();
+                    renderAll();
+                    renderNotes();
+                } else {
+                    saveData();
+                }
+            } catch (err) {
+                console.log("Lỗi tải dữ liệu từ cloud, dùng mặc định:", err);
+            }
+        }
+
+        // Lưu dữ liệu tự động lên đám mây Supabase
+        async function saveData() {
+            commanders.c1 = document.getElementById('commander1Input').value;
+            commanders.c2 = document.getElementById('commander2Input').value;
+
+            for (let i = 1; i <= 5; i++) {
+                columnNames[`g1_col${i}`] = document.getElementById(`g1_col${i}`).value;
+                columnNames[`g2_col${i}`] = document.getElementById(`g2_col${i}`).value;
+            }
+
+            const payload = {
+                members: members,
+                notes: notes,
+                squads: squadSelections,
+                commanders: commanders,
+                columnNames: columnNames
+            };
+
+            const { error } = await supabaseClient
+                .from('squad_data')
+                .upsert({ id: 'main_config', content: payload });
+
+            if (error) {
+                console.error("Lỗi khi lưu dữ liệu lên cloud:", error);
+            }
+        }
 
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebarMembers');
@@ -752,22 +814,6 @@
             } else {
                 icon.className = 'fa-solid fa-chevron-left';
             }
-        }
-
-        function saveData() {
-            commanders.c1 = document.getElementById('commander1Input').value;
-            commanders.c2 = document.getElementById('commander2Input').value;
-
-            for (let i = 1; i <= 5; i++) {
-                columnNames[`g1_col${i}`] = document.getElementById(`g1_col${i}`).value;
-                columnNames[`g2_col${i}`] = document.getElementById(`g2_col${i}`).value;
-            }
-
-            localStorage.setItem('nth_members', JSON.stringify(members));
-            localStorage.setItem('nth_notes', JSON.stringify(notes));
-            localStorage.setItem('nth_squads', JSON.stringify(squadSelections));
-            localStorage.setItem('nth_commanders', JSON.stringify(commanders));
-            localStorage.setItem('nth_col_names', JSON.stringify(columnNames));
         }
 
         function loadSavedInputs() {
@@ -1114,7 +1160,6 @@
 
         function resetAllData() {
             if (confirm("Bạn có chắc chắn muốn đặt lại sơ đồ về mặc định? Mọi thay đổi hiện tại sẽ bị xóa.")) {
-                localStorage.clear();
                 members = [...defaultMembers];
                 notes = [...defaultNotes];
                 squadSelections = {};
@@ -1201,10 +1246,9 @@
             if (e.key === 'Enter') addMember();
         });
 
+        // Khởi chạy hệ thống và tải dữ liệu từ đám mây
         initTables();
-        loadSavedInputs();
-        renderAll();
-        renderNotes();
+        loadDataFromCloud();
     </script>
 </body>
 </html>
