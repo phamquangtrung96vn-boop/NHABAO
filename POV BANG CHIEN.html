@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý POV Bang Chiến</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --panel-bg: rgba(22, 27, 34, 0.85);
+            --border-color: rgba(48, 54, 61, 0.8);
+            --accent-color: #238636;
+            --accent-hover: #2ea043;
+            --text-color: #c9d1d9;
+            --text-bright: #ffffff;
+            --win-color: #3fb950;
+            --vs-color: #ff5b5b;
+            --match-badge: #1f6feb;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0b0f19 0%, #1a1f2c 100%);
+            color: var(--text-color);
+            margin: 0;
+            padding: 30px 20px;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--text-bright);
+            margin-bottom: 35px;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            font-size: 1.8rem;
+            text-shadow: 0 2px 10px rgba(35, 134, 54, 0.3);
+        }
+
+        .main-layout {
+            display: flex;
+            gap: 25px;
+            max-width: 1250px;
+            margin: 0 auto;
+        }
+
+        .left-column {
+            flex: 1;
+        }
+
+        .right-column {
+            flex: 1.2;
+        }
+
+        .card {
+            background-color: var(--panel-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 22px 25px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 18px;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--text-bright);
+            letter-spacing: 0.5px;
+            border: none;
+            padding: 0;
+        }
+
+        .search-input {
+            padding: 6px 12px;
+            background-color: #0d1117;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-bright);
+            font-size: 0.85rem;
+            width: 180px;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(35, 134, 54, 0.2);
+            width: 210px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"], input[type="date"], select {
+            width: 100%;
+            padding: 10px 12px;
+            background-color: #0d1117;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-bright);
+            box-sizing: border-box;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        input[type="text"]:focus, input[type="date"]:focus, select:focus {
+            border-color: var(--accent-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(35, 134, 54, 0.2);
+        }
+
+        button.btn-submit {
+            background: linear-gradient(180deg, #2ea043 0%, #238636 100%);
+            color: white;
+            border: none;
+            padding: 11px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            margin-top: 8px;
+            box-shadow: 0 4px 12px rgba(35, 134, 54, 0.4);
+        }
+
+        button.btn-submit:hover {
+            background: linear-gradient(180deg, #3fb950 0%, #2ea043 100%);
+            box-shadow: 0 6px 16px rgba(35, 134, 54, 0.6);
+            transform: translateY(-1px);
+        }
+
+        .match-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .match-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .match-list::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .match-item {
+            background: linear-gradient(135deg, #161b22 0%, #1f242c 100%);
+            border: 1px solid var(--border-color);
+            padding: 14px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .match-item:hover {
+            border-color: #58a6ff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(88, 166, 255, 0.2);
+            background: linear-gradient(135deg, #1f242c 0%, #262d3a 100%);
+        }
+
+        .match-info-box {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .match-meta {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .match-date {
+            font-size: 0.75rem;
+            color: #8b949e;
+            font-weight: 500;
+        }
+
+        .match-number-badge {
+            background-color: var(--match-badge);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+
+        .match-item-title {
+            font-weight: 700;
+            color: var(--text-bright);
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+        }
+
+        .vs-text {
+            color: var(--vs-color);
+            padding: 0 4px;
+        }
+
+        .win-tag {
+            color: var(--win-color);
+            font-size: 0.82rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 2px;
+        }
+
+        .match-item-action {
+            font-size: 0.85rem;
+            color: #ffffff;
+            background: #ff0000;
+            padding: 6px 12px;
+            border-radius: 20px;
+            white-space: nowrap;
+            margin-left: 15px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .match-item:hover .match-item-action {
+            background: #cc0000;
+            box-shadow: 0 4px 12px rgba(255, 0, 0, 0.5);
+        }
+
+        .placeholder-text {
+            text-align: center;
+            color: #8b949e;
+            padding: 30px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-layout {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Quản Lý POV Bang Chiến</h1>
+
+    <div class="main-layout">
+        <!-- CỘT TRÁI: Form nhập liệu -->
+        <div class="left-column">
+            <div class="card">
+                <h2>Thêm Trận Đấu Mới</h2>
+                
+                <div class="form-group">
+                    <label for="matchDate">Ngày tháng năm:</label>
+                    <input type="date" id="matchDate">
+                </div>
+
+                <div class="form-group">
+                    <label for="matchNumber">Trận mấy:</label>
+                    <select id="matchNumber">
+                        <option value="Trận 1">Trận 1</option>
+                        <option value="Trận 2">Trận 2</option>
+                        <option value="Trận 3">Trận 3</option>
+                        <option value="Trận 4">Trận 4</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="guild1">Bang hội 1 (Chủ nhà):</label>
+                    <input type="text" id="guild1" value="Nhà Báo">
+                </div>
+                
+                <div class="form-group">
+                    <label for="guild2">Bang hội 2 (Đối thủ):</label>
+                    <input type="text" id="guild2" placeholder="Ví dụ: VSKP">
+                </div>
+
+                <div class="form-group">
+                    <label for="winner">Bên nào WIN:</label>
+                    <select id="winner">
+                        <option value="guild1">Bang 1 Win</option>
+                        <option value="guild2">Bang 2 Win</option>
+                        <option value="draw">Hòa trận</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="youtubeLink">Link YouTube trận đấu:</label>
+                    <input type="text" id="youtubeLink" placeholder="Dán link YouTube vào đây">
+                </div>
+
+                <button class="btn-submit" onclick="addMatch()">Thêm Vào Danh Sách</button>
+            </div>
+        </div>
+
+        <!-- CỘT PHẢI: Danh sách các trận -->
+        <div class="right-column">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Danh Sách Bang Chiến</h2>
+                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Tìm kiếm..." oninput="renderMatchList()">
+                </div>
+                <div class="match-list" id="matchListContainer">
+                    <div class="placeholder-text">Chưa có trận đấu nào được thêm.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('matchDate').valueAsDate = new Date();
+
+        let matches = [];
+
+        function getOriginalYouTubeUrl(url) {
+            if (url.includes('iframe')) {
+                const match = url.match(/src="([^"]+)"/);
+                if (match) {
+                    const embedUrl = match[1];
+                    const videoId = embedUrl.split('embed/')[1]?.split('?')[0];
+                    return videoId ? `https://www.youtube.com/watch?v=${videoId}` : embedUrl;
+                }
+            }
+            
+            let videoId = '';
+            if (url.includes('youtu.be/')) {
+                videoId = url.split('youtu.be/')[1]?.split('?')[0];
+            } else if (url.includes('watch?v=')) {
+                videoId = url.split('watch?v=')[1]?.split('&')[0];
+            } else if (url.includes('embed/')) {
+                videoId = url.split('embed/')[1]?.split('?')[0];
+            }
+            
+            return videoId ? `https://www.youtube.com/watch?v=${videoId}` : url;
+        }
+
+        function addMatch() {
+            const matchDate = document.getElementById('matchDate').value;
+            const matchNumber = document.getElementById('matchNumber').value;
+            const guild1 = document.getElementById('guild1').value.trim() || 'Nhà Báo';
+            const guild2 = document.getElementById('guild2').value.trim();
+            const winnerOption = document.getElementById('winner').value;
+            const rawLink = document.getElementById('youtubeLink').value.trim();
+
+            if (!guild2) {
+                alert('Vui lòng nhập tên bang hội đối thủ!');
+                return;
+            }
+
+            let winnerText = '';
+            if (winnerOption === 'guild1') {
+                winnerText = `${guild1} WIN 🏆`;
+            } else if (winnerOption === 'guild2') {
+                winnerText = `${guild2} WIN 🏆`;
+            } else {
+                winnerText = `Hòa trận 🤝`;
+            }
+
+            const originalUrl = getOriginalYouTubeUrl(rawLink);
+
+            if (!originalUrl || !originalUrl.includes('youtube')) {
+                alert('Link YouTube không hợp lệ! Vui lòng kiểm tra lại.');
+                return;
+            }
+
+            const newMatch = {
+                id: Date.now(),
+                date: matchDate,
+                matchNum: matchNumber,
+                guild1: guild1,
+                guild2: guild2,
+                winner: winnerText,
+                originalUrl: originalUrl
+            };
+
+            matches.push(newMatch);
+
+            document.getElementById('guild2').value = '';
+            document.getElementById('youtubeLink').value = '';
+
+            renderMatchList();
+        }
+
+        function renderMatchList() {
+            const container = document.getElementById('matchListContainer');
+            const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+
+            const filteredMatches = matches.filter(match => {
+                return match.guild1.toLowerCase().includes(keyword) ||
+                       match.guild2.toLowerCase().includes(keyword) ||
+                       match.date.toLowerCase().includes(keyword) ||
+                       match.matchNum.toLowerCase().includes(keyword);
+            });
+            
+            if (matches.length === 0) {
+                container.innerHTML = `<div class="placeholder-text">Chưa có trận đấu nào được thêm.</div>`;
+                return;
+            }
+
+            if (filteredMatches.length === 0) {
+                container.innerHTML = `<div class="placeholder-text">Không tìm thấy trận đấu phù hợp.</div>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            [...filteredMatches].reverse().forEach(match => {
+                const item = document.createElement('div');
+                item.className = 'match-item';
+                
+                item.onclick = () => {
+                    window.open(match.originalUrl, '_blank');
+                };
+                
+                item.innerHTML = `
+                    <div class="match-info-box">
+                        <div class="match-meta">
+                            <span class="match-date">📅 ${match.date}</span>
+                            <span class="match-number-badge">${match.matchNum}</span>
+                        </div>
+                        <div class="match-item-title">${match.guild1} <span class="vs-text">VS</span> ${match.guild2}</div>
+                        <div class="win-tag">${match.winner}</div>
+                    </div>
+                    <div class="match-item-action">▶ Xem YouTube</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+    </script>
+</body>
+</html>
