@@ -31,6 +31,7 @@
             background-color: var(--bg-main);
             color: var(--text-color);
             padding: 20px;
+            zoom: 75%; /* ĐẶT MẶC ĐỊNH ZOOM 75% TẠI ĐÂY */
         }
 
         .title-banner {
@@ -166,11 +167,10 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             background: rgba(0,0,0,0.3);
             padding: 10px;
             border-radius: 4px;
-            transition: opacity 0.2s;
         }
 
         .input-box input, .input-box select {
@@ -193,6 +193,29 @@
             font-weight: bold;
         }
         .btn-add:hover { background: #2ea043; }
+
+        /* KHUNG THÙNG RÁC KÉO THẢ */
+        .trash-drop-zone {
+            background: rgba(218, 54, 51, 0.1);
+            border: 2px dashed #da3633;
+            color: #f85149;
+            border-radius: 4px;
+            padding: 8px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+        .trash-drop-zone.drag-over {
+            background: rgba(218, 54, 51, 0.3);
+            border-color: #f85149;
+            color: #fff;
+        }
 
         .member-list-scroll {
             flex-grow: 1;
@@ -217,7 +240,8 @@
         }
 
         .sidebar-members.collapsed h3,
-        .sidebar-members.collapsed .input-box {
+        .sidebar-members.collapsed .input-box,
+        .sidebar-members.collapsed .trash-drop-zone {
             display: none;
         }
 
@@ -262,6 +286,13 @@
             gap: 8px;
             pointer-events: none;
             white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .member-name-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .custom-spear-icon {
@@ -318,11 +349,6 @@
             text-align: center;
         }
 
-        .commander-input:focus {
-            border-color: #58a6ff;
-            background: #161b22;
-        }
-
         .group-sub-header {
             background: rgba(255, 255, 255, 0.03);
             text-align: center;
@@ -340,10 +366,6 @@
             padding: 4px;
             outline: none;
             font-weight: 500;
-        }
-        .group-sub-input:focus {
-            color: #58a6ff;
-            background: rgba(88, 166, 255, 0.05);
         }
 
         .squad-table, .sub-table {
@@ -368,14 +390,8 @@
             cursor: grab;
             padding: 2px;
             border-radius: 4px;
-            transition: background 0.2s;
         }
-        .pt-header-cell:active {
-            cursor: grabbing;
-        }
-        .pt-header-cell.dragging-col {
-            opacity: 0.4;
-        }
+        .pt-header-cell.dragging-col { opacity: 0.4; }
         .squad-table th.col-drag-over, .sub-table th.col-drag-over {
             background: rgba(88, 166, 255, 0.2);
             border: 1px dashed #58a6ff;
@@ -393,18 +409,7 @@
             width: 65px;
             text-align: center;
         }
-
-        .sub-table th input.col-name-input {
-            width: 45px;
-            font-size: 11px;
-            padding: 2px 1px;
-        }
-
-        .squad-table th input.col-name-input:focus, .sub-table th input.col-name-input:focus {
-            border-color: #58a6ff;
-            background: #161b22;
-            color: #fff;
-        }
+        .sub-table th input.col-name-input { width: 45px; font-size: 11px; }
 
         .squad-table td, .sub-table td {
             border: 1px solid var(--border-color);
@@ -412,19 +417,8 @@
             text-align: center;
             height: 38px;
         }
-
-        .sub-table td {
-            padding: 2px;
-            height: 34px;
-        }
-
-        .squad-table td.stt {
-            width: 3%;
-            background: #0d1117;
-            color: #6e7681;
-            font-size: 12px;
-            font-weight: bold;
-        }
+        .sub-table td { padding: 2px; height: 34px; }
+        .squad-table td.stt { width: 3%; background: #0d1117; color: #6e7681; font-size: 12px; font-weight: bold; }
 
         .drop-zone {
             width: 100%;
@@ -438,25 +432,9 @@
             border: 1px dashed transparent;
             transition: all 0.2s;
         }
-
-        .sub-table .drop-zone {
-            min-height: 28px;
-        }
-
-        .drop-zone.drag-over {
-            border-color: #58a6ff;
-            background: rgba(88, 166, 255, 0.15);
-        }
-
-        .drop-zone .empty-text {
-            color: #484f58;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        .sub-table .empty-text {
-            font-size: 10px;
-        }
+        .sub-table .drop-zone { min-height: 28px; }
+        .drop-zone.drag-over { border-color: #58a6ff; background: rgba(88, 166, 255, 0.15); }
+        .drop-zone .empty-text { color: #484f58; font-size: 11px; font-weight: bold; }
 
         .class-ThietY    { background-color: #facc15 !important; color: #111; }
         .class-HuyetHa   { background-color: #dc2626 !important; color: #fff; }
@@ -480,18 +458,9 @@
             height: calc(100vh - 110px);
             overflow-y: auto;
             transition: all 0.3s ease;
-            position: relative;
         }
-
-        .sidebar-right.collapsed {
-            padding: 10px 5px;
-            overflow: hidden;
-        }
-
-        .sidebar-right.collapsed .right-content-wrap {
-            display: none;
-        }
-
+        .sidebar-right.collapsed { padding: 10px 5px; overflow: hidden; }
+        .sidebar-right.collapsed .right-content-wrap { display: none; }
         .right-header {
             display: flex;
             justify-content: space-between;
@@ -501,230 +470,35 @@
             margin-bottom: 2px;
             flex-direction: row-reverse;
         }
+        .sidebar-right.collapsed .right-header { justify-content: center; border-bottom: none; margin-bottom: 0; padding-bottom: 0; flex-direction: row; }
+        .right-header h4 { color: #58a6ff; font-size: 13px; text-transform: uppercase; white-space: nowrap; }
+        .sidebar-right.collapsed .right-header h4 { display: none; }
+        .right-content-wrap { display: flex; flex-direction: column; gap: 10px; }
 
-        .sidebar-right.collapsed .right-header {
-            justify-content: center;
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-            flex-direction: row;
-        }
+        .sub-box { background: #0d1117; border: 1px solid var(--border-color); border-radius: 6px; padding: 6px; }
+        .sub-box h4 { color: #c9d1d9; font-size: 11px; margin-bottom: 4px; text-align: center; text-transform: uppercase; border-bottom: 1px solid var(--border-color); padding-bottom: 3px; }
 
-        .right-header h4 {
-            color: #58a6ff;
-            font-size: 13px;
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
+        .sub-table .member-card { font-size: 11px; padding: 3px 5px; gap: 4px; }
 
-        .sidebar-right.collapsed .right-header h4 {
-            display: none;
-        }
-
-        .right-content-wrap {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .sub-box {
-            background: #0d1117;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 6px;
-        }
-
-        .sub-box h4 {
-            color: #c9d1d9;
-            font-size: 11px;
-            margin-bottom: 4px;
-            text-align: center;
-            text-transform: uppercase;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 3px;
-        }
-
-        /* Thẻ tên riêng trong bảng dự bị cho gọn */
-        .sub-table .member-card {
-            font-size: 11px;
-            padding: 3px 5px;
-            gap: 4px;
-        }
-        .sub-table .member-card span {
-            gap: 4px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .sub-table .member-card .member-name-text {
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .note-box {
-            background: #161b22;
-            border: 1px dashed #388bfd;
-            padding: 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            color: #58a6ff;
-            line-height: 1.4;
-        }
-
-        .note-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 3px;
-        }
-
-        .note-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .note-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            background: rgba(255,255,255,0.03);
-            padding: 3px 5px;
-            border-radius: 4px;
-        }
-
+        .note-box { background: #161b22; border: 1px dashed #388bfd; padding: 8px; border-radius: 6px; font-size: 11px; color: #58a6ff; }
+        .note-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; border-bottom: 1px solid var(--border-color); padding-bottom: 3px; }
+        .note-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+        .note-item { display: flex; justify-content: space-between; align-items: flex-start; background: rgba(255,255,255,0.03); padding: 3px 5px; border-radius: 4px; }
         .note-item span { color: #c9d1d9; word-break: break-word; }
+        .btn-del-note { color: #f85149; cursor: pointer; margin-left: 5px; font-size: 10px; }
+        .note-input-group { display: flex; gap: 4px; margin-top: 6px; }
+        .note-input-group input { flex-grow: 1; padding: 3px 6px; background: #0d1117; border: 1px solid var(--border-color); color: #fff; border-radius: 4px; font-size: 11px; outline: none; }
+        .btn-add-note { background: #238636; color: white; border: none; padding: 3px 6px; border-radius: 4px; cursor: pointer; font-size: 11px; }
 
-        .btn-del-note {
-            color: #f85149;
-            cursor: pointer;
-            margin-left: 5px;
-            font-size: 10px;
-            margin-top: 2px;
-        }
+        .big-note-section { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .big-note-header { color: #58a6ff; font-size: 14px; font-weight: bold; text-transform: uppercase; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px; }
+        .big-note-textarea { width: 100%; height: 150px; background: #0d1117; border: 1px solid var(--border-color); color: #c9d1d9; padding: 10px; border-radius: 4px; font-size: 13px; line-height: 1.5; resize: vertical; outline: none; }
 
-        .note-input-group {
-            display: flex;
-            gap: 4px;
-            margin-top: 6px;
-        }
-
-        .note-input-group input {
-            flex-grow: 1;
-            padding: 3px 6px;
-            background: #0d1117;
-            border: 1px solid var(--border-color);
-            color: #fff;
-            border-radius: 4px;
-            font-size: 11px;
-            outline: none;
-        }
-
-        .btn-add-note {
-            background: #238636;
-            color: white;
-            border: none;
-            padding: 3px 6px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 11px;
-        }
-
-        /* --- KHUNG NHẬP TEXT LỚN (GHI CHÚ CHIẾN THUẬT) --- */
-        .big-note-section {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .big-note-header {
-            color: #58a6ff;
-            font-size: 14px;
-            font-weight: bold;
-            text-transform: uppercase;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 6px;
-        }
-
-        .big-note-textarea {
-            width: 100%;
-            height: 150px;
-            background: #0d1117;
-            border: 1px solid var(--border-color);
-            color: #c9d1d9;
-            padding: 10px;
-            border-radius: 4px;
-            font-size: 13px;
-            line-height: 1.5;
-            resize: vertical;
-            outline: none;
-        }
-
-        .big-note-textarea:focus {
-            border-color: #58a6ff;
-            background: #121820;
-        }
-
-        /* --- THỐNG KÊ MÔN PHÁI --- */
-        .stats-box {
-            background: #0d1117;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 6px;
-        }
-
-        .stats-box h4 {
-            color: #58a6ff;
-            font-size: 11px;
-            margin-bottom: 5px;
-            text-align: center;
-            text-transform: uppercase;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 3px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 3px;
-        }
-
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 2px 4px;
-            border-radius: 3px;
-            font-size: 10px;
-            font-weight: bold;
-        }
-
-        .stat-item span {
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .stat-count {
-            background: rgba(0, 0, 0, 0.4);
-            padding: 1px 3px;
-            border-radius: 6px;
-            font-size: 9px;
-            white-space: nowrap;
-            letter-spacing: -0.2px;
-        }
+        .stats-box { background: #0d1117; border: 1px solid var(--border-color); border-radius: 6px; padding: 6px; }
+        .stats-box h4 { color: #58a6ff; font-size: 11px; margin-bottom: 5px; text-align: center; text-transform: uppercase; border-bottom: 1px solid var(--border-color); padding-bottom: 3px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+        .stat-item { display: flex; justify-content: space-between; align-items: center; padding: 2px 4px; border-radius: 3px; font-size: 10px; font-weight: bold; }
+        .stat-count { background: rgba(0, 0, 0, 0.4); padding: 1px 3px; border-radius: 6px; font-size: 9px; }
     </style>
 </head>
 <body>
@@ -767,6 +541,12 @@
                 </select>
                 <button class="btn-add" onclick="addMember()"><i class="fa-solid fa-plus"></i> Thêm Thành Viên</button>
             </div>
+            
+            <!-- THÙNG RÁC XÓA THÀNH VIÊN -->
+            <div class="trash-drop-zone" id="trashDropZone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropToTrash(event)">
+                <i class="fa-solid fa-trash-can"></i> Thả vào đây để xóa thành viên
+            </div>
+
             <div class="member-list-scroll" id="memberListScroll" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropToUnassigned(event)"></div>
         </div>
 
@@ -834,7 +614,7 @@
                 </table>
             </div>
 
-            <!-- KHUNG NHẬP TEXT LỚN (GHI CHÚ / CHIẾN THUẬT) -->
+            <!-- KHUNG NHẬP TEXT LỚN -->
             <div class="big-note-section">
                 <div class="big-note-header">
                     <i class="fa-solid fa-pen-to-square"></i> Ghi Chú & Kế Hoạch Chiến Thuật Chi Tiết
@@ -1190,8 +970,7 @@
 
         function handleColDragOver(e) {
             e.preventDefault();
-            const th = e.currentTarget;
-            th.classList.add('col-drag-over');
+            e.currentTarget.classList.add('col-drag-over');
         }
 
         function handleColDragLeave(e) {
@@ -1298,6 +1077,14 @@
             renderAll();
         }
 
+        function handleDropToTrash(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+
+            if (!draggedMemberName) return;
+            removeMemberByName(draggedMemberName);
+        }
+
         function removeFromSlot(slotId) {
             delete squadSelections[slotId];
             renderAll();
@@ -1324,9 +1111,7 @@
             unassignedMembers.sort((a, b) => {
                 const indexA = classOrder.indexOf(a.classType) !== -1 ? classOrder.indexOf(a.classType) : 999;
                 const indexB = classOrder.indexOf(b.classType) !== -1 ? classOrder.indexOf(b.classType) : 999;
-                if (indexA !== indexB) {
-                    return indexA - indexB;
-                }
+                if (indexA !== indexB) return indexA - indexB;
                 return a.name.localeCompare(b.name);
             });
 
@@ -1397,9 +1182,7 @@
                 const memberObj = members.find(m => m.name === memberName);
                 if (!memberObj) return;
 
-                const classKey = counts[memberObj.classType] !== undefined
-                    ? memberObj.classType
-                    : 'Khac';
+                const classKey = counts[memberObj.classType] !== undefined ? memberObj.classType : 'Khac';
 
                 if (slotId.startsWith('g1_')) {
                     group1Counts[classKey]++;
@@ -1587,9 +1370,7 @@
                                 method: "POST",
                                 body: formData
                             });
-                            if (response.ok) {
-                                successCount++;
-                            }
+                            if (response.ok) successCount++;
                         } catch (err) {
                             console.error("Lỗi gửi webhook:", err);
                         }
