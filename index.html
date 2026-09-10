@@ -31,7 +31,7 @@
             background-color: var(--bg-main);
             color: var(--text-color);
             padding: 20px;
-            zoom: 85%; /* ĐẶT MẶC ĐỊNH ZOOM 85% TẠI ĐÂY */
+            zoom: 85%;
         }
 
         .title-banner {
@@ -194,7 +194,6 @@
         }
         .btn-add:hover { background: #2ea043; }
 
-        /* KHUNG THÙNG RÁC KÉO THẢ */
         .trash-drop-zone {
             background: rgba(218, 54, 51, 0.1);
             border: 2px dashed #da3633;
@@ -499,6 +498,57 @@
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
         .stat-item { display: flex; justify-content: space-between; align-items: center; padding: 2px 4px; border-radius: 3px; font-size: 10px; font-weight: bold; }
         .stat-count { background: rgba(0, 0, 0, 0.4); padding: 1px 3px; border-radius: 6px; font-size: 9px; }
+
+        /* MODAL POPUP NHẬP NỘI DUNG DISCORD */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            width: 600px;
+            max-width: 90%;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            color: #58a6ff;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .modal-body textarea {
+            width: 100%;
+            height: 220px;
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.5;
+            resize: vertical;
+            outline: none;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
     </style>
 </head>
 <body>
@@ -507,12 +557,43 @@
         <span><i class="fa-solid fa-shield-halved"></i> ĐỘI HÌNH BANG CHIẾN - NGHỊCH THỦY HÀN</span>
         <div class="toolbar-btns">
             <button class="btn-action btn-save-cloud" onclick="manualSaveToCloud()"><i class="fa-solid fa-cloud-arrow-up"></i> Lưu Lên Cloud</button>
-            <button class="btn-action btn-discord" onclick="sendToDiscord()"><i class="fa-brands fa-discord"></i> Gửi Discord</button>
+            <button class="btn-action btn-discord" onclick="openDiscordModal()"><i class="fa-brands fa-discord"></i> Gửi Discord</button>
             <a href="https://phamquangtrung96vn-boop.github.io/NHABAO/ChienThuat.html" class="btn-action btn-strategy"><i class="fa-solid fa-chess-knight"></i> Chiến Thuật</a>
             <button class="btn-action" onclick="exportData()"><i class="fa-solid fa-download"></i> Xuất File Máy</button>
             <button class="btn-action" onclick="document.getElementById('importFileInput').click()"><i class="fa-solid fa-upload"></i> Nhập File</button>
             <input type="file" id="importFileInput" style="display:none" accept=".json" onchange="importData(event)">
             <button class="btn-action btn-reset" onclick="resetAllData()"><i class="fa-solid fa-rotate-right"></i> Reset</button>
+        </div>
+    </div>
+
+    <!-- MODAL NHẬP NỘI DUNG GỬI DISCORD -->
+    <div class="modal-overlay" id="discordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span><i class="fa-brands fa-discord"></i> Nhập Nội Dung Thông Báo Discord</span>
+                <i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="closeDiscordModal()"></i>
+            </div>
+            <div class="modal-body">
+                <textarea id="discordMessageInput" placeholder="Nhập tiêu đề và nội dung thông báo gửi kèm ảnh sơ đồ tại đây...">THÔNG BÁO QUAN TRỌNG: TẬP TRUNG SCRIM TẤT CẢ THÀNH VIÊN HÔM NAY!
+
+Chào mọi người, tối nay Bang mình sẽ có buổi Scrim (đấu tập) cực kỳ quan trọng để chính thức chạy thử nghiệm chiến thuật mới. Đây là bước chuẩn bị then chốt để cả Bang làm quen nhịp đánh, phối hợp trơn tru trước khi bước vào 2 trận quan trọng vào tuần sau.
+Yêu Cầu Tham Gia:
+
+Điểm danh: Cố gắng tham gia đầy đủ nếu ko có việc bận.
+
+Thời gian: Tập trung trước 15 - 20 phút để xếp team và vào đúng Room Discord.
+Chuẩn bị:
+Kiểm tra lại bảng Skill, trang bị.
+Mỗi team bắt buộc chuẩn bị sẵn Quấn Thiên Hạo Ý(QTHY) để sẵn sàng ép trụ.
+Kiểm tra Mic/Tai nghe trên Discord và In-game.
+
+Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất cao từ tất cả mọi người. Anh em cố gắng thu xếp thời gian vào game đúng giờ tối nay để chúng ta cùng test nhé!
+@Báo 义</textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-action" onclick="closeDiscordModal()">Hủy</button>
+                <button class="btn-action btn-discord" id="btnConfirmSendDiscord" onclick="confirmSendToDiscord()">Xác Nhận Gửi Discord</button>
+            </div>
         </div>
     </div>
 
@@ -542,7 +623,6 @@
                 <button class="btn-add" onclick="addMember()"><i class="fa-solid fa-plus"></i> Thêm Thành Viên</button>
             </div>
             
-            <!-- THÙNG RÁC XÓA THÀNH VIÊN -->
             <div class="trash-drop-zone" id="trashDropZone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropToTrash(event)">
                 <i class="fa-solid fa-trash-can"></i> Thả vào đây để xóa thành viên
             </div>
@@ -614,7 +694,6 @@
                 </table>
             </div>
 
-            <!-- KHUNG NHẬP TEXT LỚN -->
             <div class="big-note-section">
                 <div class="big-note-header">
                     <i class="fa-solid fa-pen-to-square"></i> Ghi Chú & Kế Hoạch Chiến Thuật Chi Tiết
@@ -645,7 +724,7 @@
                                     </div>
                                 </th>
                                 <th id="th_res_col2" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'res', 2)">
-                                    <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'res', 2)" ondragend="handleColDragEnd(event)">
+                                    <div class="pt-header-cell" draggable="true" ondragstart="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'res', 2)">
                                         <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 9px;"></i>
                                         <input type="text" class="col-name-input" id="res_col2" value="DB2" oninput="saveData()" onclick="event.stopPropagation()">
                                     </div>
@@ -1047,14 +1126,12 @@
             e.currentTarget.classList.remove('drag-over');
         }
 
-        // CẬP NHẬT LOGIC TRÁO ĐỔI VỊ TRÍ KHI KÉO THẢ
         function handleDropSlot(e, slotId) {
             e.preventDefault();
             e.currentTarget.classList.remove('drag-over');
 
             if (!draggedMemberName) return;
 
-            // Tìm xem thành viên đang kéo vốn đang nằm ở ô nào trên bàn (nếu có)
             let sourceSlotId = null;
             for (const key in squadSelections) {
                 if (squadSelections[key] === draggedMemberName) {
@@ -1063,23 +1140,17 @@
                 }
             }
 
-            // Lấy tên thành viên đang đứng ở ô đích chuẩn bị thả vào
             const targetMemberName = squadSelections[slotId];
 
-            // Nếu người kéo đến từ một ô khác trên bàn
             if (sourceSlotId) {
                 if (targetMemberName) {
-                    // Tráo đổi: Đưa người ở ô đích về ô cũ của người kéo
                     squadSelections[sourceSlotId] = targetMemberName;
                 } else {
-                    // Ô đích trống: Xóa vị trí cũ của người kéo
                     delete squadSelections[sourceSlotId];
                 }
             } else {
-                // Nếu kéo từ danh sách chờ ra ô có người -> Người ở ô đích sẽ tự động quay về danh sách chờ (bị xóa khỏi squadSelections)
             }
 
-            // Gán người mới vào ô đích
             squadSelections[slotId] = draggedMemberName;
             
             renderAll();
@@ -1313,7 +1384,7 @@
                     if (parsed.members && parsed.notes) {
                         members = parsed.members;
                         notes = parsed.notes;
-                        squadSelections = parsed.squads || {};
+                        squads = parsed.squads || {};
                         commanders = parsed.commanders || { c1: "Đạo Đạo", c2: "Minh Sói Trần" };
                         subHeaders = parsed.subHeaders || { sub1: "Đội hình 10 PT tham chiến", sub2: "Đội hình 10 PT tham chiến" };
                         bigNoteContent = parsed.bigNoteContent || "";
@@ -1353,15 +1424,25 @@
             }
         }
 
-        async function sendToDiscord() {
+        // CÁC HÀM XỬ LÝ GỬI DISCORD KÈM BẢNG NHẬP TEXT
+        function openDiscordModal() {
+            document.getElementById('discordModal').style.display = 'flex';
+        }
+
+        function closeDiscordModal() {
+            document.getElementById('discordModal').style.display = 'none';
+        }
+
+        async function confirmSendToDiscord() {
+            const customText = document.getElementById('discordMessageInput').value;
             const webhookUrls = [
                 "https://discord.com/api/webhooks/1547208709627977809/HEbz1V-BtTIjKaQXppUQZ3XDqDe7b-0JxwX_NGsx5XwWA7CGIwBIyKDPm7yuznoURUgO",
                 "https://discord.com/api/webhooks/1547283260923445381/pPkjiE_iYDWmoPQbZ5nX2XZKosSmNtTIeALYPZEORI6RWOnNMIswISpViRU0aPEw0K4f"
             ];
             
-            const btn = event.currentTarget;
+            const btn = document.getElementById('btnConfirmSendDiscord');
             const originalText = btn.innerHTML;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...`;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang chụp & gửi...`;
             btn.disabled = true;
 
             try {
@@ -1379,12 +1460,11 @@
                         return;
                     }
 
-                    const dateStr = new Date().toLocaleString('vi-VN');
                     let successCount = 0;
 
                     for (const webhookUrl of webhookUrls) {
                         const formData = new FormData();
-                        formData.append("content", `📸 **Cập nhật sơ đồ Đội Hình Bang Chiến**\n⏰ *Thời gian: ${dateStr}*`);
+                        formData.append("content", customText);
                         formData.append("file", blob, `SoDoBangChien_${Date.now()}.png`);
 
                         try {
@@ -1400,6 +1480,7 @@
 
                     if (successCount > 0) {
                         alert(`✅ Đã chụp và gửi thành công đến ${successCount}/${webhookUrls.length} kênh Discord!`);
+                        closeDiscordModal();
                     } else {
                         alert("❌ Gửi thất bại đến tất cả các kênh Discord!");
                     }
