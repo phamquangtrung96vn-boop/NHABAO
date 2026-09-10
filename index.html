@@ -567,8 +567,8 @@
             <button class="btn-action btn-save-cloud" onclick="manualSaveToCloud()"><i class="fa-solid fa-cloud-arrow-up"></i> Lưu Lên Cloud</button>
             <button class="btn-action btn-discord" onclick="openDiscordModal()"><i class="fa-brands fa-discord"></i> Gửi Discord</button>
             <a href="https://phamquangtrung96vn-boop.github.io/NHABAO/ChienThuat.html" class="btn-action btn-strategy"><i class="fa-solid fa-chess-knight"></i> Chiến Thuật</a>
-            <!-- THÊM NÚT XEM POV Ở ĐÂY -->
-            <a href="POV Bang Chien.html" class="btn-action"><i class="fa-solid fa-video"></i> Xem POV</a>
+            <!-- ĐÃ CẬP NHẬT ĐƯỜNG DẪN URL-ENCODE CHO TRANG POV -->
+            <a href="POV%20BANG%20CHIEN.html" class="btn-action"><i class="fa-solid fa-video"></i> Xem POV</a>
             <button class="btn-action" onclick="exportData()"><i class="fa-solid fa-download"></i> Xuất File Máy</button>
             <button class="btn-action" onclick="document.getElementById('importFileInput').click()"><i class="fa-solid fa-upload"></i> Nhập File</button>
             <input type="file" id="importFileInput" style="display:none" accept=".json" onchange="importData(event)">
@@ -734,7 +734,7 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                                     </div>
                                 </th>
                                 <th id="th_res_col2" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'res', 2)">
-                                    <div class="pt-header-cell" draggable="true" ondragstart="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'res', 2)">
+                                    <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'res', 2)" ondragend="handleColDragEnd(event)">
                                         <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 9px;"></i>
                                         <input type="text" class="col-name-input" id="res_col2" value="DB2" oninput="saveData()" onclick="event.stopPropagation()">
                                     </div>
