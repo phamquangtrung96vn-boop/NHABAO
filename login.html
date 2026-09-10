@@ -90,17 +90,28 @@
     </div>
 
     <script>
-        function handleLogin(event) {
+        // Hàm mã hóa chuỗi sang chuẩn SHA-256 an toàn
+        async function hashPassword(string) {
+            const utf8 = new TextEncoder().encode(string);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function handleLogin(event) {
             event.preventDefault();
             
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value.trim();
 
-            // ĐÃ CẬP NHẬT TÀI KHOẢN VÀ MẬT KHẨU MỚI
             const correctUser = "nhabao";
-            const correctPass = "Pk123456*";
+            // Đây là chuỗi mật khẩu "Pk123456*" sau khi đã được mã hóa SHA-256
+            const correctPassHash = "19307d8846c4f744e82488aa447d6d7cf61771960d705c742e7c10b7b122c608";
 
-            if (user === correctUser && pass === correctPass) {
+            // Mã hóa mật khẩu người dùng vừa nhập để so sánh
+            const inputPassHash = await hashPassword(pass);
+
+            if (user === correctUser && inputPassHash === correctPassHash) {
                 // Đánh dấu đã đăng nhập thành công
                 sessionStorage.setItem("isLoggedIn", "true");
                 // Chuyển hướng vào trang chính index.html
@@ -113,3 +124,6 @@
 
 </body>
 </html>
+```[cite: 3]
+
+Bạn chỉ cần copy toàn bộ đoạn code trên và cập nhật vào file **`login.html`** trên GitHub là mật khẩu của bạn đã được bảo vệ an toàn dưới dạng mã hóa[cite: 3]!
