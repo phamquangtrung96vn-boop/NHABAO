@@ -1047,19 +1047,41 @@
             e.currentTarget.classList.remove('drag-over');
         }
 
+        // CẬP NHẬT LOGIC TRÁO ĐỔI VỊ TRÍ KHI KÉO THẢ
         function handleDropSlot(e, slotId) {
             e.preventDefault();
             e.currentTarget.classList.remove('drag-over');
 
             if (!draggedMemberName) return;
 
+            // Tìm xem thành viên đang kéo vốn đang nằm ở ô nào trên bàn (nếu có)
+            let sourceSlotId = null;
             for (const key in squadSelections) {
                 if (squadSelections[key] === draggedMemberName) {
-                    delete squadSelections[key];
+                    sourceSlotId = key;
+                    break;
                 }
             }
 
+            // Lấy tên thành viên đang đứng ở ô đích chuẩn bị thả vào
+            const targetMemberName = squadSelections[slotId];
+
+            // Nếu người kéo đến từ một ô khác trên bàn
+            if (sourceSlotId) {
+                if (targetMemberName) {
+                    // Tráo đổi: Đưa người ở ô đích về ô cũ của người kéo
+                    squadSelections[sourceSlotId] = targetMemberName;
+                } else {
+                    // Ô đích trống: Xóa vị trí cũ của người kéo
+                    delete squadSelections[sourceSlotId];
+                }
+            } else {
+                // Nếu kéo từ danh sách chờ ra ô có người -> Người ở ô đích sẽ tự động quay về danh sách chờ (bị xóa khỏi squadSelections)
+            }
+
+            // Gán người mới vào ô đích
             squadSelections[slotId] = draggedMemberName;
+            
             renderAll();
         }
 
