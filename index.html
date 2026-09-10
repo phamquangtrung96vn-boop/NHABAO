@@ -30,60 +30,67 @@
         body {
             background-color: var(--bg-main);
             color: var(--text-color);
-            padding: 10px 15px;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            padding: 20px;
         }
 
         .title-banner {
             background: linear-gradient(90deg, #161b22, #21262d);
             color: #f0f6fc;
-            padding: 8px 15px;
-            font-size: 17px;
+            padding: 12px 20px;
+            font-size: 20px;
             font-weight: bold;
             letter-spacing: 1px;
             border-radius: 6px;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             border: 1px solid var(--border-color);
             text-transform: uppercase;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-shrink: 0;
         }
 
         .toolbar-btns {
             display: flex;
-            gap: 8px;
+            gap: 10px;
         }
 
         .btn-action {
             background: #21262d;
             color: #c9d1d9;
             border: 1px solid var(--border-color);
-            padding: 5px 10px;
+            padding: 6px 12px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
             transition: 0.2s;
             text-decoration: none;
         }
 
         .btn-action:hover { background: #30363d; color: #fff; }
 
-        .btn-save-cloud { background-color: #238636; color: #fff; border: none; }
+        .btn-save-cloud {
+            background-color: #238636;
+            color: #fff;
+            border: none;
+        }
         .btn-save-cloud:hover { background-color: #2ea043; }
 
-        .btn-discord { background-color: #5865F2; color: #fff; border: none; }
+        .btn-discord {
+            background-color: #5865F2;
+            color: #fff;
+            border: none;
+        }
         .btn-discord:hover { background-color: #4752C4; color: #fff; }
 
-        .btn-strategy { background: #1f6beb; color: #fff; border: none; }
+        .btn-strategy {
+            background: #1f6beb;
+            color: #fff;
+            border: none;
+        }
         .btn-strategy:hover { background: #388bfd; }
 
         .btn-reset { background: #da3633; color: #fff; border: none; }
@@ -91,19 +98,17 @@
 
         .layout-container {
             display: grid;
-            grid-template-columns: 270px 1fr 290px;
-            gap: 12px;
-            flex-grow: 1;
-            overflow: hidden;
+            grid-template-columns: 290px 1fr 310px;
+            gap: 20px;
             transition: grid-template-columns 0.3s ease;
         }
 
         .layout-container.collapsed-left {
-            grid-template-columns: 50px 1fr 290px;
+            grid-template-columns: 50px 1fr 310px;
         }
 
         .layout-container.collapsed-right {
-            grid-template-columns: 270px 1fr 50px;
+            grid-template-columns: 290px 1fr 50px;
         }
 
         .layout-container.collapsed-left.collapsed-right {
@@ -114,7 +119,8 @@
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 10px;
+            padding: 15px;
+            height: calc(100vh - 110px);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -126,11 +132,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .sidebar-members h3 {
-            font-size: 13px;
+            font-size: 15px;
             color: #58a6ff;
             text-transform: uppercase;
             white-space: nowrap;
@@ -140,8 +146,8 @@
             background: #21262d;
             color: #58a6ff;
             border: 1px solid var(--border-color);
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
             border-radius: 4px;
             cursor: pointer;
             display: flex;
@@ -149,7 +155,6 @@
             justify-content: center;
             transition: 0.2s;
             flex-shrink: 0;
-            font-size: 11px;
         }
 
         .btn-toggle-sidebar:hover {
@@ -160,32 +165,32 @@
         .input-box {
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            margin-bottom: 8px;
+            gap: 8px;
+            margin-bottom: 12px;
             background: rgba(0,0,0,0.3);
-            padding: 8px;
+            padding: 10px;
             border-radius: 4px;
+            transition: opacity 0.2s;
         }
 
         .input-box input, .input-box select {
-            padding: 5px 8px;
+            padding: 6px 10px;
             background: #0d1117;
             border: 1px solid var(--border-color);
             color: #fff;
             border-radius: 4px;
             outline: none;
-            font-size: 12px;
+            font-size: 13px;
         }
 
         .btn-add {
             background: #238636;
             color: white;
             border: none;
-            padding: 6px;
+            padding: 8px;
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 12px;
         }
         .btn-add:hover { background: #2ea043; }
 
@@ -195,8 +200,9 @@
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            padding-right: 2px;
+            gap: 6px;
+            padding-right: 4px;
+            min-height: 100px;
             border: 2px dashed transparent;
             transition: border 0.2s;
         }
@@ -206,49 +212,23 @@
             background: rgba(88, 166, 255, 0.05);
         }
 
-        /* --- CSS THÙNG RÁC --- */
-        .trash-bin {
-            margin-top: 8px;
-            background: rgba(218, 54, 51, 0.1);
-            border: 2px dashed #da3633;
-            border-radius: 6px;
-            padding: 10px;
-            text-align: center;
-            color: #f85149;
-            font-size: 12px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            transition: 0.2s;
-            flex-shrink: 0;
-        }
-        .trash-bin.drag-over {
-            background: rgba(218, 54, 51, 0.3);
-            border-color: #f85149;
-            color: #ffffff;
-            transform: scale(1.02);
-        }
-
         .sidebar-members.collapsed {
-            padding: 8px 4px;
+            padding: 10px 5px;
         }
 
         .sidebar-members.collapsed h3,
-        .sidebar-members.collapsed .input-box,
-        .sidebar-members.collapsed .trash-bin {
+        .sidebar-members.collapsed .input-box {
             display: none;
         }
 
         .sidebar-members.collapsed .sidebar-header {
             justify-content: center;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         .sidebar-members.collapsed .member-card {
             justify-content: center;
-            padding: 6px 0;
+            padding: 8px 0;
         }
 
         .sidebar-members.collapsed .member-card .member-name-text,
@@ -260,39 +240,33 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 4px 8px;
+            padding: 6px 10px;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: bold;
             cursor: grab;
             transition: transform 0.1s, opacity 0.2s;
         }
 
-        .member-card:active { cursor: grabbing; }
-        .member-card.dragging { opacity: 0.4; }
+        .member-card:active {
+            cursor: grabbing;
+        }
+
+        .member-card.dragging {
+            opacity: 0.4;
+        }
 
         .member-card span {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             pointer-events: none;
-            overflow: hidden;
-            min-width: 0;
-            flex-grow: 1;
-        }
-        .member-name-text {
-            overflow: hidden;
-            text-overflow: ellipsis;
             white-space: nowrap;
-        }
-        .btn-del-member {
-            flex-shrink: 0;
-            margin-left: 6px;
         }
 
         .custom-spear-icon {
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 14px;
             display: inline-block;
             vertical-align: middle;
             background-color: currentColor;
@@ -303,10 +277,8 @@
         .main-squads {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            overflow-y: auto;
+            gap: 20px;
             overflow-x: auto;
-            padding-right: 4px;
         }
 
         .group-box {
@@ -314,22 +286,23 @@
             border: 1px solid var(--border-color);
             border-radius: 6px;
             overflow: hidden;
-            min-width: 850px;
+            min-width: 900px;
         }
 
         .group-header {
             background: #21262d;
             color: #f0f6fc;
             text-align: center;
-            padding: 5px;
+            padding: 8px;
             font-weight: bold;
-            font-size: 13px;
+            font-size: 15px;
             border-bottom: 1px solid var(--border-color);
             text-transform: uppercase;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 6px;
+            flex-wrap: wrap;
         }
 
         .commander-input {
@@ -337,18 +310,23 @@
             border: 1px solid var(--border-color);
             color: #58a6ff;
             font-weight: bold;
-            padding: 1px 6px;
+            padding: 2px 8px;
             border-radius: 4px;
             outline: none;
-            font-size: 13px;
-            width: 140px;
+            font-size: 14px;
+            width: 150px;
             text-align: center;
+        }
+
+        .commander-input:focus {
+            border-color: #58a6ff;
+            background: #161b22;
         }
 
         .group-sub-header {
             background: rgba(255, 255, 255, 0.03);
             text-align: center;
-            padding: 1px;
+            padding: 2px;
             border-bottom: 1px solid var(--border-color);
         }
 
@@ -358,9 +336,14 @@
             border: none;
             color: #8b949e;
             text-align: center;
-            font-size: 11px;
-            padding: 2px;
+            font-size: 12px;
+            padding: 4px;
             outline: none;
+            font-weight: 500;
+        }
+        .group-sub-input:focus {
+            color: #58a6ff;
+            background: rgba(88, 166, 255, 0.05);
         }
 
         .squad-table, .sub-table {
@@ -371,22 +354,28 @@
         .squad-table th, .sub-table th {
             background: #161b22;
             color: #8b949e;
-            padding: 2px;
-            font-size: 12px;
+            padding: 4px;
+            font-size: 13px;
             border: 1px solid var(--border-color);
+            position: relative;
         }
 
         .pt-header-cell {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 3px;
+            gap: 4px;
             cursor: grab;
-            padding: 1px;
-            border-radius: 3px;
+            padding: 2px;
+            border-radius: 4px;
+            transition: background 0.2s;
         }
-        .pt-header-cell:active { cursor: grabbing; }
-        .pt-header-cell.dragging-col { opacity: 0.4; }
+        .pt-header-cell:active {
+            cursor: grabbing;
+        }
+        .pt-header-cell.dragging-col {
+            opacity: 0.4;
+        }
         .squad-table th.col-drag-over, .sub-table th.col-drag-over {
             background: rgba(88, 166, 255, 0.2);
             border: 1px dashed #58a6ff;
@@ -397,44 +386,61 @@
             border: 1px solid var(--border-color);
             color: #58a6ff;
             font-weight: bold;
-            padding: 2px;
-            border-radius: 3px;
+            padding: 4px 2px;
+            border-radius: 4px;
             outline: none;
-            font-size: 11px;
-            width: 60px;
+            font-size: 12px;
+            width: 65px;
             text-align: center;
         }
 
-        .sub-table th input.col-name-input { width: 40px; font-size: 10px; }
+        .sub-table th input.col-name-input {
+            width: 45px;
+            font-size: 11px;
+            padding: 2px 1px;
+        }
+
+        .squad-table th input.col-name-input:focus, .sub-table th input.col-name-input:focus {
+            border-color: #58a6ff;
+            background: #161b22;
+            color: #fff;
+        }
 
         .squad-table td, .sub-table td {
             border: 1px solid var(--border-color);
-            padding: 2px;
+            padding: 3px;
             text-align: center;
-            height: 30px;
+            height: 38px;
         }
 
-        .sub-table td { height: 28px; }
+        .sub-table td {
+            padding: 2px;
+            height: 34px;
+        }
 
         .squad-table td.stt {
             width: 3%;
             background: #0d1117;
             color: #6e7681;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: bold;
         }
 
         .drop-zone {
             width: 100%;
             height: 100%;
-            min-height: 26px;
-            border-radius: 2px;
+            min-height: 32px;
+            border-radius: 3px;
             display: flex;
             align-items: center;
             justify-content: center;
             background: rgba(255, 255, 255, 0.02);
             border: 1px dashed transparent;
             transition: all 0.2s;
+        }
+
+        .sub-table .drop-zone {
+            min-height: 28px;
         }
 
         .drop-zone.drag-over {
@@ -444,8 +450,12 @@
 
         .drop-zone .empty-text {
             color: #484f58;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: bold;
+        }
+
+        .sub-table .empty-text {
+            font-size: 10px;
         }
 
         .class-ThietY    { background-color: #facc15 !important; color: #111; }
@@ -462,101 +472,118 @@
         .sidebar-right {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 12px;
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 8px;
+            padding: 10px;
+            height: calc(100vh - 110px);
             overflow-y: auto;
             transition: all 0.3s ease;
             position: relative;
         }
 
         .sidebar-right.collapsed {
-            padding: 8px 4px;
+            padding: 10px 5px;
             overflow: hidden;
         }
 
-        .sidebar-right.collapsed .right-content-wrap { display: none; }
+        .sidebar-right.collapsed .right-content-wrap {
+            display: none;
+        }
 
         .right-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 4px;
+            padding-bottom: 6px;
+            margin-bottom: 2px;
             flex-direction: row-reverse;
         }
 
         .sidebar-right.collapsed .right-header {
             justify-content: center;
             border-bottom: none;
+            margin-bottom: 0;
             padding-bottom: 0;
             flex-direction: row;
         }
 
         .right-header h4 {
             color: #58a6ff;
-            font-size: 12px;
+            font-size: 13px;
             text-transform: uppercase;
+            white-space: nowrap;
         }
 
-        .sidebar-right.collapsed .right-header h4 { display: none; }
+        .sidebar-right.collapsed .right-header h4 {
+            display: none;
+        }
 
         .right-content-wrap {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
 
         .sub-box {
             background: #0d1117;
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 5px;
+            padding: 6px;
         }
 
         .sub-box h4 {
             color: #c9d1d9;
-            font-size: 10px;
-            margin-bottom: 3px;
+            font-size: 11px;
+            margin-bottom: 4px;
             text-align: center;
             text-transform: uppercase;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 2px;
+            padding-bottom: 3px;
         }
 
+        /* Thẻ tên riêng trong bảng dự bị cho gọn */
         .sub-table .member-card {
-            font-size: 10px;
-            padding: 2px 4px;
-            gap: 3px;
+            font-size: 11px;
+            padding: 3px 5px;
+            gap: 4px;
+        }
+        .sub-table .member-card span {
+            gap: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sub-table .member-card .member-name-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .note-box {
             background: #161b22;
             border: 1px dashed #388bfd;
-            padding: 6px;
+            padding: 8px;
             border-radius: 6px;
-            font-size: 10px;
+            font-size: 11px;
             color: #58a6ff;
+            line-height: 1.4;
         }
 
         .note-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 2px;
+            padding-bottom: 3px;
         }
 
         .note-list {
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 3px;
-            max-height: 80px;
-            overflow-y: auto;
+            gap: 4px;
         }
 
         .note-item {
@@ -564,8 +591,8 @@
             justify-content: space-between;
             align-items: flex-start;
             background: rgba(255,255,255,0.03);
-            padding: 2px 4px;
-            border-radius: 3px;
+            padding: 3px 5px;
+            border-radius: 4px;
         }
 
         .note-item span { color: #c9d1d9; word-break: break-word; }
@@ -573,24 +600,25 @@
         .btn-del-note {
             color: #f85149;
             cursor: pointer;
-            margin-left: 4px;
-            font-size: 9px;
+            margin-left: 5px;
+            font-size: 10px;
+            margin-top: 2px;
         }
 
         .note-input-group {
             display: flex;
-            gap: 3px;
-            margin-top: 4px;
+            gap: 4px;
+            margin-top: 6px;
         }
 
         .note-input-group input {
             flex-grow: 1;
-            padding: 2px 5px;
+            padding: 3px 6px;
             background: #0d1117;
             border: 1px solid var(--border-color);
             color: #fff;
-            border-radius: 3px;
-            font-size: 10px;
+            border-radius: 4px;
+            font-size: 11px;
             outline: none;
         }
 
@@ -598,87 +626,104 @@
             background: #238636;
             color: white;
             border: none;
-            padding: 2px 5px;
-            border-radius: 3px;
+            padding: 3px 6px;
+            border-radius: 4px;
             cursor: pointer;
-            font-size: 10px;
+            font-size: 11px;
         }
 
+        /* --- KHUNG NHẬP TEXT LỚN (GHI CHÚ CHIẾN THUẬT) --- */
         .big-note-section {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 8px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            margin-top: 4px;
+            gap: 8px;
         }
 
         .big-note-header {
             color: #58a6ff;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: bold;
             text-transform: uppercase;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 4px;
+            padding-bottom: 6px;
         }
 
         .big-note-textarea {
             width: 100%;
-            height: 70px;
+            height: 150px;
             background: #0d1117;
             border: 1px solid var(--border-color);
             color: #c9d1d9;
-            padding: 6px;
+            padding: 10px;
             border-radius: 4px;
-            font-size: 12px;
-            line-height: 1.4;
+            font-size: 13px;
+            line-height: 1.5;
             resize: vertical;
             outline: none;
         }
 
+        .big-note-textarea:focus {
+            border-color: #58a6ff;
+            background: #121820;
+        }
+
+        /* --- THỐNG KÊ MÔN PHÁI --- */
         .stats-box {
             background: #0d1117;
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 5px;
+            padding: 6px;
         }
 
         .stats-box h4 {
             color: #58a6ff;
-            font-size: 10px;
-            margin-bottom: 3px;
+            font-size: 11px;
+            margin-bottom: 5px;
             text-align: center;
             text-transform: uppercase;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 2px;
+            padding-bottom: 3px;
         }
 
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 2px;
+            gap: 3px;
         }
 
         .stat-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1px 3px;
+            padding: 2px 4px;
             border-radius: 3px;
-            font-size: 9px;
+            font-size: 10px;
             font-weight: bold;
+        }
+
+        .stat-item span {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .stat-count {
             background: rgba(0, 0, 0, 0.4);
             padding: 1px 3px;
-            border-radius: 4px;
-            font-size: 8px;
+            border-radius: 6px;
+            font-size: 9px;
+            white-space: nowrap;
+            letter-spacing: -0.2px;
         }
     </style>
 </head>
@@ -723,11 +768,6 @@
                 <button class="btn-add" onclick="addMember()"><i class="fa-solid fa-plus"></i> Thêm Thành Viên</button>
             </div>
             <div class="member-list-scroll" id="memberListScroll" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropToUnassigned(event)"></div>
-            
-            <!-- THÙNG RÁC XÓA THÀNH VIÊN -->
-            <div class="trash-bin" id="trashBin" ondragover="handleTrashDragOver(event)" ondragleave="handleTrashDragLeave(event)" ondrop="handleDropToTrash(event)">
-                <i class="fa-solid fa-trash-can"></i> Thả vào đây để xóa
-            </div>
         </div>
 
         <!-- BẢNG GIỮA -->
@@ -750,7 +790,7 @@
                                     document.write(`
                                         <th id="th_g1_col${i}" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g1', ${i})">
                                             <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g1', ${i})" ondragend="handleColDragEnd(event)">
-                                                <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 9px;"></i>
+                                                <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 10px;"></i>
                                                 <input type="text" class="col-name-input" id="g1_col${i}" value="PT${i}" oninput="saveData()" onclick="event.stopPropagation()">
                                             </div>
                                         </th>
@@ -781,7 +821,7 @@
                                     document.write(`
                                         <th id="th_g2_col${i}" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g2', ${i})">
                                             <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g2', ${i})" ondragend="handleColDragEnd(event)">
-                                                <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 9px;"></i>
+                                                <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 10px;"></i>
                                                 <input type="text" class="col-name-input" id="g2_col${i}" value="PT${i}" oninput="saveData()" onclick="event.stopPropagation()">
                                             </div>
                                         </th>
@@ -794,6 +834,7 @@
                 </table>
             </div>
 
+            <!-- KHUNG NHẬP TEXT LỚN (GHI CHÚ / CHIẾN THUẬT) -->
             <div class="big-note-section">
                 <div class="big-note-header">
                     <i class="fa-solid fa-pen-to-square"></i> Ghi Chú & Kế Hoạch Chiến Thuật Chi Tiết
@@ -819,13 +860,13 @@
                             <tr id="headerRowRes">
                                 <th id="th_res_col1" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'res', 1)">
                                     <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'res', 1)" ondragend="handleColDragEnd(event)">
-                                        <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 8px;"></i>
+                                        <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 9px;"></i>
                                         <input type="text" class="col-name-input" id="res_col1" value="DB1" oninput="saveData()" onclick="event.stopPropagation()">
                                     </div>
                                 </th>
                                 <th id="th_res_col2" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'res', 2)">
                                     <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'res', 2)" ondragend="handleColDragEnd(event)">
-                                        <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 8px;"></i>
+                                        <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 9px;"></i>
                                         <input type="text" class="col-name-input" id="res_col2" value="DB2" oninput="saveData()" onclick="event.stopPropagation()">
                                     </div>
                                 </th>
@@ -837,17 +878,17 @@
 
                 <div class="note-box">
                     <div class="note-header">
-                        <strong><i class="fa-solid fa-triangle-exclamation"></i> NHIỆM VỤ</strong>
+                        <strong><i class="fa-solid fa-triangle-exclamation"></i> GHI CHÚ NHIỆM VỤ</strong>
                     </div>
                     <ul class="note-list" id="noteListContainer"></ul>
                     <div class="note-input-group">
-                        <input type="text" id="newNoteInput" placeholder="Ghi chú mới...">
+                        <input type="text" id="newNoteInput" placeholder="Nhập ghi chú mới...">
                         <button class="btn-add-note" onclick="addNote()"><i class="fa-solid fa-plus"></i></button>
                     </div>
                 </div>
 
                 <div class="stats-box">
-                    <h4><i class="fa-solid fa-chart-pie"></i> THỐNG KÊ PHÁI</h4>
+                    <h4><i class="fa-solid fa-chart-pie"></i> THỐNG KÊ MÔN PHÁI</h4>
                     <div class="stats-grid" id="statsGridContainer"></div>
                 </div>
             </div>
@@ -856,7 +897,7 @@
 
     <script>
         const SUPABASE_URL = 'https://shblqenkrzjuklzrvoie.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYmxxZW5rcnpqdWtsenJ2b2llIiwicm9sZSI6ImFub24iOiJpYXQiOjE3ODg5NzA4MjMsImV4cCI6MjEwNDU0NjgyM30.I8bsjcbR3dNYm99kHan8mLj9X7jcNuPEzFQTk9jUups'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYmxxZW5rcnpqdWtsenJ2b2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NzA4MjMsImV4cCI6MjEwNDU0NjgyM30.I8bsjcbR3dNYm99kHan8mLj9X7jcNuPEzFQTk9jUups'; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const classNames = {
@@ -912,7 +953,8 @@
 
         const defaultNotes = [
             "Tố Vấn chú ý duy trì Buff Máu toàn PT.",
-            "Thiết Y gom người để dồn sát thương.",
+            "Thiết Y gom quái / gom người để Thần Tương & Cửu Linh dồn sát thương.",
+            "Toái Mộng bắt lẻ hàng sau của địch.",
             "AE BẬT DISCORD ĐỂ NGHE CALL CHIẾN THUẬT!"
         ];
 
@@ -936,7 +978,6 @@
 
         async function initApp() {
             await loadDataFromCloud();
-            members = members.filter(m => !m.name.startsWith('v') && !m.name.startsWith('V') || m.name.length < 15);
             initTables();
             loadSavedInputs();
             renderAll();
@@ -1149,7 +1190,8 @@
 
         function handleColDragOver(e) {
             e.preventDefault();
-            e.currentTarget.classList.add('col-drag-over');
+            const th = e.currentTarget;
+            th.classList.add('col-drag-over');
         }
 
         function handleColDragLeave(e) {
@@ -1256,27 +1298,6 @@
             renderAll();
         }
 
-        // --- XỬ LÝ SỰ KIỆN THÙNG RÁC ---
-        function handleTrashDragOver(e) {
-            e.preventDefault();
-            e.currentTarget.classList.add('drag-over');
-        }
-
-        function handleTrashDragLeave(e) {
-            e.currentTarget.classList.remove('drag-over');
-        }
-
-        function handleDropToTrash(e) {
-            e.preventDefault();
-            e.currentTarget.classList.remove('drag-over');
-
-            if (!draggedMemberName) return;
-
-            // Xóa thành viên hoàn toàn khỏi mảng và các ô đội hình
-            removeMemberByName(draggedMemberName);
-            draggedMemberName = null;
-        }
-
         function removeFromSlot(slotId) {
             delete squadSelections[slotId];
             renderAll();
@@ -1303,7 +1324,9 @@
             unassignedMembers.sort((a, b) => {
                 const indexA = classOrder.indexOf(a.classType) !== -1 ? classOrder.indexOf(a.classType) : 999;
                 const indexB = classOrder.indexOf(b.classType) !== -1 ? classOrder.indexOf(b.classType) : 999;
-                if (indexA !== indexB) return indexA - indexB;
+                if (indexA !== indexB) {
+                    return indexA - indexB;
+                }
                 return a.name.localeCompare(b.name);
             });
 
@@ -1317,12 +1340,12 @@
                 card.ondragend = handleDragEnd;
                 card.innerHTML = `
                     <span>${iconHtml} <span class="member-name-text">${m.name}</span></span>
-                    <i class="fa-solid fa-xmark btn-del-member" style="cursor:pointer" title="Xóa" onclick="removeMemberByName('${m.name}')"></i>
+                    <i class="fa-solid fa-xmark btn-del-member" style="cursor:pointer" title="Xóa hẳn" onclick="removeMemberByName('${m.name}')"></i>
                 `;
                 listEl.appendChild(card);
             });
 
-            document.getElementById('memberCountTitle').innerText = `Chờ (${unassignedMembers.length}/${members.length})`;
+            document.getElementById('memberCountTitle').innerText = `Chờ Xếp Đội (${unassignedMembers.length}/${members.length})`;
         }
 
         function renderSlots() {
@@ -1342,14 +1365,14 @@
                                  ondragstart="handleDragStart(event, '${memberObj.name}')" 
                                  ondragend="handleDragEnd(event)">
                                 <span>${iconHtml} <span class="member-name-text">${memberObj.name}</span></span>
-                                <i class="fa-solid fa-xmark btn-del-member" style="cursor:pointer; font-size: ${isReserve ? '9px' : 'inherit'}" title="Bỏ" onclick="removeFromSlot('${slotId}')"></i>
+                                <i class="fa-solid fa-xmark" style="cursor:pointer; font-size: ${isReserve ? '10px' : 'inherit'}" title="Bỏ khỏi đội" onclick="removeFromSlot('${slotId}')"></i>
                             </div>
                         `;
                     } else {
-                        zone.innerHTML = `<span class="empty-text">--</span>`;
+                        zone.innerHTML = `<span class="empty-text">-- Trống --</span>`;
                     }
                 } else {
-                    zone.innerHTML = `<span class="empty-text">--</span>`;
+                    zone.innerHTML = `<span class="empty-text">-- Trống --</span>`;
                 }
             });
         }
@@ -1374,7 +1397,9 @@
                 const memberObj = members.find(m => m.name === memberName);
                 if (!memberObj) return;
 
-                const classKey = counts[memberObj.classType] !== undefined ? memberObj.classType : 'Khac';
+                const classKey = counts[memberObj.classType] !== undefined
+                    ? memberObj.classType
+                    : 'Khac';
 
                 if (slotId.startsWith('g1_')) {
                     group1Counts[classKey]++;
@@ -1394,7 +1419,7 @@
                 item.className = `stat-item class-${classKey}`;
                 item.innerHTML = `
                     <span>${getIconHTML(classKey)} ${classNames[classKey]}</span>
-                    <span class="stat-count">
+                    <span class="stat-count" title="Đoàn 1: ${group1Counts[classKey]} | Đoàn 2: ${group2Counts[classKey]} | Tổng: ${total}">
                         ${group1Counts[classKey]}|${group2Counts[classKey]} (${assignedTotal}/${total})
                     </span>
                 `;
@@ -1408,7 +1433,10 @@
             const val = nameInput.value.trim();
 
             if (!val) return alert("Vui lòng nhập tên Ingame!");
-            if (members.some(m => m.name === val)) return alert("Tên thành viên đã tồn tại!");
+
+            if (members.some(m => m.name === val)) {
+                return alert("Tên thành viên đã tồn tại!");
+            }
 
             members.push({ name: val, classType: classInput.value });
             nameInput.value = '';
@@ -1418,7 +1446,9 @@
         function removeMemberByName(nameToRemove) {
             members = members.filter(m => m.name !== nameToRemove);
             for (const key in squadSelections) {
-                if (squadSelections[key] === nameToRemove) delete squadSelections[key];
+                if (squadSelections[key] === nameToRemove) {
+                    delete squadSelections[key];
+                }
             }
             renderAll();
         }
@@ -1478,11 +1508,13 @@
                     if (parsed.members && parsed.notes) {
                         members = parsed.members;
                         notes = parsed.notes;
-                        squads = parsed.squads || {};
+                        squadSelections = parsed.squads || {};
                         commanders = parsed.commanders || { c1: "Đạo Đạo", c2: "Minh Sói Trần" };
                         subHeaders = parsed.subHeaders || { sub1: "Đội hình 10 PT tham chiến", sub2: "Đội hình 10 PT tham chiến" };
                         bigNoteContent = parsed.bigNoteContent || "";
-                        if (parsed.columnNames) columnNames = { ...columnNames, ...parsed.columnNames };
+                        if (parsed.columnNames) {
+                            columnNames = { ...columnNames, ...parsed.columnNames };
+                        }
                         loadSavedInputs();
                         renderAll();
                         renderNotes();
@@ -1498,7 +1530,7 @@
         }
 
         function resetAllData() {
-            if (confirm("Đặt lại sơ đồ về mặc định?")) {
+            if (confirm("Bạn có chắc chắn muốn đặt lại sơ đồ về mặc định? Mọi thay đổi hiện tại sẽ bị xóa.")) {
                 members = [...defaultMembers];
                 notes = [...defaultNotes];
                 squadSelections = {};
@@ -1528,11 +1560,15 @@
             btn.disabled = true;
 
             try {
-                const canvas = await html2canvas(document.body, { scale: 2, useCORS: true, logging: false });
+                const canvas = await html2canvas(document.body, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false
+                });
 
                 canvas.toBlob(async (blob) => {
                     if (!blob) {
-                        alert("Lỗi chụp ảnh!");
+                        alert("Lỗi khi chụp màn hình!");
                         btn.innerHTML = originalText;
                         btn.disabled = false;
                         return;
@@ -1547,21 +1583,31 @@
                         formData.append("file", blob, `SoDoBangChien_${Date.now()}.png`);
 
                         try {
-                            const response = await fetch(webhookUrl, { method: "POST", body: formData });
-                            if (response.ok) successCount++;
+                            const response = await fetch(webhookUrl, {
+                                method: "POST",
+                                body: formData
+                            });
+                            if (response.ok) {
+                                successCount++;
+                            }
                         } catch (err) {
                             console.error("Lỗi gửi webhook:", err);
                         }
                     }
 
-                    alert(`✅ Đã gửi thành công đến ${successCount}/${webhookUrls.length} kênh Discord!`);
+                    if (successCount > 0) {
+                        alert(`✅ Đã chụp và gửi thành công đến ${successCount}/${webhookUrls.length} kênh Discord!`);
+                    } else {
+                        alert("❌ Gửi thất bại đến tất cả các kênh Discord!");
+                    }
+
                     btn.innerHTML = originalText;
                     btn.disabled = false;
                 }, "image/png");
 
             } catch (error) {
                 console.error("Lỗi:", error);
-                alert("Có lỗi xảy ra.");
+                alert("Có lỗi xảy ra trong quá trình chụp và gửi ảnh.");
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
@@ -1574,6 +1620,7 @@
             if (e.key === 'Enter') addMember();
         });
 
+        // Khởi chạy ứng dụng
         initApp();
     </script>
 </body>
