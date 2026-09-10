@@ -3,45 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập hệ thống - Bang Chiến</title>
+    <title>Đăng nhập hệ thống</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-image: url('image_35c007.PNG'); 
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            background-color: #0d1117;
             color: #c9d1d9;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            position: relative;
         }
-
-        body::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.4); 
-            z-index: 1;
-        }
-
         .login-box {
-            position: relative;
-            z-index: 2;
-            background: rgba(22, 27, 34, 0.9);
+            background: #161b22;
             border: 1px solid #30363d;
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.7);
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
             width: 320px;
         }
-
         .login-box h2 {
             margin-bottom: 20px;
             font-size: 20px;
@@ -49,18 +30,15 @@
             color: #58a6ff;
             text-transform: uppercase;
         }
-
         .input-group {
             margin-bottom: 15px;
         }
-
         .input-group label {
             display: block;
             margin-bottom: 5px;
             color: #8b949e;
             font-size: 13px;
         }
-
         .input-group input {
             width: 100%;
             padding: 10px;
@@ -71,11 +49,6 @@
             border-radius: 4px;
             outline: none;
         }
-
-        .input-group input:focus {
-            border-color: #58a6ff;
-        }
-
         button {
             width: 100%;
             padding: 10px;
@@ -86,13 +59,10 @@
             font-weight: bold;
             border-radius: 4px;
             cursor: pointer;
-            transition: background-color 0.2s;
         }
-
         button:hover {
             background-color: #2ea043;
         }
-
         .error {
             color: #f85149;
             font-size: 13px;
@@ -127,10 +97,13 @@
             const pass = document.getElementById('password').value.trim();
 
             const correctUser = "nhabao";
-            const correctPass = "Pk123456*";
+            const correctPass = "Pk123456*"; // Mật khẩu dạng văn bản thông thường
 
+            // So sánh trực tiếp tài khoản và mật khẩu người dùng nhập
             if (user === correctUser && pass === correctPass) {
+                // Đánh dấu đã đăng nhập thành công
                 sessionStorage.setItem("isLoggedIn", "true");
+                // Chuyển hướng vào trang chính index.html
                 window.location.href = "index.html";
             } else {
                 document.getElementById('errorMsg').innerText = "Sai tài khoản hoặc mật khẩu!";
