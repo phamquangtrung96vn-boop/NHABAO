@@ -107,6 +107,14 @@
             grid-template-columns: 50px 1fr 310px;
         }
 
+        .layout-container.collapsed-right {
+            grid-template-columns: 290px 1fr 50px;
+        }
+
+        .layout-container.collapsed-left.collapsed-right {
+            grid-template-columns: 50px 1fr 50px;
+        }
+
         .sidebar-members {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -270,6 +278,7 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
+            overflow-x: auto;
         }
 
         .group-box {
@@ -277,6 +286,7 @@
             border: 1px solid var(--border-color);
             border-radius: 6px;
             overflow: hidden;
+            min-width: 900px;
         }
 
         .group-header {
@@ -314,20 +324,34 @@
         }
 
         .group-sub-header {
-            background: rgba(255,255,255,0.03);
+            background: rgba(255, 255, 255, 0.03);
             text-align: center;
-            padding: 4px;
-            font-size: 12px;
-            color: #8b949e;
+            padding: 2px;
             border-bottom: 1px solid var(--border-color);
         }
 
-        .squad-table {
+        .group-sub-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #8b949e;
+            text-align: center;
+            font-size: 12px;
+            padding: 4px;
+            outline: none;
+            font-weight: 500;
+        }
+        .group-sub-input:focus {
+            color: #58a6ff;
+            background: rgba(88, 166, 255, 0.05);
+        }
+
+        .squad-table, .sub-table {
             width: 100%;
             border-collapse: collapse;
         }
 
-        .squad-table th {
+        .squad-table th, .sub-table th {
             background: #161b22;
             color: #8b949e;
             padding: 4px;
@@ -340,7 +364,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 4px;
             cursor: grab;
             padding: 2px;
             border-radius: 4px;
@@ -352,40 +376,50 @@
         .pt-header-cell.dragging-col {
             opacity: 0.4;
         }
-        .squad-table th.col-drag-over {
+        .squad-table th.col-drag-over, .sub-table th.col-drag-over {
             background: rgba(88, 166, 255, 0.2);
             border: 1px dashed #58a6ff;
         }
 
-        .squad-table th input.col-name-input {
+        .squad-table th input.col-name-input, .sub-table th input.col-name-input {
             background: #0d1117;
             border: 1px solid var(--border-color);
             color: #58a6ff;
             font-weight: bold;
-            padding: 4px 6px;
+            padding: 4px 2px;
             border-radius: 4px;
             outline: none;
-            font-size: 13px;
-            width: 75px;
+            font-size: 12px;
+            width: 65px;
             text-align: center;
         }
 
-        .squad-table th input.col-name-input:focus {
+        .sub-table th input.col-name-input {
+            width: 45px;
+            font-size: 11px;
+            padding: 2px 1px;
+        }
+
+        .squad-table th input.col-name-input:focus, .sub-table th input.col-name-input:focus {
             border-color: #58a6ff;
             background: #161b22;
             color: #fff;
         }
 
-        .squad-table td {
+        .squad-table td, .sub-table td {
             border: 1px solid var(--border-color);
             padding: 3px;
             text-align: center;
-            width: 18%;
             height: 38px;
         }
 
+        .sub-table td {
+            padding: 2px;
+            height: 34px;
+        }
+
         .squad-table td.stt {
-            width: 4%;
+            width: 3%;
             background: #0d1117;
             color: #6e7681;
             font-size: 12px;
@@ -405,6 +439,10 @@
             transition: all 0.2s;
         }
 
+        .sub-table .drop-zone {
+            min-height: 28px;
+        }
+
         .drop-zone.drag-over {
             border-color: #58a6ff;
             background: rgba(88, 166, 255, 0.15);
@@ -412,8 +450,12 @@
 
         .drop-zone .empty-text {
             color: #484f58;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
+        }
+
+        .sub-table .empty-text {
+            font-size: 10px;
         }
 
         .class-ThietY    { background-color: #facc15 !important; color: #111; }
@@ -430,61 +472,118 @@
         .sidebar-right {
             display: flex;
             flex-direction: column;
-            gap: 20px;
-        }
-
-        .sub-box {
+            gap: 12px;
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 15px;
+            padding: 10px;
+            height: calc(100vh - 110px);
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .sidebar-right.collapsed {
+            padding: 10px 5px;
+            overflow: hidden;
+        }
+
+        .sidebar-right.collapsed .right-content-wrap {
+            display: none;
+        }
+
+        .right-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 6px;
+            margin-bottom: 2px;
+            flex-direction: row-reverse;
+        }
+
+        .sidebar-right.collapsed .right-header {
+            justify-content: center;
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+            flex-direction: row;
+        }
+
+        .right-header h4 {
+            color: #58a6ff;
+            font-size: 13px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .sidebar-right.collapsed .right-header h4 {
+            display: none;
+        }
+
+        .right-content-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sub-box {
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px;
         }
 
         .sub-box h4 {
             color: #c9d1d9;
-            font-size: 14px;
-            margin-bottom: 10px;
+            font-size: 11px;
+            margin-bottom: 4px;
             text-align: center;
             text-transform: uppercase;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 5px;
+            padding-bottom: 3px;
         }
 
-        .sub-table {
-            width: 100%;
-            border-collapse: collapse;
+        /* Thẻ tên riêng trong bảng dự bị cho gọn */
+        .sub-table .member-card {
+            font-size: 11px;
+            padding: 3px 5px;
+            gap: 4px;
         }
-
-        .sub-table td {
-            padding: 3px;
-            border: 1px solid var(--border-color);
-            height: 38px;
+        .sub-table .member-card span {
+            gap: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sub-table .member-card .member-name-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .note-box {
             background: #161b22;
             border: 1px dashed #388bfd;
-            padding: 12px;
+            padding: 8px;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 11px;
             color: #58a6ff;
-            line-height: 1.5;
+            line-height: 1.4;
         }
 
         .note-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 5px;
+            padding-bottom: 3px;
         }
 
         .note-list {
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 4px;
         }
 
         .note-item {
@@ -492,7 +591,7 @@
             justify-content: space-between;
             align-items: flex-start;
             background: rgba(255,255,255,0.03);
-            padding: 5px 8px;
+            padding: 3px 5px;
             border-radius: 4px;
         }
 
@@ -501,25 +600,25 @@
         .btn-del-note {
             color: #f85149;
             cursor: pointer;
-            margin-left: 8px;
-            font-size: 12px;
+            margin-left: 5px;
+            font-size: 10px;
             margin-top: 2px;
         }
 
         .note-input-group {
             display: flex;
-            gap: 5px;
-            margin-top: 10px;
+            gap: 4px;
+            margin-top: 6px;
         }
 
         .note-input-group input {
             flex-grow: 1;
-            padding: 5px;
+            padding: 3px 6px;
             background: #0d1117;
             border: 1px solid var(--border-color);
             color: #fff;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: 11px;
             outline: none;
         }
 
@@ -527,59 +626,104 @@
             background: #238636;
             color: white;
             border: none;
-            padding: 5px 10px;
+            padding: 3px 6px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
         }
 
-        .stats-box {
+        /* --- KHUNG NHẬP TEXT LỚN (GHI CHÚ CHIẾN THUẬT) --- */
+        .big-note-section {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 6px;
             padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .big-note-header {
+            color: #58a6ff;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 6px;
+        }
+
+        .big-note-textarea {
+            width: 100%;
+            height: 150px;
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            color: #c9d1d9;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            line-height: 1.5;
+            resize: vertical;
+            outline: none;
+        }
+
+        .big-note-textarea:focus {
+            border-color: #58a6ff;
+            background: #121820;
+        }
+
+        /* --- THỐNG KÊ MÔN PHÁI --- */
+        .stats-box {
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px;
         }
 
         .stats-box h4 {
             color: #58a6ff;
-            font-size: 13px;
-            margin-bottom: 10px;
+            font-size: 11px;
+            margin-bottom: 5px;
             text-align: center;
             text-transform: uppercase;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 5px;
+            padding-bottom: 3px;
         }
 
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 6px;
+            gap: 3px;
         }
 
         .stat-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 10px;
             font-weight: bold;
+        }
+
+        .stat-item span {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .stat-count {
             background: rgba(0, 0, 0, 0.4);
-            padding: 1px 6px;
-            border-radius: 10px;
-            font-size: 11px;
+            padding: 1px 3px;
+            border-radius: 6px;
+            font-size: 9px;
             white-space: nowrap;
-        }
-
-        .stat-count .group-count {
-            font-weight: bold;
-        }
-
-        .stat-count .total-count {
-            opacity: 0.95;
+            letter-spacing: -0.2px;
         }
     </style>
 </head>
@@ -603,7 +747,7 @@
         <div class="sidebar-members" id="sidebarMembers">
             <div class="sidebar-header">
                 <h3 id="memberCountTitle">Chờ Xếp Đội (0)</h3>
-                <button class="btn-toggle-sidebar" onclick="toggleSidebar()" id="toggleSidebarBtn" title="Thu / Mở Sidebar">
+                <button class="btn-toggle-sidebar" onclick="toggleLeftSidebar()" id="toggleSidebarBtn" title="Thu / Mở Sidebar">
                     <i class="fa-solid fa-chevron-left" id="toggleIcon"></i>
                 </button>
             </div>
@@ -634,41 +778,25 @@
                     <input type="text" id="commander1Input" class="commander-input" value="Đạo Đạo" oninput="saveData()">
                     <span>)</span>
                 </div>
-                <div class="group-sub-header">PT 1, 2, 3 đánh đoàn lớn | PT 4, 5 cơ động</div>
+                <div class="group-sub-header">
+                    <input type="text" id="subHeader1Input" class="group-sub-input" value="Đội hình 10 PT tham chiến" oninput="saveData()">
+                </div>
                 <table class="squad-table">
                     <thead>
                         <tr id="headerRow1">
                             <th></th>
-                            <th id="th_g1_col1" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g1', 1)">
-                                <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g1', 1)" ondragend="handleColDragEnd(event)">
-                                    <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 11px;"></i>
-                                    <input type="text" class="col-name-input" id="g1_col1" value="PT1" oninput="saveData()" onclick="event.stopPropagation()">
-                                </div>
-                            </th>
-                            <th id="th_g1_col2" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g1', 2)">
-                                <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g1', 2)" ondragend="handleColDragEnd(event)">
-                                    <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 11px;"></i>
-                                    <input type="text" class="col-name-input" id="g1_col2" value="PT2" oninput="saveData()" onclick="event.stopPropagation()">
-                                </div>
-                            </th>
-                            <th id="th_g1_col3" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g1', 3)">
-                                <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g1', 3)" ondragend="handleColDragEnd(event)">
-                                    <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 11px;"></i>
-                                    <input type="text" class="col-name-input" id="g1_col3" value="PT3" oninput="saveData()" onclick="event.stopPropagation()">
-                                </div>
-                            </th>
-                            <th id="th_g1_col4" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g1', 4)">
-                                <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g1', 4)" ondragend="handleColDragEnd(event)">
-                                    <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 11px;"></i>
-                                    <input type="text" class="col-name-input" id="g1_col4" value="PT4" oninput="saveData()" onclick="event.stopPropagation()">
-                                </div>
-                            </th>
-                            <th id="th_g1_col5" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g1', 5)">
-                                <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g1', 5)" ondragend="handleColDragEnd(event)">
-                                    <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 11px;"></i>
-                                    <input type="text" class="col-name-input" id="g1_col5" value="PT5" oninput="saveData()" onclick="event.stopPropagation()">
-                                </div>
-                            </th>
+                            <script>
+                                for(let i=1; i<=10; i++) {
+                                    document.write(`
+                                        <th id="th_g1_col${i}" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g1', ${i})">
+                                            <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g1', ${i})" ondragend="handleColDragEnd(event)">
+                                                <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 10px;"></i>
+                                                <input type="text" class="col-name-input" id="g1_col${i}" value="PT${i}" oninput="saveData()" onclick="event.stopPropagation()">
+                                            </div>
+                                        </th>
+                                    `);
+                                }
+                            </script>
                         </tr>
                     </thead>
                     <tbody id="group1Body"></tbody>
@@ -681,71 +809,88 @@
                     <input type="text" id="commander2Input" class="commander-input" value="Minh Sói Trần" oninput="saveData()">
                     <span>)</span>
                 </div>
-                <div class="group-sub-header">Huyết Hà / Thiết Y lead phụ PT 4, 5</div>
+                <div class="group-sub-header">
+                    <input type="text" id="subHeader2Input" class="group-sub-input" value="Đội hình 10 PT tham chiến" oninput="saveData()">
+                </div>
                 <table class="squad-table">
                     <thead>
                         <tr id="headerRow2">
                             <th></th>
-                            <th id="th_g2_col1" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g2', 1)">
-                                <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g2', 1)" ondragend="handleColDragEnd(event)">
-                                    <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 11px;"></i>
-                                    <input type="text" class="col-name-input" id="g2_col1" value="PT1" oninput="saveData()" onclick="event.stopPropagation()">
-                                </div>
-                            </th>
-                            <th id="th_g2_col2" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g2', 2)">
-                                <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g2', 2)" ondragend="handleColDragEnd(event)">
-                                    <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 11px;"></i>
-                                    <input type="text" class="col-name-input" id="g2_col2" value="PT2" oninput="saveData()" onclick="event.stopPropagation()">
-                                </div>
-                            </th>
-                            <th id="th_g2_col3" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g2', 3)">
-                                <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g2', 3)" ondragend="handleColDragEnd(event)">
-                                    <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 11px;"></i>
-                                    <input type="text" class="col-name-input" id="g2_col3" value="PT3" oninput="saveData()" onclick="event.stopPropagation()">
-                                </div>
-                            </th>
-                            <th id="th_g2_col4" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g2', 4)">
-                                <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g2', 4)" ondragend="handleColDragEnd(event)">
-                                    <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 11px;"></i>
-                                    <input type="text" class="col-name-input" id="g2_col4" value="PT4" oninput="saveData()" onclick="event.stopPropagation()">
-                                </div>
-                            </th>
-                            <th id="th_g2_col5" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g2', 5)">
-                                <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g2', 5)" ondragend="handleColDragEnd(event)">
-                                    <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 11px;"></i>
-                                    <input type="text" class="col-name-input" id="g2_col5" value="PT5" oninput="saveData()" onclick="event.stopPropagation()">
-                                </div>
-                            </th>
+                            <script>
+                                for(let i=1; i<=10; i++) {
+                                    document.write(`
+                                        <th id="th_g2_col${i}" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'g2', ${i})">
+                                            <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g2', ${i})" ondragend="handleColDragEnd(event)">
+                                                <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 10px;"></i>
+                                                <input type="text" class="col-name-input" id="g2_col${i}" value="PT${i}" oninput="saveData()" onclick="event.stopPropagation()">
+                                            </div>
+                                        </th>
+                                    `);
+                                }
+                            </script>
                         </tr>
                     </thead>
                     <tbody id="group2Body"></tbody>
                 </table>
             </div>
+
+            <!-- KHUNG NHẬP TEXT LỚN (GHI CHÚ / CHIẾN THUẬT) -->
+            <div class="big-note-section">
+                <div class="big-note-header">
+                    <i class="fa-solid fa-pen-to-square"></i> Ghi Chú & Kế Hoạch Chiến Thuật Chi Tiết
+                </div>
+                <textarea id="bigNoteTextarea" class="big-note-textarea" placeholder="Nhập ghi chú lớn, phân công chiến thuật chi tiết tại đây..." oninput="saveData()"></textarea>
+            </div>
         </div>
 
         <!-- CỘT BÊN PHẢI -->
-        <div class="sidebar-right">
-            <div class="sub-box">
-                <h4>DỰ BỊ BANG CHIẾN</h4>
-                <table class="sub-table">
-                    <tbody id="reserveBody"></tbody>
-                </table>
+        <div class="sidebar-right" id="sidebarRight">
+            <div class="right-header">
+                <button class="btn-toggle-sidebar" onclick="toggleRightSidebar()" id="toggleRightBtn" title="Thu / Mở Menu Phải">
+                    <i class="fa-solid fa-chevron-right" id="toggleRightIcon"></i>
+                </button>
+                <h4>QUẢN LÝ BỔ SUNG</h4>
             </div>
-
-            <div class="note-box">
-                <div class="note-header">
-                    <strong><i class="fa-solid fa-triangle-exclamation"></i> GHI CHÚ NHIỆM VỤ</strong>
+            
+            <div class="right-content-wrap">
+                <div class="sub-box">
+                    <h4>DỰ BỊ BANG CHIẾN</h4>
+                    <table class="sub-table">
+                        <thead>
+                            <tr id="headerRowRes">
+                                <th id="th_res_col1" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'res', 1)">
+                                    <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'res', 1)" ondragend="handleColDragEnd(event)">
+                                        <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 9px;"></i>
+                                        <input type="text" class="col-name-input" id="res_col1" value="DB1" oninput="saveData()" onclick="event.stopPropagation()">
+                                    </div>
+                                </th>
+                                <th id="th_res_col2" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'res', 2)">
+                                    <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'res', 2)" ondragend="handleColDragEnd(event)">
+                                        <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 9px;"></i>
+                                        <input type="text" class="col-name-input" id="res_col2" value="DB2" oninput="saveData()" onclick="event.stopPropagation()">
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="reserveBody"></tbody>
+                    </table>
                 </div>
-                <ul class="note-list" id="noteListContainer"></ul>
-                <div class="note-input-group">
-                    <input type="text" id="newNoteInput" placeholder="Nhập ghi chú mới...">
-                    <button class="btn-add-note" onclick="addNote()"><i class="fa-solid fa-plus"></i></button>
-                </div>
-            </div>
 
-            <div class="stats-box">
-                <h4><i class="fa-solid fa-chart-pie"></i> THỐNG KÊ MÔN PHÁI</h4>
-                <div class="stats-grid" id="statsGridContainer"></div>
+                <div class="note-box">
+                    <div class="note-header">
+                        <strong><i class="fa-solid fa-triangle-exclamation"></i> GHI CHÚ NHIỆM VỤ</strong>
+                    </div>
+                    <ul class="note-list" id="noteListContainer"></ul>
+                    <div class="note-input-group">
+                        <input type="text" id="newNoteInput" placeholder="Nhập ghi chú mới...">
+                        <button class="btn-add-note" onclick="addNote()"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </div>
+
+                <div class="stats-box">
+                    <h4><i class="fa-solid fa-chart-pie"></i> THỐNG KÊ MÔN PHÁI</h4>
+                    <div class="stats-grid" id="statsGridContainer"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -817,10 +962,17 @@
         let notes = [...defaultNotes];
         let squadSelections = {};
         let commanders = { c1: "Đạo Đạo", c2: "Minh Sói Trần" };
+        let subHeaders = { sub1: "Đội hình 10 PT tham chiến", sub2: "Đội hình 10 PT tham chiến" };
+        let bigNoteContent = "";
+        
         let columnNames = {
-            g1_col1: "PT1", g1_col2: "PT2", g1_col3: "PT3", g1_col4: "PT4", g1_col5: "PT5",
-            g2_col1: "PT1", g2_col2: "PT2", g2_col3: "PT3", g2_col4: "PT4", g2_col5: "PT5"
+            res_col1: "DB1", res_col2: "DB2"
         };
+        for(let i=1; i<=10; i++) {
+            columnNames[`g1_col${i}`] = `PT${i}`;
+            columnNames[`g2_col${i}`] = `PT${i}`;
+        }
+
         let draggedMemberName = null;
         let draggedColInfo = null;
 
@@ -846,7 +998,11 @@
                     notes = saved.notes || defaultNotes;
                     squadSelections = saved.squads || {};
                     commanders = saved.commanders || { c1: "Đạo Đạo", c2: "Minh Sói Trần" };
-                    columnNames = saved.columnNames || columnNames;
+                    subHeaders = saved.subHeaders || { sub1: "Đội hình 10 PT tham chiến", sub2: "Đội hình 10 PT tham chiến" };
+                    bigNoteContent = saved.bigNoteContent || "";
+                    if (saved.columnNames) {
+                        columnNames = { ...columnNames, ...saved.columnNames };
+                    }
                 } else {
                     await saveData();
                 }
@@ -858,18 +1014,25 @@
         async function saveData() {
             commanders.c1 = document.getElementById('commander1Input').value;
             commanders.c2 = document.getElementById('commander2Input').value;
+            subHeaders.sub1 = document.getElementById('subHeader1Input').value;
+            subHeaders.sub2 = document.getElementById('subHeader2Input').value;
+            bigNoteContent = document.getElementById('bigNoteTextarea').value;
 
-            for (let i = 1; i <= 5; i++) {
-                columnNames[`g1_col${i}`] = document.getElementById(`g1_col${i}`).value;
-                columnNames[`g2_col${i}`] = document.getElementById(`g2_col${i}`).value;
+            for (let i = 1; i <= 10; i++) {
+                if(document.getElementById(`g1_col${i}`)) columnNames[`g1_col${i}`] = document.getElementById(`g1_col${i}`).value;
+                if(document.getElementById(`g2_col${i}`)) columnNames[`g2_col${i}`] = document.getElementById(`g2_col${i}`).value;
             }
+            if(document.getElementById('res_col1')) columnNames['res_col1'] = document.getElementById('res_col1').value;
+            if(document.getElementById('res_col2')) columnNames['res_col2'] = document.getElementById('res_col2').value;
 
             const payload = {
                 members: members,
                 notes: notes,
                 squads: squadSelections,
                 commanders: commanders,
-                columnNames: columnNames
+                subHeaders: subHeaders,
+                columnNames: columnNames,
+                bigNoteContent: bigNoteContent
             };
 
             await supabaseClient
@@ -894,38 +1057,76 @@
             }, 500);
         }
 
-        function toggleSidebar() {
+        function toggleLeftSidebar() {
             const sidebar = document.getElementById('sidebarMembers');
             const layout = document.getElementById('layoutContainer');
             const icon = document.getElementById('toggleIcon');
 
             sidebar.classList.toggle('collapsed');
-            layout.classList.toggle('collapsed-left');
-
+            
             if (sidebar.classList.contains('collapsed')) {
+                if (document.getElementById('sidebarRight').classList.contains('collapsed')) {
+                    layout.className = 'layout-container collapsed-left collapsed-right';
+                } else {
+                    layout.className = 'layout-container collapsed-left';
+                }
                 icon.className = 'fa-solid fa-chevron-right';
             } else {
+                if (document.getElementById('sidebarRight').classList.contains('collapsed')) {
+                    layout.className = 'layout-container collapsed-right';
+                } else {
+                    layout.className = 'layout-container';
+                }
                 icon.className = 'fa-solid fa-chevron-left';
+            }
+        }
+
+        function toggleRightSidebar() {
+            const sidebar = document.getElementById('sidebarRight');
+            const layout = document.getElementById('layoutContainer');
+            const icon = document.getElementById('toggleRightIcon');
+
+            sidebar.classList.toggle('collapsed');
+
+            if (sidebar.classList.contains('collapsed')) {
+                if (document.getElementById('sidebarMembers').classList.contains('collapsed')) {
+                    layout.className = 'layout-container collapsed-left collapsed-right';
+                } else {
+                    layout.className = 'layout-container collapsed-right';
+                }
+                icon.className = 'fa-solid fa-chevron-left';
+            } else {
+                if (document.getElementById('sidebarMembers').classList.contains('collapsed')) {
+                    layout.className = 'layout-container collapsed-left';
+                } else {
+                    layout.className = 'layout-container';
+                }
+                icon.className = 'fa-solid fa-chevron-right';
             }
         }
 
         function loadSavedInputs() {
             document.getElementById('commander1Input').value = commanders.c1 || "Đạo Đạo";
             document.getElementById('commander2Input').value = commanders.c2 || "Minh Sói Trần";
+            document.getElementById('subHeader1Input').value = subHeaders.sub1 || "Đội hình 10 PT tham chiến";
+            document.getElementById('subHeader2Input').value = subHeaders.sub2 || "Đội hình 10 PT tham chiến";
+            document.getElementById('bigNoteTextarea').value = bigNoteContent || "";
 
-            for (let i = 1; i <= 5; i++) {
-                if(columnNames[`g1_col${i}`]) document.getElementById(`g1_col${i}`).value = columnNames[`g1_col${i}`];
-                if(columnNames[`g2_col${i}`]) document.getElementById(`g2_col${i}`).value = columnNames[`g2_col${i}`];
+            for (let i = 1; i <= 10; i++) {
+                if(columnNames[`g1_col${i}`] && document.getElementById(`g1_col${i}`)) document.getElementById(`g1_col${i}`).value = columnNames[`g1_col${i}`];
+                if(columnNames[`g2_col${i}`] && document.getElementById(`g2_col${i}`)) document.getElementById(`g2_col${i}`).value = columnNames[`g2_col${i}`];
             }
+            if(columnNames['res_col1'] && document.getElementById('res_col1')) document.getElementById('res_col1').value = columnNames['res_col1'];
+            if(columnNames['res_col2'] && document.getElementById('res_col2')) document.getElementById('res_col2').value = columnNames['res_col2'];
         }
 
         function initTables() {
-            createSquadRows('group1Body', 'g1');
-            createSquadRows('group2Body', 'g2');
+            createSquadRows('group1Body', 'g1', 10);
+            createSquadRows('group2Body', 'g2', 10);
             createReserveRows('reserveBody');
         }
 
-        function createSquadRows(containerId, prefix) {
+        function createSquadRows(containerId, prefix, totalCols) {
             const tbody = document.getElementById(containerId);
             tbody.innerHTML = '';
             for (let row = 1; row <= 6; row++) {
@@ -935,7 +1136,7 @@
                 tdStt.innerText = row;
                 tr.appendChild(tdStt);
 
-                for (let col = 1; col <= 5; col++) {
+                for (let col = 1; col <= totalCols; col++) {
                     const td = document.createElement('td');
                     const slotId = `${prefix}_r${row}_c${col}`;
                     td.innerHTML = `
@@ -975,7 +1176,6 @@
             }
         }
 
-        // --- XỬ LÝ KÉO THẢ CỘT (PT) GIỮA MỌI ĐOÀN ---
         function handleColDragStart(e, groupPrefix, colIndex) {
             draggedColInfo = { groupPrefix, colIndex };
             e.currentTarget.classList.add('dragging-col');
@@ -985,7 +1185,7 @@
         function handleColDragEnd(e) {
             e.currentTarget.classList.remove('dragging-col');
             draggedColInfo = null;
-            document.querySelectorAll('.squad-table th').forEach(th => th.classList.remove('col-drag-over'));
+            document.querySelectorAll('th').forEach(th => th.classList.remove('col-drag-over'));
         }
 
         function handleColDragOver(e) {
@@ -1008,42 +1208,46 @@
 
             if (sourceGroup === targetGroupPrefix && sourceCol === targetColIndex) return;
 
-            // 1. Hoán đổi tên cột (tên hiển thị PT)
             const sourceColKey = `${sourceGroup}_col${sourceCol}`;
             const targetColKey = `${targetGroupPrefix}_col${targetColIndex}`;
             const tempName = columnNames[sourceColKey];
             columnNames[sourceColKey] = columnNames[targetColKey];
             columnNames[targetColKey] = tempName;
 
-            // Cập nhật lại giá trị input header ngay lập tức
-            document.getElementById(sourceColKey).value = columnNames[sourceColKey];
-            document.getElementById(targetColKey).value = columnNames[targetColKey];
+            if(document.getElementById(sourceColKey)) document.getElementById(sourceColKey).value = columnNames[sourceColKey];
+            if(document.getElementById(targetColKey)) document.getElementById(targetColKey).value = columnNames[targetColKey];
 
-            // 2. Hoán đổi toàn bộ thành viên trong 6 hàng giữa 2 cột (dù khác đoàn hay cùng đoàn)
-            for (let row = 1; row <= 6; row++) {
+            const sourceMaxRows = (sourceGroup === 'res') ? 4 : 6;
+            const targetMaxRows = (targetGroupPrefix === 'res') ? 4 : 6;
+            const maxRows = Math.max(sourceMaxRows, targetMaxRows);
+
+            for (let row = 1; row <= maxRows; row++) {
                 const sourceSlotId = `${sourceGroup}_r${row}_c${sourceCol}`;
                 const targetSlotId = `${targetGroupPrefix}_r${row}_c${targetColIndex}`;
 
                 const valSource = squadSelections[sourceSlotId];
                 const valTarget = squadSelections[targetSlotId];
 
-                if (valTarget !== undefined) {
-                    squadSelections[sourceSlotId] = valTarget;
-                } else {
-                    delete squadSelections[sourceSlotId];
+                if (row <= targetMaxRows) {
+                    if (valSource !== undefined) {
+                        squadSelections[targetSlotId] = valSource;
+                    } else {
+                        delete squadSelections[targetSlotId];
+                    }
                 }
 
-                if (valSource !== undefined) {
-                    squadSelections[targetSlotId] = valSource;
-                } else {
-                    delete squadSelections[targetSlotId];
+                if (row <= sourceMaxRows) {
+                    if (valTarget !== undefined) {
+                        squadSelections[sourceSlotId] = valTarget;
+                    } else {
+                        delete squadSelections[sourceSlotId];
+                    }
                 }
             }
 
             renderAll();
         }
 
-        // --- XỬ LÝ KÉO THẢ THÀNH VIÊN ---
         function handleDragStart(e, memberName) {
             draggedMemberName = memberName;
             e.target.classList.add('dragging');
@@ -1148,6 +1352,7 @@
             document.querySelectorAll('.drop-zone').forEach(zone => {
                 const slotId = zone.id.replace('zone_', '');
                 const memberName = squadSelections[slotId];
+                const isReserve = slotId.startsWith('res_');
 
                 if (memberName) {
                     const memberObj = members.find(m => m.name === memberName);
@@ -1159,8 +1364,8 @@
                                  style="width: 100%; height: 100%;"
                                  ondragstart="handleDragStart(event, '${memberObj.name}')" 
                                  ondragend="handleDragEnd(event)">
-                                <span>${iconHtml} ${memberObj.name}</span>
-                                <i class="fa-solid fa-xmark" style="cursor:pointer" title="Bỏ khỏi đội" onclick="removeFromSlot('${slotId}')"></i>
+                                <span>${iconHtml} <span class="member-name-text">${memberObj.name}</span></span>
+                                <i class="fa-solid fa-xmark" style="cursor:pointer; font-size: ${isReserve ? '10px' : 'inherit'}" title="Bỏ khỏi đội" onclick="removeFromSlot('${slotId}')"></i>
                             </div>
                         `;
                     } else {
@@ -1215,9 +1420,7 @@
                 item.innerHTML = `
                     <span>${getIconHTML(classKey)} ${classNames[classKey]}</span>
                     <span class="stat-count" title="Đoàn 1: ${group1Counts[classKey]} | Đoàn 2: ${group2Counts[classKey]} | Tổng: ${total}">
-                        <span class="group-count">Đ1: ${group1Counts[classKey]}</span>
-                        <span class="group-count">Đ2: ${group2Counts[classKey]}</span>
-                        <span class="total-count">| ${assignedTotal}/${total}</span>
+                        ${group1Counts[classKey]}|${group2Counts[classKey]} (${assignedTotal}/${total})
                     </span>
                 `;
                 container.appendChild(item);
@@ -1287,7 +1490,9 @@
                 notes: notes,
                 squads: squadSelections,
                 commanders: commanders,
-                columnNames: columnNames
+                subHeaders: subHeaders,
+                columnNames: columnNames,
+                bigNoteContent: bigNoteContent
             }, null, 2));
             const dlAnchorElem = document.createElement('a');
             dlAnchorElem.setAttribute("href", dataStr);
@@ -1305,7 +1510,11 @@
                         notes = parsed.notes;
                         squadSelections = parsed.squads || {};
                         commanders = parsed.commanders || { c1: "Đạo Đạo", c2: "Minh Sói Trần" };
-                        columnNames = parsed.columnNames || columnNames;
+                        subHeaders = parsed.subHeaders || { sub1: "Đội hình 10 PT tham chiến", sub2: "Đội hình 10 PT tham chiến" };
+                        bigNoteContent = parsed.bigNoteContent || "";
+                        if (parsed.columnNames) {
+                            columnNames = { ...columnNames, ...parsed.columnNames };
+                        }
                         loadSavedInputs();
                         renderAll();
                         renderNotes();
@@ -1326,10 +1535,13 @@
                 notes = [...defaultNotes];
                 squadSelections = {};
                 commanders = { c1: "Đạo Đạo", c2: "Minh Sói Trần" };
-                columnNames = {
-                    g1_col1: "PT1", g1_col2: "PT2", g1_col3: "PT3", g1_col4: "PT4", g1_col5: "PT5",
-                    g2_col1: "PT1", g2_col2: "PT2", g2_col3: "PT3", g2_col4: "PT4", g2_col5: "PT5"
-                };
+                subHeaders = { sub1: "Đội hình 10 PT tham chiến", sub2: "Đội hình 10 PT tham chiến" };
+                bigNoteContent = "";
+                columnNames = { res_col1: "DB1", res_col2: "DB2" };
+                for(let i=1; i<=10; i++) {
+                    columnNames[`g1_col${i}`] = `PT${i}`;
+                    columnNames[`g2_col${i}`] = `PT${i}`;
+                }
                 loadSavedInputs();
                 renderAll();
                 renderNotes();
