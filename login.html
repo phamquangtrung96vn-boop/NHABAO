@@ -7,7 +7,6 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            /* Đặt hình nền lâu đài và căn chỉnh phủ kín màn hình */
             background-image: url('image_35c007.PNG'); 
             background-size: cover;
             background-position: center;
@@ -21,7 +20,6 @@
             position: relative;
         }
 
-        /* Lớp phủ tối nhẹ giúp form đăng nhập nổi bật trên nền */
         body::before {
             content: "";
             position: absolute;
@@ -35,8 +33,8 @@
 
         .login-box {
             position: relative;
-            z-index: 2; /* Đảm bảo khung đăng nhập nằm trên lớp phủ */
-            background: rgba(22, 27, 34, 0.9); /* Hiệu ứng trong suốt nhẹ cho khung */
+            z-index: 2;
+            background: rgba(22, 27, 34, 0.9);
             border: 1px solid #30363d;
             padding: 30px;
             border-radius: 8px;
@@ -122,31 +120,17 @@
     </div>
 
     <script>
-        // Hàm mã hóa chuỗi sang chuẩn SHA-256 an toàn
-        async function hashPassword(string) {
-            const utf8 = new TextEncoder().encode(string);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
-        async function handleLogin(event) {
+        function handleLogin(event) {
             event.preventDefault();
             
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value.trim();
 
             const correctUser = "nhabao";
-            // Đây là chuỗi mật khẩu "Pk123456*" sau khi đã được mã hóa SHA-256
-            const correctPassHash = "19307d8846c4f744e82488aa447d6d7cf61771960d705c742e7c10b7b122c608";
+            const correctPass = "Pk123456*";
 
-            // Mã hóa mật khẩu người dùng vừa nhập để so sánh
-            const inputPassHash = await hashPassword(pass);
-
-            if (user === correctUser && inputPassHash === correctPassHash) {
-                // Đánh dấu đã đăng nhập thành công
+            if (user === correctUser && pass === correctPass) {
                 sessionStorage.setItem("isLoggedIn", "true");
-                // Chuyển hướng vào trang chính index.html
                 window.location.href = "index.html";
             } else {
                 document.getElementById('errorMsg').innerText = "Sai tài khoản hoặc mật khẩu!";
