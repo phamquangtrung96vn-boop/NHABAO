@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sa Bàn Chiến Thuật Bang Hội - Full Zoom & Interactive</title>
+    <title>Sa Bàn Chiến Thuật Bang Hội - Dragon's Legacy</title>
     <!-- FontAwesome icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Thư viện html2canvas để xuất file ảnh -->
@@ -51,12 +51,10 @@
             flex-shrink: 0;
         }
 
-        /* TRẠNG THÁI THU GỌN SIDEBAR */
         .sidebar.collapsed {
             margin-left: -330px;
         }
 
-        /* NÚT ĐÓNG MỞ SIDEBAR */
         .toggle-sidebar-btn {
             position: absolute;
             right: -28px;
@@ -95,7 +93,6 @@
             text-transform: uppercase;
         }
 
-        /* KHỐI CÔNG CỤ VẼ TỰ DO & KHOANH VÙNG */
         .draw-mode-box {
             padding: 12px 15px;
             background: rgba(255,255,255,0.03);
@@ -121,6 +118,9 @@
             font-size: 12px;
             font-weight: bold;
             transition: 0.2s;
+            width: 100%;
+            text-align: center;
+            margin-top: 4px;
         }
 
         .toggle-draw-btn.active {
@@ -134,6 +134,8 @@
             padding: 8px;
             border-radius: 4px;
             border: 1px solid var(--border-color);
+            flex-direction: column;
+            gap: 8px;
         }
 
         .draw-options label {
@@ -174,7 +176,6 @@
             border: 1px solid rgba(255,255,255,0.3);
         }
 
-        /* FORM TẠO ICON */
         .add-icon-form {
             padding: 12px 15px;
             background: rgba(0,0,0,0.15);
@@ -221,7 +222,6 @@
 
         .btn-add-icon:hover { background: #219150; }
 
-        /* DANH SÁCH ICON */
         .icon-section {
             padding: 15px;
             flex-grow: 1;
@@ -259,6 +259,7 @@
             cursor: pointer;
             font-size: 12px;
         }
+        .btn-icon-action:hover { color: var(--accent-red); }
 
         /* KHU VỰC CHÍNH */
         .main-container {
@@ -280,12 +281,13 @@
             justify-content: space-between;
             padding: 0 15px 0 40px;
             z-index: 5;
+            flex-wrap: wrap;
         }
 
         .tool-btn-group {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .timer-box {
@@ -300,10 +302,10 @@
 
         .timer-display {
             font-family: 'Courier New', Courier, monospace;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             color: var(--accent-gold);
-            min-width: 65px;
+            min-width: 60px;
             text-align: center;
         }
 
@@ -323,13 +325,13 @@
             background: #222d3d;
             border: 1px solid var(--border-color);
             color: var(--text-color);
-            padding: 7px 12px;
+            padding: 6px 10px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             transition: 0.2s;
         }
 
@@ -353,7 +355,7 @@
 
         .zoom-wrapper {
             transform-origin: center center;
-            transition: transform 0.1s ease-out;
+            transition: transform 0.05s ease-out;
         }
 
         .map-canvas {
@@ -398,7 +400,6 @@
             box-sizing: content-box;
         }
 
-        /* KHUNG VIỀN KHI CHỌN ICON VẼ LỘ TRÌNH (CHỈ ÔM ICON) */
         .placed-icon.selected i {
             outline: 2px dashed var(--accent-gold);
             outline-offset: 2px;
@@ -467,7 +468,7 @@
         </button>
 
         <div class="sidebar-header">
-            <h2>SA BÀN CHIẾN THUẬT</h2>
+            <h2>SA BÀN NHÀ BÁO</h2>
         </div>
 
         <div class="draw-mode-box">
@@ -478,7 +479,7 @@
             <div class="form-group" style="margin-bottom: 2px;">
                 <select id="drawToolMode" class="form-select" style="width: 100%;" onchange="changeDrawTool(this.value)">
                     <option value="brush">✏️ Bút vẽ tự do (Brush)</option>
-                    <option value="line">📏 Đường thẳng</option>
+                    <option value="line">📏 Đường thẳng / Mũi tên</option>
                     <option value="rect">🔲 Khoanh vùng Chữ Nhật</option>
                     <option value="circle">⭕ Khoanh vùng Hình Tròn</option>
                     <option value="text">🔤 Thêm Chữ ghi chú</option>
@@ -486,9 +487,9 @@
                 </select>
             </div>
 
-            <div class="draw-options" style="flex-direction: column; gap: 8px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                    <label>Màu nét / Chữ:</label>
+            <div class="draw-options">
+                <div style="display: flex; align-items: center; justify-content: space-width; width: 100%;">
+                    <label>Màu nét:</label>
                     <div class="color-picker-wrapper">
                         <input type="color" id="paintColor" value="#ff4d4d" onchange="setPaintColor(this.value)">
                         <div class="quick-colors">
@@ -501,7 +502,7 @@
                 </div>
 
                 <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                    <label>Kích thước nét:</label>
+                    <label>Kích thước:</label>
                     <input type="range" id="brushWidth" min="1" max="25" value="4" style="width: 110px;" onchange="setBrushWidth(this.value)">
                 </div>
             </div>
@@ -512,10 +513,10 @@
         </div>
 
         <div class="draw-mode-box">
-            <div class="draw-mode-header">
-                <span style="font-size: 12px; font-weight: bold;">🏹 VẼ LỘ TRÌNH ICON</span>
+            <div class="draw-mode-header" style="flex-direction: column; align-items: stretch; gap: 4px;">
+                <span style="font-size: 12px; font-weight: bold; color: var(--accent-blue);">🏹 VẼ LỘ TRÌNH DI CHUYỂN</span>
                 <button id="drawToggleBtn" class="toggle-draw-btn" onclick="toggleDrawPathMode()">
-                    <i class="fa-solid fa-route"></i> VẼ ĐƯỜNG ĐI
+                    <i class="fa-solid fa-route"></i> VẼ ĐƯỜNG ĐI CHO ICON
                 </button>
             </div>
         </div>
@@ -523,7 +524,7 @@
         <div class="add-icon-form">
             <div class="form-title">Tạo Icon Mới</div>
             <div class="form-group">
-                <input type="text" id="newIconName" class="form-input" placeholder="Tên Icon (VD: Đội 1)">
+                <input type="text" id="newIconName" class="form-input" placeholder="Tên Đoàn / Mục tiêu">
                 <select id="newIconColor" class="form-select">
                     <option value="#4d94ff">Xanh Dương</option>
                     <option value="#ff4d4d">Đỏ</option>
@@ -536,11 +537,11 @@
                 <select id="newIconSymbol" class="form-select" style="width: 100%;">
                     <option value="fa-shield-halved">🛡️ Khiên (Đội Thủ)</option>
                     <option value="fa-crosshairs">🎯 Tâm ngắm (Đội Công)</option>
-                    <option value="fa-skull">💀 Đầu lâu (Quái / Địch)</option>
+                    <option value="fa-skull">💀 Đầu lâu (Boss / Địch)</option>
                     <option value="fa-chess-rook">🏰 Tháp / Thành</option>
                     <option value="fa-flag">🚩 Cờ / Điểm Dừng</option>
                     <option value="fa-location-dot">📍 Điểm Tập Hợp</option>
-                    <option value="fa-horse">🐎 Kỵ Binh / Tốc Độ</option>
+                    <option value="fa-horse">🐎 Kỵ Binh / Đột Kích</option>
                 </select>
             </div>
             <button class="btn-add-icon" onclick="addNewIconToList()"><i class="fa-solid fa-plus"></i> THÊM VÀO DANH SÁCH</button>
@@ -556,8 +557,8 @@
     <div class="main-container">
         <div class="top-toolbar">
             <div class="tool-btn-group">
-                <button class="btn btn-upload" onclick="document.getElementById('mapFileInput').click()">
-                    <i class="fa-solid fa-file-image"></i> Úp Bản Đồ
+                <button class="btn btn-upload" onclick="document.getElementById('mapFileInput').click()" title="Đổi hình nền bản đồ khác">
+                    <i class="fa-solid fa-file-image"></i> Đổi Bản Đồ
                 </button>
                 <input type="file" id="mapFileInput" accept="image/*" style="display: none;" onchange="uploadMapImage(event)">
 
@@ -582,7 +583,9 @@
             </div>
 
             <div class="tool-btn-group">
-                <button class="btn" onclick="clearCanvas()"><i class="fa-solid fa-eraser"></i> Xóa Nét Vẽ</button>
+                <button class="btn" onclick="undoDrawing()" title="Hoàn tác nét vẽ cuối"><i class="fa-solid fa-rotate-left"></i> Undo</button>
+                <button class="btn" onclick="toggleCanvasVisibility()" id="toggleCanvasVisBtn" title="Ẩn/Hiện đường vẽ"><i class="fa-solid fa-eye-slash"></i> Ẩn Nét</button>
+                <button class="btn" onclick="clearCanvas()"><i class="fa-solid fa-eraser"></i> Xóa Nét</button>
                 <button class="btn btn-danger" onclick="clearMap()"><i class="fa-solid fa-trash"></i> Xóa Hết</button>
             </div>
         </div>
@@ -598,7 +601,7 @@
                 <button class="zoom-btn" onclick="zoomIn()" title="Phóng to"><i class="fa-solid fa-plus"></i></button>
                 <div class="zoom-level" id="zoomDisplay">100%</div>
                 <button class="zoom-btn" onclick="zoomOut()" title="Thu nhỏ"><i class="fa-solid fa-minus"></i></button>
-                <button class="zoom-btn" onclick="resetZoom()" title="Về ban đầu"><i class="fa-solid fa-compress"></i></button>
+                <button class="zoom-btn" onclick="resetZoom()" title="Về mặc định"><i class="fa-solid fa-compress"></i></button>
             </div>
         </div>
     </div>
@@ -622,14 +625,33 @@
         let draggedData = null;
         let selectedIconForDrawing = null;
         let animationId = null;
+        let undoStack = [];
+
+        function saveCanvasState() {
+            if (undoStack.length > 15) undoStack.shift(); // Giới hạn lưu 15 bước
+            undoStack.push(ctx.getImageData(0, 0, arrowCanvas.width, arrowCanvas.height));
+        }
+
+        function undoDrawing() {
+            if (undoStack.length > 0) {
+                const lastState = undoStack.pop();
+                ctx.putImageData(lastState, 0, 0);
+            } else {
+                ctx.clearRect(0, 0, arrowCanvas.width, arrowCanvas.height);
+            }
+        }
+
+        let isCanvasHidden = false;
+        function toggleCanvasVisibility() {
+            isCanvasHidden = !isCanvasHidden;
+            arrowCanvas.style.display = isCanvasHidden ? 'none' : 'block';
+            const btn = document.getElementById('toggleCanvasVisBtn');
+            btn.innerHTML = isCanvasHidden ? '<i class="fa-solid fa-eye"></i> Hiện Nét' : '<i class="fa-solid fa-eye-slash"></i> Ẩn Nét';
+        }
 
         function toggleSidebar() {
             sidebar.classList.toggle('collapsed');
-            if (sidebar.classList.contains('collapsed')) {
-                toggleSidebarIcon.className = 'fa-solid fa-chevron-right';
-            } else {
-                toggleSidebarIcon.className = 'fa-solid fa-chevron-left';
-            }
+            toggleSidebarIcon.className = sidebar.classList.contains('collapsed') ? 'fa-solid fa-chevron-right' : 'fa-solid fa-chevron-left';
         }
 
         let currentScale = 1.0;
@@ -641,34 +663,13 @@
             document.getElementById('zoomDisplay').innerText = `${Math.round(currentScale * 100)}%`;
         }
 
-        function zoomIn() {
-            if (currentScale < MAX_SCALE) {
-                currentScale += 0.15;
-                updateZoom();
-            }
-        }
-
-        function zoomOut() {
-            if (currentScale > MIN_SCALE) {
-                currentScale -= 0.15;
-                updateZoom();
-            }
-        }
-
-        function resetZoom() {
-            currentScale = 1.0;
-            updateZoom();
-        }
+        function zoomIn() { if (currentScale < MAX_SCALE) { currentScale += 0.15; updateZoom(); } }
+        function zoomOut() { if (currentScale > MIN_SCALE) { currentScale -= 0.15; updateZoom(); } }
+        function resetZoom() { currentScale = 1.0; updateZoom(); }
 
         mapViewport.addEventListener('wheel', (e) => {
-            if (e.ctrlKey || e.metaKey || true) {
-                e.preventDefault();
-                if (e.deltaY < 0) {
-                    zoomIn();
-                } else {
-                    zoomOut();
-                }
-            }
+            e.preventDefault();
+            if (e.deltaY < 0) zoomIn(); else zoomOut();
         }, { passive: false });
 
         let isPathDrawingMode = false;
@@ -692,18 +693,12 @@
             document.getElementById('paintColor').value = color;
         }
 
-        function setBrushWidth(width) {
-            strokeWidth = parseInt(width);
-        }
-
-        function changeDrawTool(tool) {
-            currentTool = tool;
-        }
+        function setBrushWidth(width) { strokeWidth = parseInt(width); }
+        function changeDrawTool(tool) { currentTool = tool; }
 
         function togglePaintMode() {
             isPaintActive = !isPaintActive;
             const btn = document.getElementById('togglePaintBtn');
-            
             if (isPaintActive) {
                 if (isPathDrawingMode) toggleDrawPathMode();
                 btn.classList.add('active');
@@ -719,15 +714,14 @@
         function toggleDrawPathMode() {
             isPathDrawingMode = !isPathDrawingMode;
             const btn = document.getElementById('drawToggleBtn');
-            
             if (isPathDrawingMode) {
                 if (isPaintActive) togglePaintMode();
                 btn.classList.add('active');
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> ĐANG VẼ ĐƯỜNG ĐI';
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> ĐANG CHỌN ICON VẼ ĐƯỜNG';
                 arrowCanvas.classList.add('active');
             } else {
                 btn.classList.remove('active');
-                btn.innerHTML = '<i class="fa-solid fa-route"></i> VẼ ĐƯỜNG ĐI';
+                btn.innerHTML = '<i class="fa-solid fa-route"></i> VẼ ĐƯỜNG ĐI CHO ICON';
                 arrowCanvas.classList.remove('active');
                 if (selectedIconForDrawing) {
                     selectedIconForDrawing.classList.remove('selected');
@@ -745,11 +739,12 @@
             const clickY = (e.clientY - rect.top) * scaleY;
 
             if (isPaintActive) {
+                saveCanvasState();
                 startPaintX = clickX;
                 startPaintY = clickY;
 
                 if (currentTool === 'text') {
-                    const textInput = prompt("Nhập nội dung ghi chú:", "Tập trung tại đây");
+                    const textInput = prompt("Nhập nội dung ghi chú chiến thuật:", "Điểm nóng");
                     if (textInput) {
                         ctx.font = `bold ${strokeWidth * 3 + 12}px 'Segoe UI', sans-serif`;
                         ctx.fillStyle = paintColor;
@@ -760,7 +755,6 @@
 
                 isDrawingPaint = true;
                 snapshotData = ctx.getImageData(0, 0, arrowCanvas.width, arrowCanvas.height);
-
                 ctx.beginPath();
                 ctx.moveTo(startPaintX, startPaintY);
                 return;
@@ -768,7 +762,7 @@
 
             if (isPathDrawingMode) {
                 if (!selectedIconForDrawing) {
-                    alert("Vui lòng click chọn 1 Icon trên sa bàn trước khi vẽ đường đi!");
+                    alert("Vui lòng click chọn 1 Icon trên sa bàn trước khi vẽ lộ trình!");
                     return;
                 }
 
@@ -809,7 +803,6 @@
                 } else {
                     ctx.putImageData(snapshotData, 0, 0);
                     ctx.beginPath();
-
                     if (currentTool === 'line') {
                         ctx.moveTo(startPaintX, startPaintY);
                         ctx.lineTo(currentX, currentY);
@@ -857,7 +850,6 @@
             ctx.strokeStyle = color;
             ctx.fillStyle = color;
             ctx.lineWidth = 3;
-
             ctx.moveTo(fromx, fromy);
             ctx.lineTo(tox, toy);
             ctx.stroke();
@@ -872,6 +864,7 @@
 
         function redrawPathArrows() {
             ctx.clearRect(0, 0, arrowCanvas.width, arrowCanvas.height);
+            undoStack = []; // Reset undo khi vẽ lại tuyến đường icon
             const icons = document.querySelectorAll('.placed-icon');
             icons.forEach(icon => {
                 if (icon.waypoints && icon.waypoints.length > 1) {
@@ -886,6 +879,7 @@
         }
 
         function clearCanvas() {
+            saveCanvasState();
             ctx.clearRect(0, 0, arrowCanvas.width, arrowCanvas.height);
             document.querySelectorAll('.placed-icon').forEach(icon => { icon.waypoints = []; });
         }
@@ -896,7 +890,6 @@
             el.style.left = `${x}px`;
             el.style.top = `${y}px`;
             el.dataset.color = color;
-            
             el.initialX = x;
             el.initialY = y;
             el.waypoints = [];
@@ -914,7 +907,7 @@
 
             el.querySelector('span').addEventListener('dblclick', (e) => {
                 e.stopPropagation();
-                const renamed = prompt("Nhập tên mới:", el.querySelector('span').innerText);
+                const renamed = prompt("Đổi tên hiển thị:", el.querySelector('span').innerText);
                 if (renamed) el.querySelector('span').innerText = renamed;
             });
 
@@ -964,7 +957,6 @@
                     icon.style.top = `${icon.initialY}px`;
                 }
             });
-
             resetTimer();
         }
 
@@ -974,13 +966,11 @@
 
             const icons = Array.from(document.querySelectorAll('.placed-icon')).filter(i => i.waypoints && i.waypoints.length > 1);
             if (icons.length === 0) {
-                alert("Chưa có icon nào được vẽ đường đi!");
+                alert("Hãy chọn icon và vẽ đường đi trước khi diễn hoạt!");
                 return;
             }
 
-            if (!isTimerRunning) {
-                startTimer();
-            }
+            if (!isTimerRunning) startTimer();
 
             const runners = icons.map(icon => ({
                 element: icon,
@@ -988,7 +978,7 @@
                 targetIndex: 1
             }));
 
-            const speed = 2.0;
+            const speed = 2.5;
             if (animationId) cancelAnimationFrame(animationId);
 
             function step() {
@@ -1009,17 +999,14 @@
                             runner.element.style.top = `${target.y}px`;
                             runner.targetIndex++;
                         } else {
-                            const vx = (dx / dist) * speed;
-                            const vy = (dy / dist) * speed;
-                            runner.element.style.left = `${curX + vx}px`;
-                            runner.element.style.top = `${curY + vy}px`;
+                            runner.element.style.left = `${curX + (dx / dist) * speed}px`;
+                            runner.element.style.top = `${curY + (dy / dist) * speed}px`;
                         }
                     }
                 });
 
                 if (!allFinished) animationId = requestAnimationFrame(step);
             }
-
             animationId = requestAnimationFrame(step);
         }
 
@@ -1044,19 +1031,17 @@
                     clearInterval(timerInterval);
                     isTimerRunning = false;
                     btn.innerHTML = '<i class="fa-solid fa-play"></i> Chạy';
-                    alert("Hết thời gian chiến thuật!");
                 }
             }, 1000);
         }
 
         function toggleTimer() {
             const btn = document.getElementById('startTimerBtn');
-            if (!isTimerRunning) {
-                startTimer();
-            } else {
+            if (!isTimerRunning) startTimer();
+            else {
                 clearInterval(timerInterval);
                 isTimerRunning = false;
-                btn.innerHTML = '<i class="fa-solid fa-play"></i> Tiếp tục';
+                btn.innerHTML = '<i class="fa-solid fa-play"></i> Tiếp';
             }
         }
 
@@ -1091,7 +1076,6 @@
             e.preventDefault();
             if (!draggedData) return;
             const rect = mapCanvas.getBoundingClientRect();
-            
             const dropX = (e.clientX - rect.left) / currentScale;
             const dropY = (e.clientY - rect.top) / currentScale;
 
@@ -1116,10 +1100,10 @@
             currentScale = 1.0;
             updateZoom();
 
-            alert('Đang xuất ảnh sơ đồ...');
+            alert('Đang chuẩn bị xuất ảnh sa bàn...');
             html2canvas(mapCanvas, { useCORS: true, scale: 2 }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = 'Sa-Do-Chien-Thuat.png';
+                link.download = 'Sa-Ban-Nha-Bao.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
 
@@ -1130,7 +1114,7 @@
 
         function addNewIconToList() {
             const name = document.getElementById('newIconName').value.trim();
-            if (!name) return alert("Vui lòng nhập tên Icon!");
+            if (!name) return alert("Vui lòng nhập tên đoàn/mục tiêu!");
             iconList.push({ id: Date.now(), name, symbol: document.getElementById('newIconSymbol').value, color: document.getElementById('newIconColor').value });
             renderIconList();
             document.getElementById('newIconName').value = '';
@@ -1142,7 +1126,7 @@
         }
 
         function clearMap() {
-            if(confirm('Xóa toàn bộ icon và nét vẽ trên bản đồ?')) {
+            if(confirm('Bạn có chắc muốn xóa toàn bộ quân và nét vẽ không?')) {
                 document.querySelectorAll('.placed-icon').forEach(el => el.remove());
                 clearCanvas();
                 resetTimer();
