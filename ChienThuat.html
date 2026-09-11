@@ -340,7 +340,20 @@
         .btn-export { background: #2e7d32; border-color: #4caf50; color: #a5d6a7; }
         .btn-play { background: #16a34a; border-color: #22c55e; color: #ffffff; font-weight: bold; }
         .btn-reset-pos { background: #d97706; border-color: #f59e0b; color: #fef3c7; }
+        .btn-save { background: #7c3aed; border-color: #8b5cf6; color: #ede9fe; font-weight: bold; }
         .btn-danger:hover { background: var(--accent-red); color: #fff; }
+
+        .saved-select {
+            background: #111827;
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            outline: none;
+            cursor: pointer;
+        }
 
         /* VIEWPORT & CANVAS */
         .map-viewport {
@@ -488,7 +501,7 @@
             </div>
 
             <div class="draw-options">
-                <div style="display: flex; align-items: center; justify-content: space-width; width: 100%;">
+                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
                     <label>Màu nét:</label>
                     <div class="color-picker-wrapper">
                         <input type="color" id="paintColor" value="#ff4d4d" onchange="setPaintColor(this.value)">
@@ -562,6 +575,15 @@
                 </button>
                 <input type="file" id="mapFileInput" accept="image/*" style="display: none;" onchange="uploadMapImage(event)">
 
+                <button class="btn btn-save" onclick="saveCurrentTacticsToStorage()">
+                    <i class="fa-solid fa-floppy-disk"></i> Lưu Sa Bàn
+                </button>
+
+                <!-- KHU VỰC SHOW DANH SÁCH ĐÃ LƯU (Click là load code hiện tại) -->
+                <select id="savedTacticsSelect" class="saved-select" onchange="loadTacticsFromStorage(this.value)">
+                    <option value="">📂 Chọn Chiến Thuật Đã Lưu...</option>
+                </select>
+
                 <button class="btn btn-export" onclick="exportMapToImage()">
                     <i class="fa-solid fa-download"></i> Tải Ảnh
                 </button>
@@ -628,7 +650,7 @@
         let undoStack = [];
 
         function saveCanvasState() {
-            if (undoStack.length > 15) undoStack.shift(); // Giới hạn lưu 15 bước
+            if (undoStack.length > 15) undoStack.shift();
             undoStack.push(ctx.getImageData(0, 0, arrowCanvas.width, arrowCanvas.height));
         }
 
@@ -864,7 +886,7 @@
 
         function redrawPathArrows() {
             ctx.clearRect(0, 0, arrowCanvas.width, arrowCanvas.height);
-            undoStack = []; // Reset undo khi vẽ lại tuyến đường icon
+            undoStack = [];
             const icons = document.querySelectorAll('.placed-icon');
             icons.forEach(icon => {
                 if (icon.waypoints && icon.waypoints.length > 1) {
@@ -884,7 +906,7 @@
             document.querySelectorAll('.placed-icon').forEach(icon => { icon.waypoints = []; });
         }
 
-        function createIconOnMap(name, symbol, color, x, y) {
+        function createIconOnMap(name, symbol, color, x, y, waypoints = []) {
             const el = document.createElement('div');
             el.className = 'placed-icon';
             el.style.left = `${x}px`;
@@ -892,7 +914,7 @@
             el.dataset.color = color;
             el.initialX = x;
             el.initialY = y;
-            el.waypoints = [];
+            el.waypoints = waypoints;
 
             el.innerHTML = `<i class="fa-solid ${symbol}" style="color: ${color};"></i><span>${name}</span>`;
 
@@ -1091,6 +1113,102 @@
                 reader.readAsDataURL(file);
             }
         }
+
+        // ==========================================
+        // TÍNH NĂNG LƯU & SHOW DANH SÁCH CHIẾN THUẬT
+        // ==========================================
+        function saveCurrentTacticsToStorage() {
+            const tacticName = prompt("Nhập tên để lưu chiến thuật này (Ví dụ: Đánh chiếm Lương Cẩu 1):", "Chiến Thuật " + new Date().toLocaleTimeString());
+            if (!tacticName) return;
+
+            // Thu thập các icon đang có trên bản đồ
+            const iconsData = [];
+            document.querySelectorAll('.placed-icon').forEach(el => {
+                const iconSymbol = el.querySelector('i').className.replace('fa-solid ', '').trim();
+                const iconColor = el.dataset.color || '#fff';
+                const iconName = el.querySelector('span').innerText;
+                iconsData.push({
+                    name: iconName,
+                    symbol: iconSymbol,
+                    color: iconColor,
+                    x: el.offsetLeft,
+                    y: el.offsetTop,
+                    waypoints: el.waypoints || []
+                });
+            });
+
+            // Lấy dữ liệu nét vẽ trên canvas dưới dạng hình ảnh base64
+            const canvasDataURL = arrowCanvas.toDataURL();
+            const mapBg = mapCanvas.style.backgroundImage;
+
+            const tacticPackage = {
+                name: tacticName,
+                bg: mapBg,
+                icons: iconsData,
+                canvasImg: canvasDataURL
+            };
+
+            // Lưu vào localStorage
+            let savedList = JSON.parse(localStorage.getItem('saBanTacticsList') || '{}');
+            savedList[tacticName] = tacticPackage;
+            localStorage.setItem('saBanTacticsList', JSON.stringify(savedList));
+
+            updateSavedTacticsDropdown();
+            alert(`Đã lưu thành công chiến thuật: "${tacticName}"!`);
+        }
+
+        function updateSavedTacticsDropdown() {
+            const selectBox = document.getElementById('savedTacticsSelect');
+            const savedList = JSON.parse(localStorage.getItem('saBanTacticsList') || '{}');
+            
+            // Giữ lại option đầu tiên
+            selectBox.innerHTML = '<option value="">📂 Chọn Chiến Thuật Đã Lưu...</option>';
+
+            for (let name in savedList) {
+                const opt = document.createElement('option');
+                opt.value = name;
+                opt.innerText = name;
+                selectBox.appendChild(opt);
+            }
+        }
+
+        function loadTacticsFromStorage(tacticName) {
+            if (!tacticName) return;
+            const savedList = JSON.parse(localStorage.getItem('saBanTacticsList') || '{}');
+            const data = savedList[tacticName];
+            if (!data) return;
+
+            // Xóa sạch bản đồ hiện tại
+            document.querySelectorAll('.placed-icon').forEach(el => el.remove());
+            ctx.clearRect(0, 0, arrowCanvas.width, arrowCanvas.height);
+            undoStack = [];
+
+            // Khôi phục hình nền bản đồ
+            if (data.bg) mapCanvas.style.backgroundImage = data.bg;
+
+            // Khôi phục các icon và lộ trình
+            if (data.icons) {
+                data.icons.forEach(ic => {
+                    createIconOnMap(ic.name, ic.symbol, ic.color, ic.x, ic.y, ic.waypoints);
+                });
+            }
+
+            // Khôi phục nét vẽ (nếu có ảnh canvas cũ)
+            if (data.canvasImg) {
+                const img = new Image();
+                img.onload = () => {
+                    ctx.clearRect(0, 0, arrowCanvas.width, arrowCanvas.height);
+                    ctx.drawImage(img, 0, 0);
+                };
+                img.src = data.canvasImg;
+            }
+
+            // Vẽ lại các đường đi của icon
+            setTimeout(redrawPathArrows, 100);
+        }
+
+        // Tải danh sách chiến thuật khi vừa mở trang
+        updateSavedTacticsDropdown();
 
         function exportMapToImage() {
             if (isPathDrawingMode) toggleDrawPathMode();
