@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Ký Thành Viên Bang Chiến - Nhà Báo 2</title>
+    <!-- Supabase Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg-main: #0d1117;
+            --bg-card: #161b22;
+            --border-color: #30363d;
+            --text-color: #c9d1d9;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .registration-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            width: 360px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+        .registration-container h2 {
+            font-size: 16px;
+            color: #58a6ff;
+            text-align: center;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: #8b949e;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            color: #fff;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: #58a6ff;
+        }
+        .btn-submit {
+            width: 100%;
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+        .btn-submit:hover { background: #2ea043; }
+        .success-msg {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 13px;
+            color: #3fb950;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="registration-container">
+        <h2>Đăng Ký Thành Viên Bang Chiến</h2>
+        <form id="publicRegForm" onsubmit="submitRegistration(event)">
+            <div class="form-group">
+                <label for="regIngame">Tên Ingame</label>
+                <input type="text" id="regIngame" placeholder="VD: VixKings" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="regClass">Môn Phái</label>
+                <select id="regClass">
+                    <option value="ThietY">Thiết Y (Nắm đấm)</option>
+                    <option value="HuyetHa">Huyết Hà (Cây Thương)</option>
+                    <option value="ToaiMong">Toái Mộng (Đao)</option>
+                    <option value="ThanTuang">Thần Tương (Đàn)</option>
+                    <option value="ToVan">Tố Vấn (Trị liệu)</option>
+                    <option value="CuuLinh">Cửu Linh (Sọ)</option>
+                    <option value="LongNgam">Long Ngâm (Song kiếm)</option>
+                    <option value="HuyenCo">Huyền Cơ (Cơ quan)</option>
+                    <option value="TrieuQuang">Triều Quang (Nước)</option>
+                    <option value="Khac">Khác</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">Gửi Đăng Ký</button>
+            <div class="success-msg" id="successMsg">✅ Đăng ký thành công! Đã cập nhật vào danh sách bang.</div>
+        </form>
+    </div>
+
+    <script>
+        // Cấu hình kết nối Supabase (dùng chung thông tin với trang lớn của bạn)
+        const SUPABASE_URL = 'https://shblqenkrzjuklzrvoie.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYmxxZW5rcnpqdWtsenJ2b2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NzA4MjMsImV4cCI6MjEwNDU0NjgyM30.I8bsjcbR3dNYm99kHan8mLj9X7jcNuPEzFQTk9jUups'; 
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function submitRegistration(e) {
+            e.preventDefault();
+            const ingameName = document.getElementById('regIngame').value.trim();
+            const classType = document.getElementById('regClass').value;
+            const btn = document.getElementById('submitBtn');
+
+            if (!ingameName) return;
+
+            btn.disabled = true;
+            btn.innerText = "Đang gửi...";
+
+            try {
+                // 1. Tải dữ liệu hiện tại từ bảng cấu hình trên Cloud
+                let { data, error } = await supabaseClient
+                    .from('squad_data')
+                    .select('*')
+                    .eq('id', 'main_config')
+                    .maybeSingle();
+
+                if (error) throw error;
+
+                let payload = data ? data.content : {};
+                let members = payload.members || [];
+
+                // 2. Kiểm tra xem tên Ingame đã tồn tại chưa
+                if (members.some(m => m.name.toLowerCase() === ingameName.toLowerCase())) {
+                    alert("⚠️ Tên Ingame này đã tồn tại trong danh sách!");
+                    btn.disabled = false;
+                    btn.innerText = "Gửi Đăng Ký";
+                    return;
+                }
+
+                // 3. Thêm thành viên mới vào mảng
+                members.push({ name: ingameName, classType: classType });
+                payload.members = members;
+
+                // 4. Lưu ngược lại lên Supabase Cloud
+                let { error: updateError } = await supabaseClient
+                    .from('squad_data')
+                    .upsert({ id: 'main_config', content: payload });
+
+                if (updateError) throw updateError;
+
+                // Hiển thị thông báo thành công
+                document.getElementById('successMsg').style.display = 'block';
+                document.getElementById('publicRegForm').reset();
+
+                setTimeout(() => {
+                    document.getElementById('successMsg').style.display = 'none';
+                    btn.disabled = false;
+                    btn.innerText = "Gửi Đăng Ký";
+                }, 3000);
+
+            } catch (err) {
+                console.error("Lỗi:", err);
+                alert("❌ Có lỗi xảy ra khi kết nối cơ sở dữ liệu!");
+                btn.disabled = false;
+                btn.innerText = "Gửi Đăng Ký";
+            }
+        }
+    </script>
+</body>
+</html>
