@@ -3,163 +3,1137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sa Bàn Chiến Thuật - Nghịch Thủy Hàn</title>
-    
-    <!-- Bảo vệ trang (Kiểm tra đăng nhập giống các trang khác) -->
-    <script>
-        if (sessionStorage.getItem("isLoggedIn") !== "true") {
-            window.location.href = "login.html";
-        }
-    </script>
-
-    <!-- FontAwesome & Supabase Library -->
+    <title>Sa Bàn Chiến Thuật Bang Hội - Dragon's Legacy</title>
+    <!-- FontAwesome icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
+    <!-- Thư viện html2canvas để xuất file ảnh -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <style>
         :root {
-            --bg-main: #0d1117;
-            --bg-card: #161b22;
-            --border-color: #30363d;
-            --text-color: #c9d1d9;
+            --bg-dark: #0f141d;
+            --sidebar-bg: #161d2a;
+            --accent-gold: #d4af37;
+            --accent-red: #ff4d4d;
+            --accent-blue: #4d94ff;
+            --accent-green: #2ecc71;
+            --text-color: #e0e6ed;
+            --border-color: #2a3548;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { background-color: var(--bg-main); color: var(--text-color); padding: 20px; }
-        
-        .title-banner {
-            background: linear-gradient(90deg, #161b22, #21262d);
-            color: #f0f6fc; padding: 12px 20px; font-size: 20px; font-weight: bold;
-            border-radius: 6px; margin-bottom: 20px; border: 1px solid var(--border-color);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .nav-links { display: flex; gap: 10px; }
-        .action-btn {
-            background: #21262d; color: #c9d1d9; border: 1px solid var(--border-color);
-            padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;
-            text-decoration: none; display: flex; align-items: center; gap: 6px; transition: 0.2s;
-        }
-        .action-btn:hover { background: #30363d; color: #fff; }
-        .btn-primary { background: #238636; color: #fff; border: none; }
-        .btn-primary:hover { background: #2ea043; }
 
-        .workspace {
-            display: grid;
-            grid-template-columns: 1fr 320px;
-            gap: 20px;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
         }
-        .map-container {
-            background: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: 6px; height: 600px; display: flex; align-items: center; justify-content: center;
-            position: relative; overflow: hidden;
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
         }
-        .sidebar-card {
-            background: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 12px;
+
+        /* SIDEBAR BÊN TRÁI */
+        .sidebar {
+            width: 330px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            flex-shrink: 0;
         }
-        .sidebar-card h3 { color: #58a6ff; font-size: 14px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px; }
-        .status-msg { font-size: 12px; color: #8b949e; font-style: italic; }
+
+        .sidebar.collapsed {
+            margin-left: -330px;
+        }
+
+        .toggle-sidebar-btn {
+            position: absolute;
+            right: -28px;
+            top: 12px;
+            width: 28px;
+            height: 40px;
+            background: var(--sidebar-bg);
+            border: 1px solid var(--border-color);
+            border-left: none;
+            color: var(--accent-gold);
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            z-index: 20;
+            box-shadow: 3px 0 8px rgba(0,0,0,0.4);
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .toggle-sidebar-btn:hover {
+            background: var(--accent-gold);
+            color: #000;
+        }
+
+        .sidebar-header {
+            padding: 15px 20px;
+            background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header h2 {
+            font-size: 16px;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+        }
+
+        .draw-mode-box {
+            padding: 12px 15px;
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .draw-mode-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .toggle-draw-btn {
+            background: #2b384e;
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: 0.2s;
+            width: 100%;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        .toggle-draw-btn.active {
+            background: var(--accent-gold);
+            color: #000;
+        }
+
+        .draw-options {
+            display: flex;
+            background: rgba(0,0,0,0.2);
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .draw-options label {
+            font-size: 11px;
+            color: #8899a6;
+            font-weight: bold;
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            background: none;
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: 1px solid #fff; border-radius: 50%; }
+
+        .quick-colors {
+            display: flex;
+            gap: 4px;
+        }
+
+        .color-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .add-icon-form {
+            padding: 12px 15px;
+            background: rgba(0,0,0,0.15);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .form-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #8899a6;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-group {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .form-input, .form-select {
+            background: #0f141d;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .form-input { flex-grow: 1; }
+
+        .btn-add-icon {
+            width: 100%;
+            background: #27ae60;
+            border: none;
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .btn-add-icon:hover { background: #219150; }
+
+        .icon-section {
+            padding: 15px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .draggable-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: grab;
+            margin-bottom: 8px;
+        }
+
+        .draggable-item:hover {
+            border-color: var(--accent-gold);
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+        }
+
+        .btn-icon-action {
+            background: none;
+            border: none;
+            color: #8899a6;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-icon-action:hover { color: var(--accent-red); }
+
+        /* KHU VỰC CHÍNH */
+        .main-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .top-toolbar {
+            height: 55px;
+            background: var(--sidebar-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px 0 40px;
+            z-index: 5;
+            flex-wrap: wrap;
+        }
+
+        .tool-btn-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .timer-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--accent-gold);
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .timer-display {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--accent-gold);
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .timer-btn {
+            background: #2b384e;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .timer-btn:hover { background: var(--accent-gold); color: #000; }
+
+        .btn {
+            background: #222d3d;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: 0.2s;
+        }
+
+        .btn:hover { background: var(--accent-gold); color: #000; }
+        .btn-upload { background: #1e3a5f; border-color: #3b82f6; color: #60a5fa; }
+        .btn-export { background: #2e7d32; border-color: #4caf50; color: #a5d6a7; }
+        .btn-play { background: #16a34a; border-color: #22c55e; color: #ffffff; font-weight: bold; }
+        .btn-reset-pos { background: #d97706; border-color: #f59e0b; color: #fef3c7; }
+        .btn-danger:hover { background: var(--accent-red); color: #fff; }
+
+        /* VIEWPORT & CANVAS */
+        .map-viewport {
+            flex-grow: 1;
+            position: relative;
+            background-color: #0a0d13;
+            overflow: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .zoom-wrapper {
+            transform-origin: center center;
+            transition: transform 0.05s ease-out;
+        }
+
+        .map-canvas {
+            position: relative;
+            width: 1000px;
+            height: 650px;
+            background: url('bc.jpg') center/cover no-repeat;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            border: 2px solid var(--border-color);
+        }
+
+        #arrowCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        #arrowCanvas.active {
+            pointer-events: auto;
+            cursor: crosshair;
+        }
+
+        .placed-icon {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: move;
+            z-index: 20;
+        }
+
+        .placed-icon i {
+            font-size: 26px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+            padding: 2px;
+            border-radius: 4px;
+            box-sizing: content-box;
+        }
+
+        .placed-icon.selected i {
+            outline: 2px dashed var(--accent-gold);
+            outline-offset: 2px;
+        }
+
+        .placed-icon span {
+            font-size: 11px;
+            background: rgba(0,0,0,0.8);
+            padding: 2px 6px;
+            border-radius: 3px;
+            white-space: nowrap;
+            margin-top: 2px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .zoom-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 30;
+            background: rgba(22, 29, 42, 0.85);
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .zoom-btn {
+            width: 34px;
+            height: 34px;
+            background: #222d3d;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .zoom-btn:hover {
+            background: var(--accent-gold);
+            color: #000;
+        }
+
+        .zoom-level {
+            font-size: 10px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--accent-gold);
+            padding: 2px 0;
+        }
     </style>
 </head>
 <body>
 
-    <div class="title-banner">
-        <span><img src="https://img.icons8.com/ios-filled/20/c9d1d9/strategy-game.png" style="vertical-align: middle; margin-right: 8px;"> Sa Bàn Chiến Thuật Bang Hội</span>
-        <div class="nav-links">
-            <a href="PovBangChien.html" class="action-btn"><i class="fa-solid fa-video"></i> Quản Lý POV</a>
+    <!-- SIDEBAR BÊN TRÁI -->
+    <div class="sidebar" id="sidebar">
+        <button class="toggle-sidebar-btn" id="toggleSidebarBtn" onclick="toggleSidebar()" title="Thu gọn / Mở rộng thanh công cụ">
+            <i class="fa-solid fa-chevron-left" id="toggleSidebarIcon"></i>
+        </button>
+
+        <div class="sidebar-header">
+            <h2>SA BÀN NHÀ BÁO</h2>
+        </div>
+
+        <div class="draw-mode-box">
+            <div class="draw-mode-header">
+                <span style="font-size: 12px; font-weight: bold; color: var(--accent-gold);">🎨 CÔNG CỤ VẼ SA BÀN</span>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 2px;">
+                <select id="drawToolMode" class="form-select" style="width: 100%;" onchange="changeDrawTool(this.value)">
+                    <option value="brush">✏️ Bút vẽ tự do (Brush)</option>
+                    <option value="line">📏 Đường thẳng / Mũi tên</option>
+                    <option value="rect">🔲 Khoanh vùng Chữ Nhật</option>
+                    <option value="circle">⭕ Khoanh vùng Hình Tròn</option>
+                    <option value="text">🔤 Thêm Chữ ghi chú</option>
+                    <option value="eraser">🧹 Cục Tẩy (Eraser)</option>
+                </select>
+            </div>
+
+            <div class="draw-options">
+                <div style="display: flex; align-items: center; justify-content: space-width; width: 100%;">
+                    <label>Màu nét:</label>
+                    <div class="color-picker-wrapper">
+                        <input type="color" id="paintColor" value="#ff4d4d" onchange="setPaintColor(this.value)">
+                        <div class="quick-colors">
+                            <div class="color-dot" style="background: #ff4d4d;" onclick="setPaintColor('#ff4d4d')"></div>
+                            <div class="color-dot" style="background: #d4af37;" onclick="setPaintColor('#d4af37')"></div>
+                            <div class="color-dot" style="background: #4d94ff;" onclick="setPaintColor('#4d94ff')"></div>
+                            <div class="color-dot" style="background: #2ecc71;" onclick="setPaintColor('#2ecc71')"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                    <label>Kích thước:</label>
+                    <input type="range" id="brushWidth" min="1" max="25" value="4" style="width: 110px;" onchange="setBrushWidth(this.value)">
+                </div>
+            </div>
+
+            <button id="togglePaintBtn" class="toggle-draw-btn" onclick="togglePaintMode()">
+                <i class="fa-solid fa-paintbrush"></i> BẬT BÚT VẼ SA BÀN
+            </button>
+        </div>
+
+        <div class="draw-mode-box">
+            <div class="draw-mode-header" style="flex-direction: column; align-items: stretch; gap: 4px;">
+                <span style="font-size: 12px; font-weight: bold; color: var(--accent-blue);">🏹 VẼ LỘ TRÌNH DI CHUYỂN</span>
+                <button id="drawToggleBtn" class="toggle-draw-btn" onclick="toggleDrawPathMode()">
+                    <i class="fa-solid fa-route"></i> VẼ ĐƯỜNG ĐI CHO ICON
+                </button>
+            </div>
+        </div>
+
+        <div class="add-icon-form">
+            <div class="form-title">Tạo Icon Mới</div>
+            <div class="form-group">
+                <input type="text" id="newIconName" class="form-input" placeholder="Tên Đoàn / Mục tiêu">
+                <select id="newIconColor" class="form-select">
+                    <option value="#4d94ff">Xanh Dương</option>
+                    <option value="#ff4d4d">Đỏ</option>
+                    <option value="#d4af37">Vàng</option>
+                    <option value="#2ecc71">Lục</option>
+                    <option value="#a855f7">Tím</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <select id="newIconSymbol" class="form-select" style="width: 100%;">
+                    <option value="fa-shield-halved">🛡️ Khiên (Đội Thủ)</option>
+                    <option value="fa-crosshairs">🎯 Tâm ngắm (Đội Công)</option>
+                    <option value="fa-skull">💀 Đầu lâu (Boss / Địch)</option>
+                    <option value="fa-chess-rook">🏰 Tháp / Thành</option>
+                    <option value="fa-flag">🚩 Cờ / Điểm Dừng</option>
+                    <option value="fa-location-dot">📍 Điểm Tập Hợp</option>
+                    <option value="fa-horse">🐎 Kỵ Binh / Đột Kích</option>
+                </select>
+            </div>
+            <button class="btn-add-icon" onclick="addNewIconToList()"><i class="fa-solid fa-plus"></i> THÊM VÀO DANH SÁCH</button>
+        </div>
+
+        <div class="icon-section">
+            <div class="form-title">Danh Sách Icon Kéo Thả</div>
+            <div id="iconContainer"></div>
         </div>
     </div>
 
-    <div class="workspace">
-        <!-- KHU VỰC SA BÀN / BẢN ĐỒ -->
-        <div class="map-container" id="mapCanvas">
-            <span style="color: #8b949e;">[ Khu vực hiển thị bản đồ / quân cờ chiến thuật ]</span>
-            <!-- Các quân cờ hoặc đường vẽ của bạn sẽ nằm ở đây -->
+    <!-- KHU VỰC BẢN ĐỒ CHÍNH -->
+    <div class="main-container">
+        <div class="top-toolbar">
+            <div class="tool-btn-group">
+                <button class="btn btn-upload" onclick="document.getElementById('mapFileInput').click()" title="Đổi hình nền bản đồ khác">
+                    <i class="fa-solid fa-file-image"></i> Đổi Bản Đồ
+                </button>
+                <input type="file" id="mapFileInput" accept="image/*" style="display: none;" onchange="uploadMapImage(event)">
+
+                <button class="btn btn-export" onclick="exportMapToImage()">
+                    <i class="fa-solid fa-download"></i> Tải Ảnh
+                </button>
+
+                <button class="btn btn-play" onclick="startMovementAnimation()">
+                    <i class="fa-solid fa-play"></i> DIỄN HOẠT
+                </button>
+
+                <button class="btn btn-reset-pos" onclick="resetIconsToInitialPosition()">
+                    <i class="fa-solid fa-arrow-rotate-left"></i> RESET VỊ TRÍ
+                </button>
+            </div>
+
+            <div class="timer-box">
+                <i class="fa-solid fa-clock" style="color: var(--accent-gold);"></i>
+                <div class="timer-display" id="timerDisplay">23:00</div>
+                <button class="timer-btn" id="startTimerBtn" onclick="toggleTimer()"><i class="fa-solid fa-play"></i> Chạy</button>
+                <button class="timer-btn" onclick="resetTimer()"><i class="fa-solid fa-rotate-left"></i> Đặt lại</button>
+            </div>
+
+            <div class="tool-btn-group">
+                <button class="btn" onclick="undoDrawing()" title="Hoàn tác nét vẽ cuối"><i class="fa-solid fa-rotate-left"></i> Undo</button>
+                <button class="btn" onclick="toggleCanvasVisibility()" id="toggleCanvasVisBtn" title="Ẩn/Hiện đường vẽ"><i class="fa-solid fa-eye-slash"></i> Ẩn Nét</button>
+                <button class="btn" onclick="clearCanvas()"><i class="fa-solid fa-eraser"></i> Xóa Nét</button>
+                <button class="btn btn-danger" onclick="clearMap()"><i class="fa-solid fa-trash"></i> Xóa Hết</button>
+            </div>
         </div>
 
-        <!-- BẢNG ĐIỀU KHIỂN & ĐỒNG BỘ CLOUD -->
-        <div class="sidebar-card">
-            <h3><i class="fa-solid fa-cloud-arrow-up"></i> Đồng Bộ Cloud Chung</h3>
-            <p class="status-msg" id="syncStatus">Trạng thái: Đã sẵn sàng kết nối server.</p>
-            
-            <button class="action-btn btn-primary" onclick="saveSquadMap()"><i class="fa-solid fa-floppy-disk"></i> Lưu Chiến Thuật Lên Server</button>
-            <button class="action-btn" onclick="loadSquadMap()"><i class="fa-solid fa-rotate"></i> Tải Lại Sa Bàn Mới Nhất</button>
-            
-            <hr style="border-color: var(--border-color); margin: 5px 0;">
-            <div style="font-size: 12px; color: #8b949e; line-height: 1.5;">
-                * <b>Lưu ý:</b> Khi bạn bấm lưu, toàn bộ vị trí quân cờ, hình vẽ chiến thuật sẽ được cập nhật lên Supabase[cite: 2]. Anh em mở trang này lên sẽ thấy ngay chiến thuật mới nhất.
+        <div class="map-viewport" id="mapViewport">
+            <div class="zoom-wrapper" id="zoomWrapper">
+                <div class="map-canvas" id="mapCanvas">
+                    <canvas id="arrowCanvas" width="1000" height="650"></canvas>
+                </div>
+            </div>
+
+            <div class="zoom-controls">
+                <button class="zoom-btn" onclick="zoomIn()" title="Phóng to"><i class="fa-solid fa-plus"></i></button>
+                <div class="zoom-level" id="zoomDisplay">100%</div>
+                <button class="zoom-btn" onclick="zoomOut()" title="Thu nhỏ"><i class="fa-solid fa-minus"></i></button>
+                <button class="zoom-btn" onclick="resetZoom()" title="Về mặc định"><i class="fa-solid fa-compress"></i></button>
             </div>
         </div>
     </div>
 
     <script>
-        // CẤU HÌNH SUPABASE CHUNG CÙNG HỆ THỐNG
-        const SUPABASE_URL = 'https://shblqenkrzjuklzrvoie.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYmxxZW5rcnpqdWtsenJ2b2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NzA4MjMsImV4cCI6MjEwNDU0NjgyM30.I8bsjcbR3dNYm99kHan8mLj9X7jcNuPEzFQTk9jUups'; 
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let iconList = [
+            { id: 1, name: "Đội Thủ", symbol: "fa-shield-halved", color: "#4d94ff" },
+            { id: 2, name: "Đội Công", symbol: "fa-crosshairs", color: "#ff4d4d" },
+            { id: 3, name: "Mục Tiêu Cờ", symbol: "fa-flag", color: "#d4af37" }
+        ];
 
-        // Tự động tải dữ liệu sa bàn khi vừa vào trang
-        window.addEventListener('DOMContentLoaded', () => {
-            loadSquadMap();
+        const iconContainer = document.getElementById('iconContainer');
+        const mapCanvas = document.getElementById('mapCanvas');
+        const arrowCanvas = document.getElementById('arrowCanvas');
+        const zoomWrapper = document.getElementById('zoomWrapper');
+        const mapViewport = document.getElementById('mapViewport');
+        const sidebar = document.getElementById('sidebar');
+        const toggleSidebarIcon = document.getElementById('toggleSidebarIcon');
+        const ctx = arrowCanvas.getContext('2d');
+
+        let draggedData = null;
+        let selectedIconForDrawing = null;
+        let animationId = null;
+        let undoStack = [];
+
+        function saveCanvasState() {
+            if (undoStack.length > 15) undoStack.shift(); // Giới hạn lưu 15 bước
+            undoStack.push(ctx.getImageData(0, 0, arrowCanvas.width, arrowCanvas.height));
+        }
+
+        function undoDrawing() {
+            if (undoStack.length > 0) {
+                const lastState = undoStack.pop();
+                ctx.putImageData(lastState, 0, 0);
+            } else {
+                ctx.clearRect(0, 0, arrowCanvas.width, arrowCanvas.height);
+            }
+        }
+
+        let isCanvasHidden = false;
+        function toggleCanvasVisibility() {
+            isCanvasHidden = !isCanvasHidden;
+            arrowCanvas.style.display = isCanvasHidden ? 'none' : 'block';
+            const btn = document.getElementById('toggleCanvasVisBtn');
+            btn.innerHTML = isCanvasHidden ? '<i class="fa-solid fa-eye"></i> Hiện Nét' : '<i class="fa-solid fa-eye-slash"></i> Ẩn Nét';
+        }
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('collapsed');
+            toggleSidebarIcon.className = sidebar.classList.contains('collapsed') ? 'fa-solid fa-chevron-right' : 'fa-solid fa-chevron-left';
+        }
+
+        let currentScale = 1.0;
+        const MIN_SCALE = 0.5;
+        const MAX_SCALE = 2.5;
+
+        function updateZoom() {
+            zoomWrapper.style.transform = `scale(${currentScale})`;
+            document.getElementById('zoomDisplay').innerText = `${Math.round(currentScale * 100)}%`;
+        }
+
+        function zoomIn() { if (currentScale < MAX_SCALE) { currentScale += 0.15; updateZoom(); } }
+        function zoomOut() { if (currentScale > MIN_SCALE) { currentScale -= 0.15; updateZoom(); } }
+        function resetZoom() { currentScale = 1.0; updateZoom(); }
+
+        mapViewport.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.deltaY < 0) zoomIn(); else zoomOut();
+        }, { passive: false });
+
+        let isPathDrawingMode = false;
+        let isPathDrawing = false;
+        let startX = 0, startY = 0;
+
+        let isPaintActive = false;
+        let currentTool = 'brush'; 
+        let paintColor = '#ff4d4d';
+        let strokeWidth = 4;
+        let isDrawingPaint = false;
+        let startPaintX = 0, startPaintY = 0;
+        let snapshotData = null;
+
+        let totalSeconds = 23 * 60;
+        let timerInterval = null;
+        let isTimerRunning = false;
+
+        function setPaintColor(color) {
+            paintColor = color;
+            document.getElementById('paintColor').value = color;
+        }
+
+        function setBrushWidth(width) { strokeWidth = parseInt(width); }
+        function changeDrawTool(tool) { currentTool = tool; }
+
+        function togglePaintMode() {
+            isPaintActive = !isPaintActive;
+            const btn = document.getElementById('togglePaintBtn');
+            if (isPaintActive) {
+                if (isPathDrawingMode) toggleDrawPathMode();
+                btn.classList.add('active');
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> ĐANG VẼ SA BÀN';
+                arrowCanvas.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+                btn.innerHTML = '<i class="fa-solid fa-paintbrush"></i> BẬT BÚT VẼ SA BÀN';
+                arrowCanvas.classList.remove('active');
+            }
+        }
+
+        function toggleDrawPathMode() {
+            isPathDrawingMode = !isPathDrawingMode;
+            const btn = document.getElementById('drawToggleBtn');
+            if (isPathDrawingMode) {
+                if (isPaintActive) togglePaintMode();
+                btn.classList.add('active');
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> ĐANG CHỌN ICON VẼ ĐƯỜNG';
+                arrowCanvas.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+                btn.innerHTML = '<i class="fa-solid fa-route"></i> VẼ ĐƯỜNG ĐI CHO ICON';
+                arrowCanvas.classList.remove('active');
+                if (selectedIconForDrawing) {
+                    selectedIconForDrawing.classList.remove('selected');
+                    selectedIconForDrawing = null;
+                }
+            }
+        }
+
+        arrowCanvas.addEventListener('mousedown', (e) => {
+            const rect = arrowCanvas.getBoundingClientRect();
+            const scaleX = arrowCanvas.width / rect.width;
+            const scaleY = arrowCanvas.height / rect.height;
+
+            const clickX = (e.clientX - rect.left) * scaleX;
+            const clickY = (e.clientY - rect.top) * scaleY;
+
+            if (isPaintActive) {
+                saveCanvasState();
+                startPaintX = clickX;
+                startPaintY = clickY;
+
+                if (currentTool === 'text') {
+                    const textInput = prompt("Nhập nội dung ghi chú chiến thuật:", "Điểm nóng");
+                    if (textInput) {
+                        ctx.font = `bold ${strokeWidth * 3 + 12}px 'Segoe UI', sans-serif`;
+                        ctx.fillStyle = paintColor;
+                        ctx.fillText(textInput, startPaintX, startPaintY);
+                    }
+                    return;
+                }
+
+                isDrawingPaint = true;
+                snapshotData = ctx.getImageData(0, 0, arrowCanvas.width, arrowCanvas.height);
+                ctx.beginPath();
+                ctx.moveTo(startPaintX, startPaintY);
+                return;
+            }
+
+            if (isPathDrawingMode) {
+                if (!selectedIconForDrawing) {
+                    alert("Vui lòng click chọn 1 Icon trên sa bàn trước khi vẽ lộ trình!");
+                    return;
+                }
+
+                isPathDrawing = true;
+                if (!selectedIconForDrawing.waypoints || selectedIconForDrawing.waypoints.length === 0) {
+                    selectedIconForDrawing.waypoints = [{
+                        x: selectedIconForDrawing.offsetLeft,
+                        y: selectedIconForDrawing.offsetTop,
+                        color: paintColor
+                    }];
+                    startX = selectedIconForDrawing.offsetLeft;
+                    startY = selectedIconForDrawing.offsetTop;
+                } else {
+                    const lastPoint = selectedIconForDrawing.waypoints[selectedIconForDrawing.waypoints.length - 1];
+                    startX = lastPoint.x;
+                    startY = lastPoint.y;
+                }
+            }
         });
 
-        // 1. HÀM LƯU CHIẾN THUẬT LÊN CLOUD
-        async function saveSquadMap() {
-            const statusEl = document.getElementById('syncStatus');
-            statusEl.innerText = "Trang thái: Đang lưu lên server...";
+        arrowCanvas.addEventListener('mousemove', (e) => {
+            const rect = arrowCanvas.getBoundingClientRect();
+            const scaleX = arrowCanvas.width / rect.width;
+            const scaleY = arrowCanvas.height / rect.height;
 
-            // Đóng gói dữ liệu sa bàn của bạn vào đây (Ví dụ: vị trí các quân cờ, mảng các nét vẽ...)
-            // Bạn có thể thay thế biến `mapData` bằng cấu trúc code kéo thả thực tế của bạn.
-            const mapData = {
-                timestamp: new Date().toISOString(),
-                // elements: thongTinQuanCoCuaBan,
-                // drawings: cacNetVeThucTe
-                note: "Cập nhật sa bàn chiến thuật bang chiến"
-            };
+            const currentX = (e.clientX - rect.left) * scaleX;
+            const currentY = (e.clientY - rect.top) * scaleY;
 
-            try {
-                // Sử dụng bảng 'squad_data' với id định danh riêng cho sa bàn (ví dụ: 'tactical_map_main')
-                const { error } = await supabaseClient
-                    .from('squad_data')
-                    .upsert({ id: 'tactical_map_main', content: mapData });
+            if (isDrawingPaint && isPaintActive) {
+                ctx.strokeStyle = currentTool === 'eraser' ? '#0a0d13' : paintColor;
+                ctx.lineWidth = currentTool === 'eraser' ? strokeWidth * 4 : strokeWidth;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
 
-                if (error) throw error;
-
-                statusEl.innerText = "Trang thái: Lưu thành công lên server lúc " + new Date().toLocaleTimeString();
-                alert("Đã lưu chiến thuật thành công! Anh em vào web sẽ thấy ngay.");
-            } catch (err) {
-                console.error("Lỗi khi lưu:", err);
-                statusEl.innerText = "Trang thái: Lưu thất bại!";
-                alert("Lỗi kết nối server khi lưu!");
-            }
-        }
-
-        // 2. HÀM TẢI CHIẾN THUẬT TỪ CLOUD XUỐNG
-        async function loadSquadMap() {
-            const statusEl = document.getElementById('syncStatus');
-            statusEl.innerText = "Trang thái: Đang đồng bộ dữ liệu...";
-
-            try {
-                let { data, error } = await supabaseClient
-                    .from('squad_data')
-                    .select('*')
-                    .eq('id', 'tactical_map_main')
-                    .maybeSingle();
-
-                if (error) throw error;
-
-                if (data && data.content) {
-                    console.log("Đã lấy được dữ liệu sa bàn:", data.content);
-                    // TODO: Đưa dữ liệu `data.content` vào logic hiển thị quân cờ/nét vẽ của sa bàn bạn đang viết ở đây.
-                    
-                    statusEl.innerText = "Trang thái: Đã cập nhật bản mới nhất.";
+                if (currentTool === 'brush' || currentTool === 'eraser') {
+                    ctx.lineTo(currentX, currentY);
+                    ctx.stroke();
                 } else {
-                    statusEl.innerText = "Trang thái: Chưa có chiến thuật nào trên server.";
+                    ctx.putImageData(snapshotData, 0, 0);
+                    ctx.beginPath();
+                    if (currentTool === 'line') {
+                        ctx.moveTo(startPaintX, startPaintY);
+                        ctx.lineTo(currentX, currentY);
+                    } else if (currentTool === 'rect') {
+                        ctx.strokeRect(startPaintX, startPaintY, currentX - startPaintX, currentY - startPaintY);
+                    } else if (currentTool === 'circle') {
+                        const radius = Math.hypot(currentX - startPaintX, currentY - startPaintY);
+                        ctx.arc(startPaintX, startPaintY, radius, 0, 2 * Math.PI);
+                    }
+                    ctx.stroke();
                 }
-            } catch (err) {
-                console.error("Lỗi tải dữ liệu:", err);
-                statusEl.innerText = "Trang thái: Lỗi tải dữ liệu từ server.";
+                return;
+            }
+
+            if (isPathDrawing && isPathDrawingMode && selectedIconForDrawing) {
+                redrawPathArrows();
+                drawArrow(startX, startY, currentX, currentY, paintColor);
+            }
+        });
+
+        arrowCanvas.addEventListener('mouseup', (e) => {
+            if (isDrawingPaint) isDrawingPaint = false;
+
+            if (isPathDrawing && isPathDrawingMode && selectedIconForDrawing) {
+                isPathDrawing = false;
+                const rect = arrowCanvas.getBoundingClientRect();
+                const scaleX = arrowCanvas.width / rect.width;
+                const scaleY = arrowCanvas.height / rect.height;
+
+                const endX = (e.clientX - rect.left) * scaleX;
+                const endY = (e.clientY - rect.top) * scaleY;
+
+                selectedIconForDrawing.waypoints.push({ x: endX, y: endY, color: paintColor });
+                redrawPathArrows();
+            }
+        });
+
+        function drawArrow(fromx, fromy, tox, toy, color) {
+            const headlen = 12;
+            const dx = tox - fromx;
+            const dy = toy - fromy;
+            const angle = Math.atan2(dy, dx);
+
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 3;
+            ctx.moveTo(fromx, fromy);
+            ctx.lineTo(tox, toy);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(tox, toy);
+            ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function redrawPathArrows() {
+            ctx.clearRect(0, 0, arrowCanvas.width, arrowCanvas.height);
+            undoStack = []; // Reset undo khi vẽ lại tuyến đường icon
+            const icons = document.querySelectorAll('.placed-icon');
+            icons.forEach(icon => {
+                if (icon.waypoints && icon.waypoints.length > 1) {
+                    for (let i = 0; i < icon.waypoints.length - 1; i++) {
+                        const p1 = icon.waypoints[i];
+                        const p2 = icon.waypoints[i + 1];
+                        const lineColor = p2.color || icon.dataset.color || '#ff4d4d';
+                        drawArrow(p1.x, p1.y, p2.x, p2.y, lineColor);
+                    }
+                }
+            });
+        }
+
+        function clearCanvas() {
+            saveCanvasState();
+            ctx.clearRect(0, 0, arrowCanvas.width, arrowCanvas.height);
+            document.querySelectorAll('.placed-icon').forEach(icon => { icon.waypoints = []; });
+        }
+
+        function createIconOnMap(name, symbol, color, x, y) {
+            const el = document.createElement('div');
+            el.className = 'placed-icon';
+            el.style.left = `${x}px`;
+            el.style.top = `${y}px`;
+            el.dataset.color = color;
+            el.initialX = x;
+            el.initialY = y;
+            el.waypoints = [];
+
+            el.innerHTML = `<i class="fa-solid ${symbol}" style="color: ${color};"></i><span>${name}</span>`;
+
+            el.addEventListener('click', (e) => {
+                if (isPathDrawingMode) {
+                    e.stopPropagation();
+                    if (selectedIconForDrawing) selectedIconForDrawing.classList.remove('selected');
+                    selectedIconForDrawing = el;
+                    el.classList.add('selected');
+                }
+            });
+
+            el.querySelector('span').addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                const renamed = prompt("Đổi tên hiển thị:", el.querySelector('span').innerText);
+                if (renamed) el.querySelector('span').innerText = renamed;
+            });
+
+            el.querySelector('i').addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                el.remove();
+                redrawPathArrows();
+            });
+
+            makeElementDraggable(el);
+            mapCanvas.appendChild(el);
+        }
+
+        function makeElementDraggable(element) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            element.onmousedown = (e) => {
+                if (e.target.tagName === 'SPAN' || isPathDrawingMode || isPaintActive) return;
+                e.preventDefault();
+                pos3 = e.clientX; pos4 = e.clientY;
+                document.onmouseup = () => { 
+                    document.onmouseup = null; 
+                    document.onmousemove = null; 
+                    element.initialX = element.offsetLeft;
+                    element.initialY = element.offsetTop;
+                };
+                document.onmousemove = (e) => {
+                    e.preventDefault();
+                    pos1 = (pos3 - e.clientX) / currentScale; 
+                    pos2 = (pos4 - e.clientY) / currentScale;
+                    pos3 = e.clientX; 
+                    pos4 = e.clientY;
+                    
+                    element.style.top = (element.offsetTop - pos2) + "px";
+                    element.style.left = (element.offsetLeft - pos1) + "px";
+                    element.waypoints = [];
+                    redrawPathArrows();
+                };
+            };
+        }
+
+        function resetIconsToInitialPosition() {
+            if (animationId) cancelAnimationFrame(animationId);
+            const icons = document.querySelectorAll('.placed-icon');
+            icons.forEach(icon => {
+                if (icon.initialX !== undefined && icon.initialY !== undefined) {
+                    icon.style.left = `${icon.initialX}px`;
+                    icon.style.top = `${icon.initialY}px`;
+                }
+            });
+            resetTimer();
+        }
+
+        function startMovementAnimation() {
+            if (isPathDrawingMode) toggleDrawPathMode();
+            if (isPaintActive) togglePaintMode();
+
+            const icons = Array.from(document.querySelectorAll('.placed-icon')).filter(i => i.waypoints && i.waypoints.length > 1);
+            if (icons.length === 0) {
+                alert("Hãy chọn icon và vẽ đường đi trước khi diễn hoạt!");
+                return;
+            }
+
+            if (!isTimerRunning) startTimer();
+
+            const runners = icons.map(icon => ({
+                element: icon,
+                waypoints: [...icon.waypoints],
+                targetIndex: 1
+            }));
+
+            const speed = 2.5;
+            if (animationId) cancelAnimationFrame(animationId);
+
+            function step() {
+                let allFinished = true;
+                runners.forEach(runner => {
+                    if (runner.targetIndex < runner.waypoints.length) {
+                        allFinished = false;
+                        const target = runner.waypoints[runner.targetIndex];
+                        const curX = runner.element.offsetLeft;
+                        const curY = runner.element.offsetTop;
+
+                        const dx = target.x - curX;
+                        const dy = target.y - curY;
+                        const dist = Math.hypot(dx, dy);
+
+                        if (dist <= speed) {
+                            runner.element.style.left = `${target.x}px`;
+                            runner.element.style.top = `${target.y}px`;
+                            runner.targetIndex++;
+                        } else {
+                            runner.element.style.left = `${curX + (dx / dist) * speed}px`;
+                            runner.element.style.top = `${curY + (dy / dist) * speed}px`;
+                        }
+                    }
+                });
+
+                if (!allFinished) animationId = requestAnimationFrame(step);
+            }
+            animationId = requestAnimationFrame(step);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            document.getElementById('timerDisplay').innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            const btn = document.getElementById('startTimerBtn');
+            if (totalSeconds <= 0) totalSeconds = 23 * 60;
+            isTimerRunning = true;
+            btn.innerHTML = '<i class="fa-solid fa-pause"></i> Dừng';
+            
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (totalSeconds > 0) {
+                    totalSeconds--;
+                    updateTimerDisplay();
+                } else {
+                    clearInterval(timerInterval);
+                    isTimerRunning = false;
+                    btn.innerHTML = '<i class="fa-solid fa-play"></i> Chạy';
+                }
+            }, 1000);
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('startTimerBtn');
+            if (!isTimerRunning) startTimer();
+            else {
+                clearInterval(timerInterval);
+                isTimerRunning = false;
+                btn.innerHTML = '<i class="fa-solid fa-play"></i> Tiếp';
             }
         }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            totalSeconds = 23 * 60;
+            updateTimerDisplay();
+            document.getElementById('startTimerBtn').innerHTML = '<i class="fa-solid fa-play"></i> Chạy';
+        }
+
+        function renderIconList() {
+            iconContainer.innerHTML = '';
+            iconList.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'draggable-item';
+                el.setAttribute('draggable', 'true');
+                el.innerHTML = `
+                    <div class="item-info">
+                        <i class="fa-solid ${item.symbol}" style="color: ${item.color};"></i>
+                        <span>${item.name}</span>
+                    </div>
+                    <button class="btn-icon-action" onclick="deleteIcon(${item.id})"><i class="fa-solid fa-trash"></i></button>
+                `;
+                el.addEventListener('dragstart', () => { draggedData = { ...item }; });
+                iconContainer.appendChild(el);
+            });
+        }
+
+        mapCanvas.addEventListener('dragover', (e) => e.preventDefault());
+        mapCanvas.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (!draggedData) return;
+            const rect = mapCanvas.getBoundingClientRect();
+            const dropX = (e.clientX - rect.left) / currentScale;
+            const dropY = (e.clientY - rect.top) / currentScale;
+
+            createIconOnMap(draggedData.name, draggedData.symbol, draggedData.color, dropX, dropY);
+            draggedData = null;
+        });
+
+        function uploadMapImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => mapCanvas.style.backgroundImage = `url('${e.target.result}')`;
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function exportMapToImage() {
+            if (isPathDrawingMode) toggleDrawPathMode();
+            if (isPaintActive) togglePaintMode();
+
+            const oldScale = currentScale;
+            currentScale = 1.0;
+            updateZoom();
+
+            alert('Đang chuẩn bị xuất ảnh sa bàn...');
+            html2canvas(mapCanvas, { useCORS: true, scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Sa-Ban-Nha-Bao.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+
+                currentScale = oldScale;
+                updateZoom();
+            });
+        }
+
+        function addNewIconToList() {
+            const name = document.getElementById('newIconName').value.trim();
+            if (!name) return alert("Vui lòng nhập tên đoàn/mục tiêu!");
+            iconList.push({ id: Date.now(), name, symbol: document.getElementById('newIconSymbol').value, color: document.getElementById('newIconColor').value });
+            renderIconList();
+            document.getElementById('newIconName').value = '';
+        }
+
+        function deleteIcon(id) {
+            iconList = iconList.filter(item => item.id !== id);
+            renderIconList();
+        }
+
+        function clearMap() {
+            if(confirm('Bạn có chắc muốn xóa toàn bộ quân và nét vẽ không?')) {
+                document.querySelectorAll('.placed-icon').forEach(el => el.remove());
+                clearCanvas();
+                resetTimer();
+            }
+        }
+
+        renderIconList();
     </script>
 </body>
 </html>
