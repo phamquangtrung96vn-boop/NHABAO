@@ -567,7 +567,6 @@
             <button class="btn-action btn-save-cloud" onclick="manualSaveToCloud()"><i class="fa-solid fa-cloud-arrow-up"></i> Lưu Lên Cloud</button>
             <button class="btn-action btn-discord" onclick="openDiscordModal()"><i class="fa-brands fa-discord"></i> Gửi Discord</button>
             <a href="https://phamquangtrung96vn-boop.github.io/NHABAO/ChienThuat.html" class="btn-action btn-strategy"><i class="fa-solid fa-chess-knight"></i> Chiến Thuật</a>
-            <!-- ĐÃ CẬP NHẬT ĐƯỜNG DẪN TRỎ VỀ PovBangChien.html -->
             <a href="PovBangChien.html" class="btn-action"><i class="fa-solid fa-video"></i> Xem POV</a>
             <button class="btn-action" onclick="exportData()"><i class="fa-solid fa-download"></i> Xuất File Máy</button>
             <button class="btn-action" onclick="document.getElementById('importFileInput').click()"><i class="fa-solid fa-upload"></i> Nhập File</button>
@@ -992,7 +991,7 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
         function initTables() {
             createSquadRows('group1Body', 'g1', 10);
             createSquadRows('group2Body', 'g2', 10);
-            createReserveRows('reserveBody');
+            createReserveRows('reserveBody', 10); // Thay đổi thành 10 hàng cho phần Dự bị
         }
 
         function createSquadRows(containerId, prefix, totalCols) {
@@ -1020,10 +1019,11 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
             }
         }
 
-        function createReserveRows(containerId) {
+        // Cập nhật hàm tạo 10 hàng cho Dự Bị (2 cột)
+        function createReserveRows(containerId, totalRows) {
             const tbody = document.getElementById(containerId);
             tbody.innerHTML = '';
-            for (let row = 1; row <= 4; row++) {
+            for (let row = 1; row <= totalRows; row++) {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>
@@ -1085,8 +1085,8 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
             if(document.getElementById(sourceColKey)) document.getElementById(sourceColKey).value = columnNames[sourceColKey];
             if(document.getElementById(targetColKey)) document.getElementById(targetColKey).value = columnNames[targetColKey];
 
-            const sourceMaxRows = (sourceGroup === 'res') ? 4 : 6;
-            const targetMaxRows = (targetGroupPrefix === 'res') ? 4 : 6;
+            const sourceMaxRows = (sourceGroup === 'res') ? 10 : 6; // Cập nhật số hàng tối đa của dự bị là 10
+            const targetMaxRows = (targetGroupPrefix === 'res') ? 10 : 6;
             const maxRows = Math.max(sourceMaxRows, targetMaxRows);
 
             for (let row = 1; row <= maxRows; row++) {
@@ -1158,7 +1158,6 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                 } else {
                     delete squadSelections[sourceSlotId];
                 }
-            } else {
             }
 
             squadSelections[slotId] = draggedMemberName;
@@ -1269,11 +1268,13 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
             const counts = {};
             const group1Counts = {};
             const group2Counts = {};
+            const reserveCounts = {}; // Thêm thống kê cho dự bị nếu cần
 
             Object.keys(classNames).forEach(key => {
                 counts[key] = 0;
                 group1Counts[key] = 0;
                 group2Counts[key] = 0;
+                reserveCounts[key] = 0;
             });
 
             members.forEach(m => {
@@ -1291,6 +1292,8 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                     group1Counts[classKey]++;
                 } else if (slotId.startsWith('g2_')) {
                     group2Counts[classKey]++;
+                } else if (slotId.startsWith('res_')) {
+                    reserveCounts[classKey]++;
                 }
             });
 
@@ -1298,14 +1301,14 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
             container.innerHTML = '';
 
             Object.keys(classNames).forEach(classKey => {
-                const assignedTotal = group1Counts[classKey] + group2Counts[classKey];
+                const assignedTotal = group1Counts[classKey] + group2Counts[classKey] + reserveCounts[classKey];
                 const total = counts[classKey];
 
                 const item = document.createElement('div');
                 item.className = `stat-item class-${classKey}`;
                 item.innerHTML = `
                     <span>${getIconHTML(classKey)} ${classNames[classKey]}</span>
-                    <span class="stat-count" title="Đoàn 1: ${group1Counts[classKey]} | Đoàn 2: ${group2Counts[classKey]} | Tổng: ${total}">
+                    <span class="stat-count" title="Đoàn 1: ${group1Counts[classKey]} | Đoàn 2: ${group2Counts[classKey]} | Dự bị: ${reserveCounts[classKey]} | Tổng: ${total}">
                         ${group1Counts[classKey]}|${group2Counts[classKey]} (${assignedTotal}/${total})
                     </span>
                 `;
@@ -1394,7 +1397,7 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                     if (parsed.members && parsed.notes) {
                         members = parsed.members;
                         notes = parsed.notes;
-                        squads = parsed.squads || {};
+                        squadSelections = parsed.squads || {};
                         commanders = parsed.commanders || { c1: "Đạo Đạo", c2: "Minh Sói Trần" };
                         subHeaders = parsed.subHeaders || { sub1: "Đội hình 10 PT tham chiến", sub2: "Đội hình 10 PT tham chiến" };
                         bigNoteContent = parsed.bigNoteContent || "";
