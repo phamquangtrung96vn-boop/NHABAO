@@ -315,8 +315,11 @@
 
                 if (data && data.content) {
                     if (data.content.members) {
-                        // Lọc bỏ ngay các thành viên thuộc hệ phái 'Khac' hoặc không có classType
+                        // Lọc bỏ phái 'Khac'
                         membersList = data.content.members.filter(m => m.classType && m.classType !== 'Khac');
+                        
+                        // SẮP XẾP CÁC THÀNH VIÊN CÙNG HỆ PHÁI ĐỨNG CẠNH NHAU
+                        membersList.sort((a, b) => a.classType.localeCompare(b.classType));
                     }
                     if (data.content.gaCheckedState) {
                         checkedState = data.content.gaCheckedState;
