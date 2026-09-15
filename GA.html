@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh Sách GA - Nghịch Thủy Hàn</title>
+    <title>Quản Lý Danh Sách GA & Thành Viên Bang</title>
     
     <!-- FontAwesome Icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -26,16 +26,16 @@
         body {
             background-color: var(--bg-main);
             color: var(--text-color);
-            padding: 20px;
+            padding: 15px;
         }
 
         .header-banner {
-            background: linear-gradient(90deg, #161b22, #21262d);
-            padding: 15px 20px;
-            font-size: 18px;
+            background: #161b22;
+            padding: 12px 20px;
+            font-size: 16px;
             font-weight: bold;
             border-radius: 6px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             border: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
@@ -58,55 +58,151 @@
         }
         .btn-back:hover { background: #30363d; color: #fff; }
 
-        .container {
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 15px;
+            height: calc(100vh - 90px);
+        }
+
+        .panel {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 20px;
-        }
-
-        h2 {
-            color: #58a6ff;
-            margin-bottom: 15px;
-            font-size: 16px;
-            text-transform: uppercase;
-        }
-
-        /* Danh sách hiển thị thành viên dạng lưới */
-        .member-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 10px;
-        }
-
-        .member-badge {
+            padding: 15px;
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-title {
+            color: #58a6ff;
+            margin-bottom: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            display: flex;
             justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            color: #fff;
             padding: 8px 12px;
             border-radius: 4px;
+            margin-bottom: 10px;
             font-size: 13px;
-            font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .search-input:focus { outline: none; border-color: #58a6ff; }
+
+        .member-scroll-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 4px;
         }
 
-        .member-badge span {
+        .member-card {
+            background: #21262d;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .member-info-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 120px;
+        }
+
+        .member-name {
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .member-class-tag {
+            font-size: 11px;
+            padding: 1px 6px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            width: fit-content;
+            font-weight: 600;
+        }
+
+        .member-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+            max-width: 280px;
+            justify-content: flex-end;
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 4px;
+            font-size: 11px;
+            align-items: center;
+            cursor: pointer;
+            color: #c9d1d9;
+        }
+
+        .checkbox-group input {
+            accent-color: #238636;
+            cursor: pointer;
+            width: 14px;
+            height: 14px;
+        }
+
+        .right-toolbar {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-mini {
+            background: #21262d;
+            color: #c9d1d9;
+            border: 1px solid var(--border-color);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
             display: flex;
             align-items: center;
+            gap: 4px;
+        }
+        .btn-mini.danger { color: #f85149; border-color: rgba(248,81,73,0.4); }
+        .btn-mini:hover { background: #30363d; }
+
+        .history-content {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
             gap: 8px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
         }
 
-        .empty-notice {
+        .empty-history {
             color: #8b949e;
             font-style: italic;
             text-align: center;
-            padding: 20px;
+            margin-top: 40px;
+            font-size: 13px;
         }
 
-        /* Định nghĩa màu sắc các hệ phái giống hệt trang Index */
+        /* Màu sắc hệ phái chuẩn */
         .class-ThietY    { background-color: #facc15 !important; color: #111; }
         .class-HuyetHa   { background-color: #dc2626 !important; color: #fff; }
         .class-ToaiMong  { background-color: #7dd3fc !important; color: #111; }
@@ -119,8 +215,8 @@
         .class-Khac      { background-color: #374151 !important; color: #fff; }
 
         .custom-spear-icon {
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
             display: inline-block;
             vertical-align: middle;
             background-color: currentColor;
@@ -132,14 +228,34 @@
 <body>
 
     <div class="header-banner">
-        <span><i class="fa-solid fa-bolt"></i> TRANG GA - DANH SÁCH THÀNH VIÊN BANG</span>
-        <a href="index.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Quay lại Sơ Đồ</a>
+        <span><i class="fa-solid fa-users-gear"></i> QUẢN LÝ DANH SÁCH GA & THÀNH VIÊN BANG</span>
+        <a href="index.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Về Sơ Đồ</a>
     </div>
 
-    <div class="container">
-        <h2>Danh Sách Thành Viên (Đồng Bộ Từ Trang Chủ)</h2>
-        <div class="member-grid" id="gaMemberList">
-            <!-- Dữ liệu thành viên sẽ được nạp tự động vào đây -->
+    <div class="main-layout">
+        <!-- CỘT TRÁI: THÀNH VIÊN BANG -->
+        <div class="panel">
+            <div class="panel-title">
+                <span id="leftTitle">THÀNH VIÊN BANG ( 0 )</span>
+            </div>
+            <input type="text" class="search-input" id="searchInput" placeholder="Tìm kiếm thành viên..." oninput="filterMembers()">
+            <div class="member-scroll-list" id="leftMemberList">
+                <div class="empty-history">Đang đồng bộ dữ liệu từ trang Index...</div>
+            </div>
+        </div>
+
+        <!-- CỘT PHẢI: LỊCH SỬ / TRÚNG THƯỞNG -->
+        <div class="panel">
+            <div class="panel-title">
+                <span id="rightTitle">LỊCH SỬ TRÚNG THƯỞNG ( 0 )</span>
+                <div class="right-toolbar">
+                    <button class="btn-mini" onclick="exportExcel()"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button>
+                    <button class="btn-mini danger" onclick="clearHistory()"><i class="fa-solid fa-trash"></i> Xóa Hết</button>
+                </div>
+            </div>
+            <div class="history-content" id="rightHistoryList">
+                <div class="empty-history">Chưa có dữ liệu. Hãy tích chọn ở bên trái.</div>
+            </div>
         </div>
     </div>
 
@@ -177,13 +293,15 @@
             return `<i class="${classIcons[classType] || 'fa-solid fa-user'}"></i>`;
         }
 
-        async function loadGAMembers() {
-            const container = document.getElementById('gaMemberList');
-            container.innerHTML = '<div class="empty-notice">Đang đồng bộ dữ liệu thành viên...</div>';
+        let membersList = [];
+        let checkedState = {}; 
 
-            let membersList = [];
+        async function initApp() {
+            const savedState = localStorage.getItem('ga_scrim_state_v2');
+            if (savedState) {
+                try { checkedState = JSON.parse(savedState); } catch(e) {}
+            }
 
-            // Ưu tiên đọc từ Supabase nếu trang chủ đã lưu cấu hình lên cloud
             try {
                 const SUPABASE_URL = 'https://shblqenkrzjuklzrvoie.supabase.co';
                 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYmxxZW5rcnpqdWtsenJ2b2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NzA4MjMsImV4cCI6MjEwNDU0NjgyM30.I8bsjcbR3dNYm99kHan8mLj9X7jcNuPEzFQTk9jUups';
@@ -199,39 +317,138 @@
                     membersList = data.content.members;
                 }
             } catch (err) {
-                console.log("Không tải được trực tiếp từ Supabase, chuyển sang nguồn khác nếu có.");
+                console.log("Lỗi đồng bộ cloud:", err);
             }
 
-            renderGAMembers(membersList);
+            renderAll();
         }
 
-        function renderGAMembers(list) {
-            const container = document.getElementById('gaMemberList');
+        function renderAll() {
+            renderLeftList(membersList);
+            renderRightHistory();
+        }
+
+        const matchTypes = [
+            { key: 'scrim1', label: 'Scrim 1' },
+            { key: 'scrim2', label: 'Scrim 2' },
+            { key: 'scrim3', label: 'Scrim 3' },
+            { key: 'scrim4', label: 'Scrim 4' },
+            { key: 'scrim5', label: 'Scrim 5' },
+            { key: 'bc', label: 'BC' }
+        ];
+
+        function renderLeftList(list) {
+            const container = document.getElementById('leftMemberList');
             container.innerHTML = '';
+            document.getElementById('leftTitle').innerText = `THÀNH VIÊN BANG ( ${membersList.length} )`;
 
             if (!list || list.length === 0) {
-                container.innerHTML = '<div class="empty-notice">Chưa có thành viên nào được cập nhật.</div>';
+                container.innerHTML = '<div class="empty-history">Không tìm thấy thành viên nào từ trang Index.</div>';
                 return;
             }
 
-            // Sắp xếp theo hệ phái cho gọn gàng
-            list.sort((a, b) => a.name.localeCompare(b.name));
-
             list.forEach(m => {
-                const badge = document.createElement('div');
-                badge.className = `member-badge class-${m.classType || 'Khac'}`;
-                badge.innerHTML = `
-                    <span>${getIconHTML(m.classType)} ${m.name}</span>
-                    <span style="font-size: 10px; opacity: 0.8;">[${classNamesMap[m.classType] || 'Khác'}]</span>
+                const classType = m.classType || 'Khac';
+                const name = m.name;
+                if (!checkedState[name]) checkedState[name] = {};
+
+                let checkboxesHTML = '';
+                matchTypes.forEach(type => {
+                    const isChecked = !!checkedState[name][type.key];
+                    checkboxesHTML += `
+                        <label class="checkbox-group">
+                            <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleScrim('${name}', '${type.key}', this.checked)"> ${type.label}
+                        </label>
+                    `;
+                });
+
+                const card = document.createElement('div');
+                card.className = 'member-card';
+                card.innerHTML = `
+                    <div class="member-info-left">
+                        <span class="member-name">${name}</span>
+                        <span class="member-class-tag class-${classType}">
+                            ${getIconHTML(classType)} ${classNamesMap[classType] || 'Khác'}
+                        </span>
+                    </div>
+                    <div class="member-actions">
+                        ${checkboxesHTML}
+                    </div>
                 `;
-                container.appendChild(badge);
+                container.appendChild(card);
             });
         }
 
-        // Tải thư viện supabase client script động để hỗ trợ kết nối cloud liền mạch
+        function filterMembers() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = membersList.filter(m => m.name.toLowerCase().includes(keyword));
+            renderLeftList(filtered);
+        }
+
+        function toggleScrim(name, scrimType, isChecked) {
+            if (!checkedState[name]) {
+                checkedState[name] = {};
+            }
+            checkedState[name][scrimType] = isChecked;
+            
+            localStorage.setItem('ga_scrim_state_v2', JSON.stringify(checkedState));
+            renderRightHistory();
+        }
+
+        function renderRightHistory() {
+            const container = document.getElementById('rightHistoryList');
+            container.innerHTML = '';
+
+            let historyItems = [];
+            membersList.forEach(m => {
+                const state = checkedState[m.name];
+                if (state) {
+                    matchTypes.forEach(type => {
+                        if (state[type.key]) {
+                            historyItems.push({ name: m.name, classType: m.classType, type: type.label });
+                        }
+                    });
+                }
+            });
+
+            document.getElementById('rightTitle').innerText = `LỊCH SỬ TRÚNG THƯỞNG ( ${historyItems.length} )`;
+
+            if (historyItems.length === 0) {
+                container.innerHTML = '<div class="empty-history">Chưa có dữ liệu. Hãy tích chọn ở bên trái.</div>';
+                return;
+            }
+
+            historyItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'member-card';
+                card.innerHTML = `
+                    <div class="member-info-left">
+                        <span class="member-name">${item.name}</span>
+                        <span class="member-class-tag class-${item.classType || 'Khac'}">
+                            ${getIconHTML(item.classType)} ${classNamesMap[item.classType] || 'Khác'}
+                        </span>
+                    </div>
+                    <span style="font-size: 12px; color: #58a6ff; font-weight: bold;">[${item.type}]</span>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function clearHistory() {
+            if (confirm("Bạn có chắc chắn muốn xóa hết các tích chọn lịch sử không?")) {
+                checkedState = {};
+                localStorage.removeItem('ga_scrim_state_v2');
+                renderAll();
+            }
+        }
+
+        function exportExcel() {
+            alert("Tính năng xuất Excel đang được tích hợp!");
+        }
+
         const script = document.createElement('script');
         script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-        script.onload = loadGAMembers;
+        script.onload = initApp;
         document.head.appendChild(script);
     </script>
 </body>
