@@ -427,6 +427,14 @@
         .sub-table td { padding: 2px; height: 34px; }
         .squad-table td.stt { width: 3%; background: #0d1117; color: #6e7681; font-size: 12px; font-weight: bold; }
 
+        /* CSS tạo khoảng cách tách biệt giữa hàng 6 và 2 hàng dưới */
+        .squad-table tr.separator-row td {
+            border-top: 4px solid #388bfd;
+            background: rgba(56, 139, 253, 0.05);
+            height: 8px !important;
+            padding: 0 !important;
+        }
+
         .drop-zone {
             width: 100%;
             height: 100%;
@@ -991,13 +999,51 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
         function initTables() {
             createSquadRows('group1Body', 'g1', 10);
             createSquadRows('group2Body', 'g2', 10);
-            createReserveRows('reserveBody', 10); // Thay đổi thành 10 hàng cho phần Dự bị
+            createReserveRows('reserveBody', 10);
         }
 
+        // Cập nhật hàm tạo 8 hàng (6 hàng trên + dòng phân cách + 2 hàng dưới)
         function createSquadRows(containerId, prefix, totalCols) {
             const tbody = document.getElementById(containerId);
             tbody.innerHTML = '';
+            
+            // 6 hàng đầu tiên
             for (let row = 1; row <= 6; row++) {
+                const tr = document.createElement('tr');
+                const tdStt = document.createElement('td');
+                tdStt.className = 'stt';
+                tdStt.innerText = row;
+                tr.appendChild(tdStt);
+
+                for (let col = 1; col <= totalCols; col++) {
+                    const td = document.createElement('td');
+                    const slotId = `${prefix}_r${row}_c${col}`;
+                    td.innerHTML = `
+                        <div class="drop-zone" id="zone_${slotId}" 
+                             ondragover="handleDragOver(event)" 
+                             ondragleave="handleDragLeave(event)" 
+                             ondrop="handleDropSlot(event, '${slotId}')">
+                        </div>`;
+                    tr.appendChild(td);
+                }
+                tbody.appendChild(tr);
+            }
+
+            // Dòng phân cách giữa 6 hàng trên và 2 hàng dưới
+            const sepTr = document.createElement('tr');
+            sepTr.className = 'separator-row';
+            const sepStt = document.createElement('td');
+            sepStt.className = 'stt';
+            sepStt.innerHTML = '';
+            sepTr.appendChild(sepStt);
+            for (let col = 1; col <= totalCols; col++) {
+                const sepTd = document.createElement('td');
+                sepTr.appendChild(sepTd);
+            }
+            tbody.appendChild(sepTr);
+
+            // 2 hàng tiếp theo (hàng 7 và hàng 8)
+            for (let row = 7; row <= 8; row++) {
                 const tr = document.createElement('tr');
                 const tdStt = document.createElement('td');
                 tdStt.className = 'stt';
@@ -1019,7 +1065,6 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
             }
         }
 
-        // Cập nhật hàm tạo 10 hàng cho Dự Bị (2 cột)
         function createReserveRows(containerId, totalRows) {
             const tbody = document.getElementById(containerId);
             tbody.innerHTML = '';
@@ -1085,8 +1130,8 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
             if(document.getElementById(sourceColKey)) document.getElementById(sourceColKey).value = columnNames[sourceColKey];
             if(document.getElementById(targetColKey)) document.getElementById(targetColKey).value = columnNames[targetColKey];
 
-            const sourceMaxRows = (sourceGroup === 'res') ? 10 : 6; // Cập nhật số hàng tối đa của dự bị là 10
-            const targetMaxRows = (targetGroupPrefix === 'res') ? 10 : 6;
+            const sourceMaxRows = (sourceGroup === 'res') ? 10 : 8; 
+            const targetMaxRows = (targetGroupPrefix === 'res') ? 10 : 8;
             const maxRows = Math.max(sourceMaxRows, targetMaxRows);
 
             for (let row = 1; row <= maxRows; row++) {
@@ -1268,7 +1313,7 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
             const counts = {};
             const group1Counts = {};
             const group2Counts = {};
-            const reserveCounts = {}; // Thêm thống kê cho dự bị nếu cần
+            const reserveCounts = {}; 
 
             Object.keys(classNames).forEach(key => {
                 counts[key] = 0;
@@ -1478,7 +1523,7 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                     for (const webhookUrl of webhookUrls) {
                         const formData = new FormData();
                         formData.append("content", customText);
-                        formData.append("file", blob, `SoDoBangChien_${Date.now()}.png`);
+                        formData.append("file", blob, `Doihinh_BangChien_${Date.now()}.png`);
 
                         try {
                             const response = await fetch(webhookUrl, {
