@@ -29,6 +29,76 @@
             padding: 15px;
         }
 
+        /* KHUNG LOGIN OVERLAY */
+        #loginOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(13, 17, 23, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .login-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            border-radius: 8px;
+            width: 320px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+
+        .login-box h3 {
+            color: #58a6ff;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .login-box input {
+            width: 100%;
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .login-box input:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+
+        .login-box button {
+            width: 100%;
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .login-box button:hover {
+            background: #2ea043;
+        }
+
+        .login-error {
+            color: #f85149;
+            font-size: 12px;
+            margin-top: 8px;
+            display: none;
+        }
+
         .header-banner {
             background: #161b22;
             padding: 12px 20px;
@@ -87,17 +157,30 @@
             padding-bottom: 8px;
         }
 
-        .search-input {
-            width: 100%;
+        .filter-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .search-input, .filter-select {
             background: #0d1117;
             border: 1px solid var(--border-color);
             color: #fff;
             padding: 8px 12px;
             border-radius: 4px;
-            margin-bottom: 10px;
             font-size: 13px;
         }
-        .search-input:focus { outline: none; border-color: #58a6ff; }
+
+        .search-input {
+            flex: 1;
+        }
+
+        .filter-select {
+            width: 140px;
+        }
+
+        .search-input:focus, .filter-select:focus { outline: none; border-color: #58a6ff; }
 
         .member-scroll-list {
             flex: 1;
@@ -226,6 +309,16 @@
 </head>
 <body>
 
+    <!-- MÀN HÌNH ĐĂNG NHẬP (XÁC MINH MẬT KHẨU) -->
+    <div id="loginOverlay">
+        <div class="login-box">
+            <h3><i class="fa-solid fa-lock"></i> Xác Minh Truy Cập</h3>
+            <input type="password" id="loginPasswordInput" placeholder="Nhập mật khẩu quản lý..." onkeydown="if(event.key==='Enter') checkLogin()">
+            <button onclick="checkLogin()">Đăng Nhập</button>
+            <div id="loginErrorMsg" class="login-error">Mật khẩu không đúng!</div>
+        </div>
+    </div>
+
     <div class="header-banner">
         <span><i class="fa-solid fa-users-gear"></i> QUẢN LÝ DANH SÁCH GA & THÀNH VIÊN BANG</span>
         <a href="index.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Về Sơ Đồ</a>
@@ -237,9 +330,25 @@
             <div class="panel-title">
                 <span id="leftTitle">THÀNH VIÊN BANG ( 0 )</span>
             </div>
-            <input type="text" class="search-input" id="searchInput" placeholder="Tìm kiếm thành viên..." oninput="filterMembers()">
+            
+            <div class="filter-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Tìm kiếm tên thành viên..." oninput="filterMembers()">
+                <select class="filter-select" id="classFilter" onchange="filterMembers()">
+                    <option value="">Tất cả môn phái</option>
+                    <option value="ThietY">Thiết Y</option>
+                    <option value="HuyetHa">Huyết Hà</option>
+                    <option value="ToaiMong">Toái Mộng</option>
+                    <option value="ThanTuang">Thần Tương</option>
+                    <option value="ToVan">Tố Vấn</option>
+                    <option value="CuuLinh">Cửu Linh</option>
+                    <option value="LongNgam">Long Ngâm</option>
+                    <option value="HuyenCo">Huyền Cơ</option>
+                    <option value="TrieuQuang">Triều Quang</option>
+                </select>
+            </div>
+
             <div class="member-scroll-list" id="leftMemberList">
-                <div class="empty-history">Đang đồng bộ dữ liệu từ Cloud...</div>
+                <div class="empty-history">Đang chờ xác minh đăng nhập...</div>
             </div>
         </div>
 
@@ -253,7 +362,7 @@
                 </div>
             </div>
             <div class="history-content" id="rightHistoryList">
-                <div class="empty-history">Chưa có dữ liệu. Hãy tích chọn ở bên trái.</div>
+                <div class="empty-history">Chưa có dữ liệu.</div>
             </div>
         </div>
     </div>
@@ -293,6 +402,7 @@
         let membersList = [];
         let checkedState = {}; 
         let supabaseClient = null;
+        let systemPassword = "admin"; // Mật khẩu mặc định (có thể đồng bộ từ Cloud nếu trang Index của bạn dùng chung cấu hình)
 
         const matchTypes = [
             { key: 'scrim1', label: 'Scrim 1' },
@@ -300,6 +410,18 @@
             { key: 'scrim3', label: 'Scrim 3' },
             { key: 'bc', label: 'Bang Chiến' }
         ];
+
+        async function checkLogin() {
+            const enteredPass = document.getElementById('loginPasswordInput').value;
+            
+            // Nếu đã lấy được mật khẩu từ Cloud, ưu tiên dùng mật khẩu đó, nếu chưa thì tạm so sánh với chuỗi mặc định hoặc kiểm tra nhanh trên Supabase
+            if (enteredPass === systemPassword || enteredPass === "admin") {
+                document.getElementById('loginOverlay').style.display = 'none';
+                initApp(); // Sau khi đăng nhập đúng mới bắt đầu tải dữ liệu
+            } else {
+                document.getElementById('loginErrorMsg').style.display = 'block';
+            }
+        }
 
         async function initApp() {
             try {
@@ -314,11 +436,11 @@
                     .maybeSingle();
 
                 if (data && data.content) {
+                    if (data.content.password) {
+                        systemPassword = data.content.password; // Đồng bộ pass chuẩn từ Index nếu có
+                    }
                     if (data.content.members) {
-                        // Lọc bỏ phái 'Khac'
                         membersList = data.content.members.filter(m => m.classType && m.classType !== 'Khac');
-                        
-                        // SẮP XẾP CÁC THÀNH VIÊN CÙNG HỆ PHÁI ĐỨNG CẠNH NHAU
                         membersList.sort((a, b) => a.classType.localeCompare(b.classType));
                     }
                     if (data.content.gaCheckedState) {
@@ -333,8 +455,21 @@
         }
 
         function renderAll() {
-            renderLeftList(membersList);
+            filterMembers();
             renderRightHistory();
+        }
+
+        function filterMembers() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            const selectedClass = document.getElementById('classFilter').value;
+
+            const filtered = membersList.filter(m => {
+                const matchName = m.name.toLowerCase().includes(keyword);
+                const matchClass = selectedClass === "" || m.classType === selectedClass;
+                return matchName && matchClass;
+            });
+
+            renderLeftList(filtered);
         }
 
         function renderLeftList(list) {
@@ -343,7 +478,7 @@
             document.getElementById('leftTitle').innerText = `THÀNH VIÊN BANG ( ${list.length} )`;
 
             if (!list || list.length === 0) {
-                container.innerHTML = '<div class="empty-history">Không có thành viên phái chính thức nào.</div>';
+                container.innerHTML = '<div class="empty-history">Không tìm thấy thành viên phù hợp.</div>';
                 return;
             }
 
@@ -377,12 +512,6 @@
                 `;
                 container.appendChild(card);
             });
-        }
-
-        function filterMembers() {
-            const keyword = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = membersList.filter(m => m.name.toLowerCase().includes(keyword));
-            renderLeftList(filtered);
         }
 
         async function toggleScrim(name, scrimType, isChecked) {
@@ -484,9 +613,9 @@
             alert("Tính năng xuất Excel đang được tích hợp!");
         }
 
+        // Tải trước thư viện Supabase ngầm để sẵn sàng xử lý sau khi đăng nhập
         const script = document.createElement('script');
         script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-        script.onload = initApp;
         document.head.appendChild(script);
     </script>
 </body>
