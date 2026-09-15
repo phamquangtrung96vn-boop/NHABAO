@@ -379,7 +379,7 @@
         .squad-table, .sub-table {
             width: 100%;
             border-collapse: collapse;
-            table-layout: fixed; /* Giúp chia đều kích thước các cột không bị lệch méo */
+            table-layout: fixed;
         }
 
         .squad-table th, .sub-table th {
@@ -422,7 +422,6 @@
         }
         .sub-table th input.col-name-input { font-size: 11px; }
 
-        /* Cột Extra tiêu đề */
         .squad-table th.extra-col-header input.col-name-input {
             color: #e3b341;
         }
@@ -437,7 +436,6 @@
         .sub-table td { padding: 2px; height: 34px; }
         .squad-table td.stt { width: 35px !important; background: #0d1117; color: #6e7681; font-size: 11px; font-weight: bold; }
 
-        /* CSS phân cách giữa hàng 6 và 2 hàng dưới */
         .squad-table tr.separator-row td {
             border-top: 4px solid #388bfd;
             background: rgba(56, 139, 253, 0.05);
@@ -787,6 +785,14 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                 <div class="stats-box">
                     <h4><i class="fa-solid fa-chart-pie"></i> THỐNG KÊ MÔN PHÁI</h4>
                     <div class="stats-grid" id="statsGridContainer"></div>
+                </div>
+
+                <!-- THÊM KHUNG TỔNG SỐ NGOÀI PHÁI KHÁC Ở VỊ TRÍ BẠN YÊU CẦU -->
+                <div class="stats-box" style="margin-top: 4px;">
+                    <h4><i class="fa-solid fa-users"></i> TỔNG SỐ (NGOÀI PHÁI KHÁC)</h4>
+                    <div style="text-align: center; padding: 5px; font-size: 13px; font-weight: bold; color: #58a6ff;" id="nonKhacStatsCount">
+                        0 / 80
+                    </div>
                 </div>
             </div>
         </div>
@@ -1394,9 +1400,14 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
             const container = document.getElementById('statsGridContainer');
             container.innerHTML = '';
 
+            let nonKhacTotal = 0;
             Object.keys(classNames).forEach(classKey => {
                 const assignedTotal = group1Counts[classKey] + group2Counts[classKey] + reserveCounts[classKey];
                 const total = counts[classKey];
+
+                if (classKey !== 'Khac') {
+                    nonKhacTotal += total; // Tính tổng số lượng thành viên hiện có ngoài phái Khác
+                }
 
                 const item = document.createElement('div');
                 item.className = `stat-item class-${classKey}`;
@@ -1408,6 +1419,9 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                 `;
                 container.appendChild(item);
             });
+
+            // Cập nhật giá trị vào khung tổng số ngoài phái Khác (/80)
+            document.getElementById('nonKhacStatsCount').innerText = `${nonKhacTotal} / 80`;
         }
 
         function addMember() {
