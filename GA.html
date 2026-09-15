@@ -240,7 +240,7 @@
             </div>
             <input type="text" class="search-input" id="searchInput" placeholder="Tìm kiếm thành viên..." oninput="filterMembers()">
             <div class="member-scroll-list" id="leftMemberList">
-                <div class="empty-history">Đang đồng bộ dữ liệu từ trang Index...</div>
+                <div class="empty-history">Đang đồng bộ dữ liệu từ Cloud...</div>
             </div>
         </div>
 
@@ -295,17 +295,22 @@
 
         let membersList = [];
         let checkedState = {}; 
+        let supabaseClient = null;
+
+        const matchTypes = [
+            { key: 'scrim1', label: 'Scrim 1' },
+            { key: 'scrim2', label: 'Scrim 2' },
+            { key: 'scrim3', label: 'Scrim 3' },
+            { key: 'scrim4', label: 'Scrim 4' },
+            { key: 'scrim5', label: 'Scrim 5' },
+            { key: 'bc', label: 'BC' }
+        ];
 
         async function initApp() {
-            const savedState = localStorage.getItem('ga_scrim_state_v2');
-            if (savedState) {
-                try { checkedState = JSON.parse(savedState); } catch(e) {}
-            }
-
             try {
                 const SUPABASE_URL = 'https://shblqenkrzjuklzrvoie.supabase.co';
                 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYmxxZW5rcnpqdWtsenJ2b2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NzA4MjMsImV4cCI6MjEwNDU0NjgyM30.I8bsjcbR3dNYm99kHan8mLj9X7jcNuPEzFQTk9jUups';
-                const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
                 let { data, error } = await supabaseClient
                     .from('squad_data')
@@ -313,8 +318,13 @@
                     .eq('id', 'main_config')
                     .maybeSingle();
 
-                if (data && data.content && data.content.members) {
-                    membersList = data.content.members;
+                if (data && data.content) {
+                    if (data.content.members) {
+                        membersList = data.content.members;
+                    }
+                    if (data.content.gaCheckedState) {
+                        checkedState = data.content.gaCheckedState;
+                    }
                 }
             } catch (err) {
                 console.log("Lỗi đồng bộ cloud:", err);
@@ -327,15 +337,6 @@
             renderLeftList(membersList);
             renderRightHistory();
         }
-
-        const matchTypes = [
-            { key: 'scrim1', label: 'Scrim 1' },
-            { key: 'scrim2', label: 'Scrim 2' },
-            { key: 'scrim3', label: 'Scrim 3' },
-            { key: 'scrim4', label: 'Scrim 4' },
-            { key: 'scrim5', label: 'Scrim 5' },
-            { key: 'bc', label: 'BC' }
-        ];
 
         function renderLeftList(list) {
             const container = document.getElementById('leftMemberList');
@@ -385,14 +386,35 @@
             renderLeftList(filtered);
         }
 
-        function toggleScrim(name, scrimType, isChecked) {
+        async function toggleScrim(name, scrimType, isChecked) {
             if (!checkedState[name]) {
                 checkedState[name] = {};
             }
             checkedState[name][scrimType] = isChecked;
             
-            localStorage.setItem('ga_scrim_state_v2', JSON.stringify(checkedState));
             renderRightHistory();
+
+            // Lưu trực tiếp lên Cloud ngay khi tích chọn
+            if (supabaseClient) {
+                try {
+                    // Lấy dữ liệu hiện tại trên cloud để tránh ghi đè nhầm các cấu trúc khác
+                    let { data } = await supabaseClient
+                        .from('squad_data')
+                        .select('*')
+                        .eq('id', 'main_config')
+                        .maybeSingle();
+
+                    let currentContent = data && data.content ? data.content : {};
+                    currentContent.gaCheckedState = checkedState;
+                    currentContent.members = membersList;
+
+                    await supabaseClient
+                        .from('squad_data')
+                        .upsert({ id: 'main_config', content: currentContent });
+                } catch (err) {
+                    console.log("Lỗi lưu cloud:", err);
+                }
+            }
         }
 
         function renderRightHistory() {
@@ -434,11 +456,31 @@
             });
         }
 
-        function clearHistory() {
+        async function clearHistory() {
             if (confirm("Bạn có chắc chắn muốn xóa hết các tích chọn lịch sử không?")) {
                 checkedState = {};
-                localStorage.removeItem('ga_scrim_state_v2');
                 renderAll();
+
+                if (supabaseClient) {
+                    try {
+                        let { data } = await supabaseClient
+                            .from('squad_data')
+                            .select('*')
+                            .eq('id', 'main_config')
+                            .maybeSingle();
+
+                        let currentContent = data && data.content ? data.content : {};
+                        currentContent.gaCheckedState = checkedState;
+
+                        await supabaseClient
+                            .from('squad_data')
+                            .upsert({ id: 'main_config', content: currentContent });
+                        
+                        alert("🗑️ Đã xóa và cập nhật lên Cloud thành công!");
+                    } catch (err) {
+                        console.log("Lỗi xóa cloud:", err);
+                    }
+                }
             }
         }
 
