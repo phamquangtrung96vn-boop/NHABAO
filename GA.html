@@ -29,7 +29,7 @@
             padding: 15px;
         }
 
-        /* KHUNG LOGIN OVERLAY ĐỒNG BỘ DRAGON'S LEGACY */
+        /* KHUNG LOGIN OVERLAY (CHỈ HIỆN KHI CHƯA ĐĂNG NHẬP Ở TRANG CHÍNH) */
         #loginOverlay {
             position: fixed;
             top: 0;
@@ -41,7 +41,7 @@
                               url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=1920&q=80');
             background-size: cover;
             background-position: center;
-            display: flex;
+            display: none; /* Mặc định ẩn, sẽ check bằng JS */
             justify-content: center;
             align-items: center;
             z-index: 9999;
@@ -360,7 +360,7 @@
 </head>
 <body>
 
-    <!-- MÀN HÌNH ĐĂNG NHẬP (ĐỒNG BỘ TRANG LOGIN MẪU) -->
+    <!-- MÀN HÌNH ĐĂNG NHẬP DỰ PHÒNG -->
     <div id="loginOverlay">
         <div class="login-container">
             <div class="badge-image-container">
@@ -418,7 +418,7 @@
             </div>
 
             <div class="member-scroll-list" id="leftMemberList">
-                <div class="empty-history">Đang chờ xác minh đăng nhập...</div>
+                <div class="empty-history">Đang đồng bộ dữ liệu từ Cloud...</div>
             </div>
         </div>
 
@@ -479,9 +479,21 @@
             { key: 'bc', label: 'Bang Chiến' }
         ];
 
+        // Tự động kiểm tra trạng thái đăng nhập ngay khi load trang
+        window.addEventListener('DOMContentLoaded', () => {
+            const isLoggedIn = sessionStorage.getItem("isLoggedIn");
+            if (isLoggedIn === "true") {
+                // Đã đăng nhập ở trang chính -> Ẩn khung login, chạy luôn app
+                document.getElementById('loginOverlay').style.display = 'none';
+                loadSupabaseAndInit();
+            } else {
+                // Chưa đăng nhập -> Hiện khung login dự phòng
+                document.getElementById('loginOverlay').style.display = 'flex';
+            }
+        });
+
         function handleLogin(event) {
             event.preventDefault();
-            
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value.trim();
 
@@ -489,11 +501,19 @@
             const correctPass = "Pk123456*";
 
             if (user === correctUser && pass === correctPass) {
+                sessionStorage.setItem("isLoggedIn", "true");
                 document.getElementById('loginOverlay').style.display = 'none';
-                initApp();
+                loadSupabaseAndInit();
             } else {
                 document.getElementById('errorMsg').innerText = "Sai tài khoản hoặc mật khẩu!";
             }
+        }
+
+        function loadSupabaseAndInit() {
+            const script = document.createElement('script');
+            script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+            script.onload = initApp;
+            document.head.appendChild(script);
         }
 
         async function initApp() {
@@ -682,11 +702,6 @@
         function exportExcel() {
             alert("Tính năng xuất Excel đang được tích hợp!");
         }
-
-        // Tải trước thư viện Supabase ngầm
-        const script = document.createElement('script');
-        script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-        document.head.appendChild(script);
     </script>
 </body>
 </html>
