@@ -3,14 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Danh Sách GA & Thành Viên Bang - Nghịch Thủy Hàn</title>
-
+    <title>Danh Sách GA - Nghịch Thủy Hàn</title>
+    
     <!-- FontAwesome Icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Supabase Library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- SheetJS (xlsx) để hỗ trợ xuất file Excel -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
     <style>
         :root {
@@ -33,265 +29,98 @@
             padding: 20px;
         }
 
-        .title-banner {
+        .header-banner {
             background: linear-gradient(90deg, #161b22, #21262d);
-            color: #f0f6fc;
-            padding: 12px 20px;
-            font-size: 20px;
+            padding: 15px 20px;
+            font-size: 18px;
             font-weight: bold;
-            letter-spacing: 1px;
             border-radius: 6px;
             margin-bottom: 20px;
             border: 1px solid var(--border-color);
-            text-transform: uppercase;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .banner-actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .back-btn, .btn-save-cloud {
+        .btn-back {
             background: #21262d;
             color: #c9d1d9;
             border: 1px solid var(--border-color);
             padding: 6px 12px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
             text-decoration: none;
+            font-size: 13px;
             display: flex;
             align-items: center;
             gap: 6px;
             transition: 0.2s;
         }
-        .back-btn:hover, .btn-save-cloud:hover { background: #30363d; color: #fff; }
-        
-        .btn-save-cloud {
-            background: #1f6feb;
-            color: #fff;
-            border-color: #388bfd;
-        }
-        .btn-save-cloud:hover {
-            background: #388bfd;
-        }
+        .btn-back:hover { background: #30363d; color: #fff; }
 
-        .main-container {
-            display: grid;
-            grid-template-columns: 1.1fr 0.9fr;
-            gap: 15px;
-        }
-
-        @media(max-width: 950px) {
-            .main-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .card {
+        .container {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 15px;
+            padding: 20px;
         }
 
-        .card h3 {
+        h2 {
             color: #58a6ff;
-            font-size: 14px;
+            margin-bottom: 15px;
+            font-size: 16px;
             text-transform: uppercase;
-            margin-bottom: 12px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 8px;
+        }
+
+        /* Danh sách hiển thị thành viên dạng lưới */
+        .member-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .member-badge {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .member-badge span {
             display: flex;
             align-items: center;
             gap: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            margin-bottom: 10px;
-        }
-
-        .input-group label {
-            font-size: 11px;
-            font-weight: bold;
+        .empty-notice {
             color: #8b949e;
-            text-transform: uppercase;
-        }
-
-        .input-group input, .input-group select {
-            padding: 7px 10px;
-            background: #0d1117;
-            border: 1px solid var(--border-color);
-            color: #fff;
-            border-radius: 4px;
-            outline: none;
-            font-size: 12px;
-        }
-
-        .btn-submit {
-            background: #238636;
-            color: white;
-            border: none;
-            padding: 9px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            width: 100%;
-            margin-top: 5px;
-            transition: 0.2s;
-        }
-        .btn-submit:hover { background: #2ea043; }
-
-        .list-header-wrapper {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .action-btns-group {
-            display: flex;
-            gap: 5px;
-        }
-
-        .btn-action-small {
-            background: #21262d;
-            border: 1px solid var(--border-color);
-            padding: 3px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 11px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            transition: 0.2s;
-        }
-
-        .btn-excel { color: #3fb950; }
-        .btn-excel:hover { background: #3fb950; color: #fff; border-color: #3fb950; }
-
-        .btn-clear-all { color: #f85149; }
-        .btn-clear-all:hover { background: #da3633; color: #fff; border-color: #da3633; }
-
-        .guild-list-container, .winner-list-container {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            max-height: 520px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-
-        .guild-item {
-            background: #0d1117;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 8px 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .guild-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            width: 100%;
-        }
-
-        .guild-name-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .guild-name { font-size: 12px; font-weight: bold; color: #f0f6fc; }
-        .guild-sub { font-size: 10px; color: #8b949e; display: flex; align-items: center; gap: 5px; }
-
-        .btn-delete {
-            background: transparent;
-            color: #8b949e;
-            border: none;
-            cursor: pointer;
-            font-size: 12px;
-            padding: 3px;
-            transition: 0.2s;
-        }
-        .btn-delete:hover { color: #f85149; }
-
-        .empty-msg {
+            font-style: italic;
             text-align: center;
-            color: #8b949e;
-            font-size: 12px;
-            padding: 15px;
+            padding: 20px;
         }
 
-        .scrim-checkboxes {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
-            font-size: 11px;
-            color: #8b949e;
-            margin-top: 4px;
-            background: #161b22;
-            padding: 4px 8px;
-            border-radius: 4px;
-            border: 1px solid var(--border-color);
-        }
-        .scrim-checkboxes label {
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 3px;
-            color: #c9d1d9;
-            font-weight: 600;
-        }
-        .scrim-checkboxes input {
-            cursor: pointer;
-            accent-color: #238636;
-        }
-
-        .winner-history-item {
-            background: #0d1117;
-            border: 1px solid #3fb950;
-            border-radius: 6px;
-            padding: 7px 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            animation: fadeIn 0.4s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Màu sắc môn phái */
-        .class-ThietY    { color: #facc15 !important; }
-        .class-HuyetHa   { color: #dc2626 !important; }
-        .class-ToaiMong  { color: #7dd3fc !important; }
-        .class-ThanTuang { color: #60a5fa !important; }
-        .class-ToVan     { color: #ec4899 !important; }
-        .class-CuuLinh   { color: #f472b6 !important; }
-        .class-LongNgam  { color: #4ade80 !important; }
-        .class-HuyenCo   { color: #94a3b8 !important; }
-        .class-TrieuQuang{ color: #38bdf8 !important; }
-        .class-Khac      { color: #9ca3af !important; }
+        /* Định nghĩa màu sắc các hệ phái giống hệt trang Index */
+        .class-ThietY    { background-color: #facc15 !important; color: #111; }
+        .class-HuyetHa   { background-color: #dc2626 !important; color: #fff; }
+        .class-ToaiMong  { background-color: #7dd3fc !important; color: #111; }
+        .class-ThanTuang { background-color: #1d4ed8 !important; color: #fff; }
+        .class-CuuLinh   { background-color: #831843 !important; color: #fff; }
+        .class-ToVan     { background-color: #ec4899 !important; color: #fff; }
+        .class-LongNgam  { background-color: #166534 !important; color: #fff; }
+        .class-HuyenCo   { background-color: #475569 !important; color: #fff; }
+        .class-TrieuQuang{ background-color: #0284c7 !important; color: #fff; }
+        .class-Khac      { background-color: #374151 !important; color: #fff; }
 
         .custom-spear-icon {
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 14px;
             display: inline-block;
             vertical-align: middle;
             background-color: currentColor;
@@ -302,86 +131,19 @@
 </head>
 <body>
 
-    <div class="title-banner">
-        <span><i class="fa-solid fa-users-rectangle"></i> Quản Lý Danh Sách GA & Thành Viên Bang</span>
-        <div class="banner-actions">
-            <button class="btn-save-cloud" id="saveCloudBtn" onclick="manualSaveToCloud()"><i class="fa-solid fa-cloud-arrow-up"></i> Lưu Lên Cloud</button>
-            <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Về Sơ Đồ</a>
-        </div>
+    <div class="header-banner">
+        <span><i class="fa-solid fa-bolt"></i> TRANG GA - DANH SÁCH THÀNH VIÊN BANG</span>
+        <a href="index.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Quay lại Sơ Đồ</a>
     </div>
 
-    <div class="main-container">
-        <!-- CỘT TRÁI: DANH SÁCH THÀNH VIÊN BANG & TICK CÁC BUỔI SCRIM -->
-        <div class="card">
-            <div class="list-header-wrapper">
-                <h3><i class="fa-solid fa-users" style="color: #58a6ff;"></i> Thành Viên Bang (<span id="guildTotalCount">0</span>)</h3>
-            </div>
-            
-            <div class="input-group" style="margin-bottom: 10px;">
-                <input type="text" id="guildSearchInput" placeholder="Tìm kiếm thành viên..." oninput="renderGuildMemberList()">
-            </div>
-
-            <div style="background: #0d1117; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 10px;">
-                <div class="input-group" style="margin-bottom: 6px;">
-                    <label>Thêm Thành Viên Mới:</label>
-                    <input type="text" id="memberNameInput" placeholder="Nhập tên ingame...">
-                </div>
-                <div class="input-group" style="margin-bottom: 6px;">
-                    <label>Hệ Phái:</label>
-                    <select id="memberClassInput">
-                        <option value="ThietY">Thiết Y</option>
-                        <option value="HuyetHa">Huyết Hà</option>
-                        <option value="ToaiMong">Toái Mộng</option>
-                        <option value="ThanTuang">Thần Tương</option>
-                        <option value="ToVan">Tố Vấn</option>
-                        <option value="CuuLinh">Cửu Linh</option>
-                        <option value="LongNgam">Long Ngâm</option>
-                        <option value="HuyenCo">Huyền Cơ</option>
-                        <option value="TrieuQuang">Triều Quang</option>
-                        <option value="Khac">Khác</option>
-                    </select>
-                </div>
-                <button class="btn-submit" onclick="addMember()" style="padding: 6px; font-size: 11px;"><i class="fa-solid fa-plus"></i> Thêm Vào Bang</button>
-            </div>
-
-            <div class="guild-list-container" id="guildListContainer">
-                <div class="empty-msg">Đang tải danh sách thành viên...</div>
-            </div>
-        </div>
-
-        <!-- CỘT PHẢI: BẢNG LỊCH SỬ THAM GIA SCRIM & NÚT XUẤT EXCEL -->
-        <div class="card">
-            <div class="list-header-wrapper">
-                <h3><i class="fa-solid fa-trophy" style="color: #3fb950;"></i> Lịch Sử Lịch Trình (<span id="winnerCount">0</span>)</h3>
-                <div class="action-btns-group">
-                    <button class="btn-action-small btn-excel" onclick="exportToExcel()" title="Xuất file Excel"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button>
-                    <button class="btn-action-small btn-clear-all" onclick="clearAllSelections()" title="Xóa tất cả lịch sử"><i class="fa-solid fa-trash-can"></i> Xóa Hết</button>
-                </div>
-            </div>
-            <div class="winner-list-container" id="winnerListContainer">
-                <div class="empty-msg">Chưa có dữ liệu. Hãy tích chọn Scrim ở bên trái.</div>
-            </div>
+    <div class="container">
+        <h2>Danh Sách Thành Viên (Đồng Bộ Từ Trang Chủ)</h2>
+        <div class="member-grid" id="gaMemberList">
+            <!-- Dữ liệu thành viên sẽ được nạp tự động vào đây -->
         </div>
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://shblqenkrzjuklzrvoie.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYmxxZW5rcnpqdWtsenJ2b2llIiwicm9sZSI6InFub24iLCJpYXQiOjE3ODg5NzA4MjMsImV4cCI6MjEwNDU0NjgyM30.I8bsjcbR3dNYm99kHan8mLj9X7jcNuPEzFQTk9jUups'; 
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        const classNames = {
-            ThietY: "Thiết Y",
-            HuyetHa: "Huyết Hà",
-            ToaiMong: "Toái Mộng",
-            ThanTuang: "Thần Tương",
-            ToVan: "Tố Vấn",
-            CuuLinh: "Cửu Linh",
-            LongNgam: "Long Ngâm",
-            HuyenCo: "Huyền Cơ",
-            TrieuQuang: "Triều Quang",
-            Khac: "Khác"
-        };
-
         const classIcons = {
             ThietY: "fa-solid fa-hand-fist",
             HuyetHa: "custom-spear-icon",
@@ -395,6 +157,19 @@
             Khac: "fa-solid fa-user"
         };
 
+        const classNamesMap = {
+            ThietY: "Thiết Y",
+            HuyetHa: "Huyết Hà",
+            ToaiMong: "Toái Mộng",
+            ThanTuang: "Thần Tương",
+            ToVan: "Tố Vấn",
+            CuuLinh: "Cửu Linh",
+            LongNgam: "Long Ngâm",
+            HuyenCo: "Huyền Cơ",
+            TrieuQuang: "Triều Quang",
+            Khac: "Khác"
+        };
+
         function getIconHTML(classType) {
             if (classType === 'HuyetHa') {
                 return `<i class="custom-spear-icon"></i>`;
@@ -402,272 +177,62 @@
             return `<i class="${classIcons[classType] || 'fa-solid fa-user'}"></i>`;
         }
 
-        let winnerList = [];
-        let guildMemberList = [];
+        async function loadGAMembers() {
+            const container = document.getElementById('gaMemberList');
+            container.innerHTML = '<div class="empty-notice">Đang đồng bộ dữ liệu thành viên...</div>';
 
-        const defaultExtractedMembers = [
-            "Ne Bô Nông", "Thanh Ngọc", "Lan Anh Eo Vì", "nối dây", "QTHY", "Thái cực", "TT",
-            "31 07", "Cậu Ba Khanh", "tungwtăng", "Pasteur", "Rusalka",
-            "HUWEI", "ÉchNgu", "IvanB", "Miều Miềuu", "KAIN 265",
-            "Mei Sát Thủ", "Kame", "Quân Tình Hà", "Lâm Chi", "Mai Cao Thủ",
-            "CALL1", "Tường băng 1", "QTHY2", "Hàn Lão Ma",
-            "UHuyen", "Bé Tập Nhảy", "Bé Tập Đàn", "NANGI", "apricity", "Bé Tập Hát",
-            "Tường băng", "VixKings", "Linh Dục Tú ?", "Trần Tracy", "KKaikashi",
-            "Garo", "QTHY4", "Moisier",
-            "Minh Sói Trần", "Vox", "Kkoko", "Soái KaKa", "DG Keo Li", "Duyệt Danh Kỹ",
-            "CALL3", "Tường băng 2",
-            "FamTom", "Hác Dục Đạt", "Đoạn Văn", "Tsukuhane", "Tố Ngưng",
-            "Sendoo", "POWIE", "iKhateoS", "Thư Khánh", "Ember",
-            "S2 Kiếm Tu S2", "HELLOMCVN", "LâmPunPô", "Tâm trí", "Cố Thiên Tuyết", "An An",
-            "QTHY 1", "QTHY1", "QTHY3",
-            "Độc Tại Tâm", "B E O", "Bình Pé Pông", "La Tiêu Thiên", "12 09", "Mi ơi Mi a"
-        ];
+            let membersList = [];
 
-        async function initGA() {
-            await loadDataFromCloud();
-        }
-
-        async function loadDataFromCloud() {
+            // Ưu tiên đọc từ Supabase nếu trang chủ đã lưu cấu hình lên cloud
             try {
-                let { data } = await supabaseClient
+                const SUPABASE_URL = 'https://shblqenkrzjuklzrvoie.supabase.co';
+                const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYmxxZW5rcnpqdWtsenJ2b2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NzA4MjMsImV4cCI6MjEwNDU0NjgyM30.I8bsjcbR3dNYm99kHan8mLj9X7jcNuPEzFQTk9jUups';
+                const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+                let { data, error } = await supabaseClient
                     .from('squad_data')
                     .select('*')
-                    .eq('id', 'ga_wheel_config_v5')
+                    .eq('id', 'main_config')
                     .maybeSingle();
 
-                if (data && data.content) {
-                    winnerList = data.content.winnerList || [];
-                    guildMemberList = data.content.guildMemberList || [];
-                } else {
-                    winnerList = [];
+                if (data && data.content && data.content.members) {
+                    membersList = data.content.members;
                 }
-
-                if (!guildMemberList || guildMemberList.length === 0) {
-                    guildMemberList = defaultExtractedMembers.map((name, index) => ({
-                        id: Date.now() + index + Math.random(),
-                        name: name,
-                        classType: "Khac",
-                        scrimT3: false,
-                        scrimT4: false,
-                        scrimT5: false,
-                        scrim6BC: false
-                    }));
-                    await saveDataToCloud(false);
-                }
-
-                renderWinnerList();
-                renderGuildMemberList();
             } catch (err) {
-                console.log("Lỗi tải dữ liệu:", err);
-            }
-        }
-
-        async function saveDataToCloud(showAlert = false) {
-            const payload = { 
-                gaList: [], 
-                winnerList: winnerList, 
-                guildMemberList: guildMemberList 
-            };
-            const { error } = await supabaseClient
-                .from('squad_data')
-                .upsert({ id: 'ga_wheel_config_v5', content: payload });
-
-            if (showAlert) {
-                const btn = document.getElementById('saveCloudBtn');
-                if (!error) {
-                    btn.innerHTML = `<i class="fa-solid fa-check"></i> Đã Lưu Thành Công!`;
-                    btn.style.background = '#238636';
-                    btn.style.borderColor = '#2ea043';
-                    setTimeout(() => {
-                        btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> Lưu Lên Cloud`;
-                        btn.style.background = '#1f6feb';
-                        btn.style.borderColor = '#388bfd';
-                    }, 2000);
-                } else {
-                    alert("Lưu thất bại, vui lòng kiểm tra lại kết nối mạng!");
-                }
-            }
-        }
-
-        // Nút thủ công để người dùng chủ động bấm lưu lên cloud
-        async function manualSaveToCloud() {
-            const btn = document.getElementById('saveCloudBtn');
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...`;
-            await saveDataToCloud(true);
-        }
-
-        async function updateScrim(id, scrimKey, scrimLabel, isChecked) {
-            const member = guildMemberList.find(item => item.id === id);
-            if (!member) return;
-
-            const timeString = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            member[scrimKey] = isChecked;
-
-            if (isChecked) {
-                winnerList.unshift({
-                    historyId: `${id}_${scrimKey}`,
-                    name: member.name,
-                    classType: member.classType || "Khac",
-                    time: `${timeString} (${scrimLabel})`
-                });
-            } else {
-                winnerList = winnerList.filter(w => w.historyId !== `${id}_${scrimKey}`);
+                console.log("Không tải được trực tiếp từ Supabase, chuyển sang nguồn khác nếu có.");
             }
 
-            await saveDataToCloud(false); // Lưu ngầm tự động mỗi khi tick
-            renderGuildMemberList();
-            renderWinnerList();
+            renderGAMembers(membersList);
         }
 
-        async function addMember() {
-            const name = document.getElementById('memberNameInput').value.trim();
-            const classType = document.getElementById('memberClassInput').value;
-
-            if (!name) {
-                alert("Vui lòng nhập tên thành viên!");
-                return;
-            }
-
-            const existing = guildMemberList.find(item => item.name.toLowerCase() === name.toLowerCase());
-            if (existing) {
-                existing.classType = classType;
-            } else {
-                guildMemberList.push({ 
-                    id: Date.now() + Math.random(), 
-                    name: name, 
-                    classType: classType, 
-                    scrimT3: false,
-                    scrimT4: false,
-                    scrimT5: false,
-                    scrim6BC: false
-                });
-            }
-
-            await saveDataToCloud(false);
-            renderGuildMemberList();
-            document.getElementById('memberNameInput').value = '';
-        }
-
-        async function deleteGuildMember(id) {
-            if (confirm("Xóa thành viên này khỏi danh sách bang?")) {
-                guildMemberList = guildMemberList.filter(item => item.id !== id);
-                winnerList = winnerList.filter(w => !w.historyId.startsWith(`${id}_`));
-                await saveDataToCloud(false);
-                renderGuildMemberList();
-                renderWinnerList();
-            }
-        }
-
-        async function clearAllSelections() {
-            if (confirm("Bạn có muốn bỏ tích toàn bộ các buổi và xóa hết lịch sử không?")) {
-                guildMemberList.forEach(m => { 
-                    m.scrimT3 = false; 
-                    m.scrimT4 = false; 
-                    m.scrimT5 = false; 
-                    m.scrim6BC = false; 
-                });
-                winnerList = [];
-                await saveDataToCloud(false);
-                renderGuildMemberList();
-                renderWinnerList();
-            }
-        }
-
-        function exportToExcel() {
-            if (winnerList.length === 0) {
-                alert("Chưa có dữ liệu lịch sử để xuất file!");
-                return;
-            }
-
-            const excelData = winnerList.map((item, index) => {
-                const className = classNames[item.classType] || "Khác";
-                return {
-                    "STT": winnerList.length - index,
-                    "Tên Ingame": item.name,
-                    "Hệ Phái": className,
-                    "Thời Gian & Buổi Scrim": item.time
-                };
-            });
-
-            const worksheet = XLSX.utils.json_to_sheet(excelData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "LichSuScrim");
-
-            const colWidths = [{wch: 6}, {wch: 25}, {wch: 15}, {wch: 30}];
-            worksheet['!cols'] = colWidths;
-
-            const dateStr = new Date().toISOString().slice(0, 10);
-            XLSX.writeFile(workbook, `LichSu_Scrim_Tuan_${dateStr}.xlsx`);
-        }
-
-        function renderWinnerList() {
-            const container = document.getElementById('winnerListContainer');
-            document.getElementById('winnerCount').innerText = winnerList.length;
+        function renderGAMembers(list) {
+            const container = document.getElementById('gaMemberList');
             container.innerHTML = '';
 
-            if (winnerList.length === 0) {
-                container.innerHTML = `<div class="empty-msg">Chưa có dữ liệu. Hãy tích chọn Scrim ở bên trái.</div>`;
+            if (!list || list.length === 0) {
+                container.innerHTML = '<div class="empty-notice">Chưa có thành viên nào được cập nhật.</div>';
                 return;
             }
 
-            winnerList.forEach((winner, index) => {
-                const className = classNames[winner.classType] || "";
-                const div = document.createElement('div');
-                div.className = 'winner-history-item';
-                div.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <span style="color: #3fb950; font-weight: bold; font-size: 11px;">#${winnerList.length - index}</span>
-                        <span style="font-size: 12px; font-weight: bold; color: #fff;">${winner.name} <span class="class-${winner.classType}">(${className})</span></span>
-                    </div>
-                    <span style="font-size: 10px; color: #8b949e;">${winner.time}</span>
+            // Sắp xếp theo hệ phái cho gọn gàng
+            list.sort((a, b) => a.name.localeCompare(b.name));
+
+            list.forEach(m => {
+                const badge = document.createElement('div');
+                badge.className = `member-badge class-${m.classType || 'Khac'}`;
+                badge.innerHTML = `
+                    <span>${getIconHTML(m.classType)} ${m.name}</span>
+                    <span style="font-size: 10px; opacity: 0.8;">[${classNamesMap[m.classType] || 'Khác'}]</span>
                 `;
-                container.appendChild(div);
+                container.appendChild(badge);
             });
         }
 
-        function renderGuildMemberList() {
-            const container = document.getElementById('guildListContainer');
-            const searchKeyword = document.getElementById('guildSearchInput').value.toLowerCase().trim();
-            
-            const filteredList = guildMemberList.filter(item => {
-                const nameMatch = item.name.toLowerCase().includes(searchKeyword);
-                const className = (classNames[item.classType] || "").toLowerCase();
-                const classMatch = className.includes(searchKeyword);
-                return nameMatch || classMatch;
-            });
-
-            document.getElementById('guildTotalCount').innerText = guildMemberList.length;
-            container.innerHTML = '';
-
-            if (filteredList.length === 0) {
-                container.innerHTML = `<div class="empty-msg">Không tìm thấy thành viên phù hợp.</div>`;
-                return;
-            }
-
-            filteredList.forEach(item => {
-                const className = classNames[item.classType] || "Khác";
-                const div = document.createElement('div');
-                div.className = 'guild-item';
-                div.innerHTML = `
-                    <div class="guild-info">
-                        <div class="guild-name-row">
-                            <div class="guild-name">${item.name} <span class="class-${item.classType}" style="font-weight: normal; font-size: 11px;">(${className})</span></div>
-                            <button class="btn-delete" onclick="deleteGuildMember(${item.id})" title="Xóa khỏi danh sách bang"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                        <div class="guild-sub class-${item.classType}">${getIconHTML(item.classType)} Hệ phái: ${className}</div>
-                        <div class="scrim-checkboxes">
-                            <label><input type="checkbox" ${item.scrimT3 ? 'checked' : ''} onchange="updateScrim(${item.id}, 'scrimT3', 'Scrim T3', this.checked)"> T3</label>
-                            <label><input type="checkbox" ${item.scrimT4 ? 'checked' : ''} onchange="updateScrim(${item.id}, 'scrimT4', 'Scrim T4', this.checked)"> T4</label>
-                            <label><input type="checkbox" ${item.scrimT5 ? 'checked' : ''} onchange="updateScrim(${item.id}, 'scrimT5', 'Scrim T5', this.checked)"> T5</label>
-                            <label><input type="checkbox" ${item.scrim6BC ? 'checked' : ''} onchange="updateScrim(${item.id}, 'scrim6BC', 'Scrim 6 - BC', this.checked)"> 6-BC</label>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        initGA();
+        // Tải thư viện supabase client script động để hỗ trợ kết nối cloud liền mạch
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+        script.onload = loadGAMembers;
+        document.head.appendChild(script);
     </script>
 </body>
 </html>
