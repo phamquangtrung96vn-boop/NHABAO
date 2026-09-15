@@ -324,7 +324,7 @@
             border: 1px solid var(--border-color);
             border-radius: 6px;
             overflow: hidden;
-            min-width: 900px;
+            min-width: 950px;
         }
 
         .group-header {
@@ -417,6 +417,12 @@
             text-align: center;
         }
         .sub-table th input.col-name-input { width: 45px; font-size: 11px; }
+
+        /* Style cho thẻ tiêu đề cột Not (nhỏ gọn hơn) */
+        .squad-table th.not-col-header input.col-name-input {
+            width: 45px;
+            color: #e3b341;
+        }
 
         .squad-table td, .sub-table td {
             border: 1px solid var(--border-color);
@@ -671,6 +677,11 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                                                 <input type="text" class="col-name-input" id="g1_col${i}" value="PT${i}" oninput="saveData()" onclick="event.stopPropagation()">
                                             </div>
                                         </th>
+                                        <th class="not-col-header" id="th_g1_not${i}">
+                                            <div class="pt-header-cell">
+                                                <input type="text" class="col-name-input" id="g1_not${i}" value="NOTS" oninput="saveData()" onclick="event.stopPropagation()">
+                                            </div>
+                                        </th>
                                     `);
                                 }
                             </script>
@@ -700,6 +711,11 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                                             <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'g2', ${i})" ondragend="handleColDragEnd(event)">
                                                 <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 10px;"></i>
                                                 <input type="text" class="col-name-input" id="g2_col${i}" value="PT${i}" oninput="saveData()" onclick="event.stopPropagation()">
+                                            </div>
+                                        </th>
+                                        <th class="not-col-header" id="th_g2_not${i}">
+                                            <div class="pt-header-cell">
+                                                <input type="text" class="col-name-input" id="g2_not${i}" value="NOTS" oninput="saveData()" onclick="event.stopPropagation()">
                                             </div>
                                         </th>
                                     `);
@@ -846,7 +862,9 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
         };
         for(let i=1; i<=10; i++) {
             columnNames[`g1_col${i}`] = `PT${i}`;
+            columnNames[`g1_not${i}`] = `NOTS`;
             columnNames[`g2_col${i}`] = `PT${i}`;
+            columnNames[`g2_not${i}`] = `NOTS`;
         }
 
         let draggedMemberName = null;
@@ -896,7 +914,9 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
 
             for (let i = 1; i <= 10; i++) {
                 if(document.getElementById(`g1_col${i}`)) columnNames[`g1_col${i}`] = document.getElementById(`g1_col${i}`).value;
+                if(document.getElementById(`g1_not${i}`)) columnNames[`g1_not${i}`] = document.getElementById(`g1_not${i}`).value;
                 if(document.getElementById(`g2_col${i}`)) columnNames[`g2_col${i}`] = document.getElementById(`g2_col${i}`).value;
+                if(document.getElementById(`g2_not${i}`)) columnNames[`g2_not${i}`] = document.getElementById(`g2_not${i}`).value;
             }
             if(document.getElementById('res_col1')) columnNames['res_col1'] = document.getElementById('res_col1').value;
             if(document.getElementById('res_col2')) columnNames['res_col2'] = document.getElementById('res_col2').value;
@@ -990,7 +1010,9 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
 
             for (let i = 1; i <= 10; i++) {
                 if(columnNames[`g1_col${i}`] && document.getElementById(`g1_col${i}`)) document.getElementById(`g1_col${i}`).value = columnNames[`g1_col${i}`];
+                if(columnNames[`g1_not${i}`] && document.getElementById(`g1_not${i}`)) document.getElementById(`g1_not${i}`).value = columnNames[`g1_not${i}`];
                 if(columnNames[`g2_col${i}`] && document.getElementById(`g2_col${i}`)) document.getElementById(`g2_col${i}`).value = columnNames[`g2_col${i}`];
+                if(columnNames[`g2_not${i}`] && document.getElementById(`g2_not${i}`)) document.getElementById(`g2_not${i}`).value = columnNames[`g2_not${i}`];
             }
             if(columnNames['res_col1'] && document.getElementById('res_col1')) document.getElementById('res_col1').value = columnNames['res_col1'];
             if(columnNames['res_col2'] && document.getElementById('res_col2')) document.getElementById('res_col2').value = columnNames['res_col2'];
@@ -1002,12 +1024,11 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
             createReserveRows('reserveBody', 10);
         }
 
-        // Cập nhật hàm tạo 8 hàng (6 hàng trên + dòng phân cách + 2 hàng dưới)
         function createSquadRows(containerId, prefix, totalCols) {
             const tbody = document.getElementById(containerId);
             tbody.innerHTML = '';
             
-            // 6 hàng đầu tiên
+            // 6 hàng đầu tiên (Trận 1: 1-6)
             for (let row = 1; row <= 6; row++) {
                 const tr = document.createElement('tr');
                 const tdStt = document.createElement('td');
@@ -1016,20 +1037,32 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                 tr.appendChild(tdStt);
 
                 for (let col = 1; col <= totalCols; col++) {
-                    const td = document.createElement('td');
-                    const slotId = `${prefix}_r${row}_c${col}`;
-                    td.innerHTML = `
-                        <div class="drop-zone" id="zone_${slotId}" 
+                    // Ô chính PT
+                    const tdMain = document.createElement('td');
+                    const slotMain = `${prefix}_r${row}_c${col}`;
+                    tdMain.innerHTML = `
+                        <div class="drop-zone" id="zone_${slotMain}" 
                              ondragover="handleDragOver(event)" 
                              ondragleave="handleDragLeave(event)" 
-                             ondrop="handleDropSlot(event, '${slotId}')">
+                             ondrop="handleDropSlot(event, '${slotMain}')">
                         </div>`;
-                    tr.appendChild(td);
+                    tr.appendChild(tdMain);
+
+                    // Ô phụ NOTS đi kèm bên phải
+                    const tdNot = document.createElement('td');
+                    const slotNot = `${prefix}_r${row}_not${col}`;
+                    tdNot.innerHTML = `
+                        <div class="drop-zone" id="zone_${slotNot}" 
+                             ondragover="handleDragOver(event)" 
+                             ondragleave="handleDragLeave(event)" 
+                             ondrop="handleDropSlot(event, '${slotNot}')">
+                        </div>`;
+                    tr.appendChild(tdNot);
                 }
                 tbody.appendChild(tr);
             }
 
-            // Dòng phân cách giữa 6 hàng trên và 2 hàng dưới
+            // Dòng phân cách giữa hàng 6 và hàng 7 (Trận 2)
             const sepTr = document.createElement('tr');
             sepTr.className = 'separator-row';
             const sepStt = document.createElement('td');
@@ -1037,12 +1070,14 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
             sepStt.innerHTML = '';
             sepTr.appendChild(sepStt);
             for (let col = 1; col <= totalCols; col++) {
-                const sepTd = document.createElement('td');
-                sepTr.appendChild(sepTd);
+                const sepTdMain = document.createElement('td');
+                const sepTdNot = document.createElement('td');
+                sepTr.appendChild(sepTdMain);
+                sepTr.appendChild(sepTdNot);
             }
             tbody.appendChild(sepTr);
 
-            // 2 hàng tiếp theo (hàng 7 và hàng 8)
+            // 2 hàng tiếp theo (Trận 2: 7-8)
             for (let row = 7; row <= 8; row++) {
                 const tr = document.createElement('tr');
                 const tdStt = document.createElement('td');
@@ -1051,15 +1086,25 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                 tr.appendChild(tdStt);
 
                 for (let col = 1; col <= totalCols; col++) {
-                    const td = document.createElement('td');
-                    const slotId = `${prefix}_r${row}_c${col}`;
-                    td.innerHTML = `
-                        <div class="drop-zone" id="zone_${slotId}" 
+                    const tdMain = document.createElement('td');
+                    const slotMain = `${prefix}_r${row}_c${col}`;
+                    tdMain.innerHTML = `
+                        <div class="drop-zone" id="zone_${slotMain}" 
                              ondragover="handleDragOver(event)" 
                              ondragleave="handleDragLeave(event)" 
-                             ondrop="handleDropSlot(event, '${slotId}')">
+                             ondrop="handleDropSlot(event, '${slotMain}')">
                         </div>`;
-                    tr.appendChild(td);
+                    tr.appendChild(tdMain);
+
+                    const tdNot = document.createElement('td');
+                    const slotNot = `${prefix}_r${row}_not${col}`;
+                    tdNot.innerHTML = `
+                        <div class="drop-zone" id="zone_${slotNot}" 
+                             ondragover="handleDragOver(event)" 
+                             ondragleave="handleDragLeave(event)" 
+                             ondrop="handleDropSlot(event, '${slotNot}')">
+                        </div>`;
+                    tr.appendChild(tdNot);
                 }
                 tbody.appendChild(tr);
             }
@@ -1121,39 +1166,59 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
 
             if (sourceGroup === targetGroupPrefix && sourceCol === targetColIndex) return;
 
+            // Hoán đổi tên cột chính (PT)
             const sourceColKey = `${sourceGroup}_col${sourceCol}`;
             const targetColKey = `${targetGroupPrefix}_col${targetColIndex}`;
             const tempName = columnNames[sourceColKey];
             columnNames[sourceColKey] = columnNames[targetColKey];
             columnNames[targetColKey] = tempName;
 
+            // Hoán đổi tên cột phụ (NOTS) đi kèm
+            const sourceNotKey = `${sourceGroup}_not${sourceCol}`;
+            const targetNotKey = `${targetGroupPrefix}_not${targetColIndex}`;
+            const tempNotName = columnNames[sourceNotKey];
+            columnNames[sourceNotKey] = columnNames[targetNotKey];
+            columnNames[targetNotKey] = tempNotName;
+
             if(document.getElementById(sourceColKey)) document.getElementById(sourceColKey).value = columnNames[sourceColKey];
             if(document.getElementById(targetColKey)) document.getElementById(targetColKey).value = columnNames[targetColKey];
+            if(document.getElementById(sourceNotKey)) document.getElementById(sourceNotKey).value = columnNames[sourceNotKey];
+            if(document.getElementById(targetNotKey)) document.getElementById(targetNotKey).value = columnNames[targetNotKey];
 
             const sourceMaxRows = (sourceGroup === 'res') ? 10 : 8; 
             const targetMaxRows = (targetGroupPrefix === 'res') ? 10 : 8;
             const maxRows = Math.max(sourceMaxRows, targetMaxRows);
 
             for (let row = 1; row <= maxRows; row++) {
-                const sourceSlotId = `${sourceGroup}_r${row}_c${sourceCol}`;
-                const targetSlotId = `${targetGroupPrefix}_r${row}_c${targetColIndex}`;
-
-                const valSource = squadSelections[sourceSlotId];
-                const valTarget = squadSelections[targetSlotId];
+                // Di chuyển dữ liệu cột chính
+                const sourceSlotMain = `${sourceGroup}_r${row}_c${sourceCol}`;
+                const targetSlotMain = `${targetGroupPrefix}_r${row}_c${targetColIndex}`;
+                const valSourceMain = squadSelections[sourceSlotMain];
+                const valTargetMain = squadSelections[targetSlotMain];
 
                 if (row <= targetMaxRows) {
-                    if (valSource !== undefined) {
-                        squadSelections[targetSlotId] = valSource;
-                    } else {
-                        delete squadSelections[targetSlotId];
-                    }
+                    if (valSourceMain !== undefined) squadSelections[targetSlotMain] = valSourceMain;
+                    else delete squadSelections[targetSlotMain];
+                }
+                if (row <= sourceMaxRows) {
+                    if (valTargetMain !== undefined) squadSelections[sourceSlotMain] = valTargetMain;
+                    else delete squadSelections[sourceSlotMain];
                 }
 
-                if (row <= sourceMaxRows) {
-                    if (valTarget !== undefined) {
-                        squadSelections[sourceSlotId] = valTarget;
-                    } else {
-                        delete squadSelections[sourceSlotId];
+                // Di chuyển dữ liệu cột phụ (NOTS) tương ứng
+                if (sourceGroup !== 'res' && targetGroupPrefix !== 'res') {
+                    const sourceSlotNot = `${sourceGroup}_r${row}_not${sourceCol}`;
+                    const targetSlotNot = `${targetGroupPrefix}_r${row}_not${targetColIndex}`;
+                    const valSourceNot = squadSelections[sourceSlotNot];
+                    const valTargetNot = squadSelections[targetSlotNot];
+
+                    if (row <= targetMaxRows) {
+                        if (valSourceNot !== undefined) squadSelections[targetSlotNot] = valSourceNot;
+                        else delete squadSelections[targetSlotNot];
+                    }
+                    if (row <= sourceMaxRows) {
+                        if (valTargetNot !== undefined) squadSelections[sourceSlotNot] = valTargetNot;
+                        else delete squadSelections[sourceSlotNot];
                     }
                 }
             }
@@ -1285,6 +1350,7 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                 const slotId = zone.id.replace('zone_', '');
                 const memberName = squadSelections[slotId];
                 const isReserve = slotId.startsWith('res_');
+                const isNotCol = slotId.includes('_not');
 
                 if (memberName) {
                     const memberObj = members.find(m => m.name === memberName);
@@ -1293,11 +1359,11 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                         zone.innerHTML = `
                             <div class="member-card class-${memberObj.classType}" 
                                  draggable="true" 
-                                 style="width: 100%; height: 100%;"
+                                 style="width: 100%; height: 100%; font-size: ${isNotCol ? '11px' : 'inherit'}; padding: ${isNotCol ? '2px 4px' : '6px 10px'};"
                                  ondragstart="handleDragStart(event, '${memberObj.name}')" 
                                  ondragend="handleDragEnd(event)">
                                 <span>${iconHtml} <span class="member-name-text">${memberObj.name}</span></span>
-                                <i class="fa-solid fa-xmark" style="cursor:pointer; font-size: ${isReserve ? '10px' : 'inherit'}" title="Bỏ khỏi đội" onclick="removeFromSlot('${slotId}')"></i>
+                                <i class="fa-solid fa-xmark" style="cursor:pointer; font-size: ${isReserve || isNotCol ? '10px' : 'inherit'}" title="Bỏ khỏi đội" onclick="removeFromSlot('${slotId}')"></i>
                             </div>
                         `;
                     } else {
@@ -1474,7 +1540,9 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                 columnNames = { res_col1: "DB1", res_col2: "DB2" };
                 for(let i=1; i<=10; i++) {
                     columnNames[`g1_col${i}`] = `PT${i}`;
+                    columnNames[`g1_not${i}`] = `NOTS`;
                     columnNames[`g2_col${i}`] = `PT${i}`;
+                    columnNames[`g2_not${i}`] = `NOTS`;
                 }
                 loadSavedInputs();
                 renderAll();
@@ -1482,7 +1550,6 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
             }
         }
 
-        // CÁC HÀM XỬ LÝ GỬI DISCORD KÈM BẢNG NHẬP TEXT
         function openDiscordModal() {
             document.getElementById('discordModal').style.display = 'flex';
         }
