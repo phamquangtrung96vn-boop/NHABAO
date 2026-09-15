@@ -146,7 +146,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: 8px 12px;
-            max-width: 280px;
+            max-width: 250px;
             justify-content: flex-end;
         }
 
@@ -297,13 +297,12 @@
         let checkedState = {}; 
         let supabaseClient = null;
 
+        // Chỉ giữ lại Scrim 1, Scrim 2, Scrim 3 và Bang Chiến (BC)
         const matchTypes = [
             { key: 'scrim1', label: 'Scrim 1' },
             { key: 'scrim2', label: 'Scrim 2' },
             { key: 'scrim3', label: 'Scrim 3' },
-            { key: 'scrim4', label: 'Scrim 4' },
-            { key: 'scrim5', label: 'Scrim 5' },
-            { key: 'bc', label: 'BC' }
+            { key: 'bc', label: 'Bang Chiến' }
         ];
 
         async function initApp() {
@@ -394,10 +393,8 @@
             
             renderRightHistory();
 
-            // Lưu trực tiếp lên Cloud ngay khi tích chọn
             if (supabaseClient) {
                 try {
-                    // Lấy dữ liệu hiện tại trên cloud để tránh ghi đè nhầm các cấu trúc khác
                     let { data } = await supabaseClient
                         .from('squad_data')
                         .select('*')
