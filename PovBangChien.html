@@ -4,18 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản Lý POV Bang Chiến - Nghịch Thủy Hàn</title>
-    
-    <!-- ĐOẠN CODE BẢO VỆ TRANG (KIỂM TRA ĐĂNG NHẬP) -->
-    <script>
-        if (sessionStorage.getItem("isLoggedIn") !== "true") {
-            window.location.href = "login.html";
-        }
-    </script>
 
     <!-- FontAwesome Icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Supabase Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Chart.js Library cho biểu đồ -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
         :root {
@@ -102,6 +97,42 @@
             gap: 8px;
         }
 
+        /* KHU VỰC DASHBOARD STATS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        @media(max-width: 600px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .stat-box {
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .stat-box .stat-label {
+            font-size: 11px;
+            color: #8b949e;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .stat-box .stat-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #f0f6fc;
+            margin-top: 4px;
+        }
+
         .input-group {
             display: flex;
             flex-direction: column;
@@ -144,8 +175,29 @@
         }
         .btn-submit:hover { background: #2ea043; }
 
+        .btn-reset-season {
+            background: #da3633;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+        .btn-reset-season:hover { background: #f85149; }
+
         .search-box {
             margin-bottom: 15px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
         }
         .search-box input {
             width: 100%;
@@ -158,11 +210,24 @@
             outline: none;
         }
 
+        .btn-reset-filter {
+            background: #21262d;
+            color: #c9d1d9;
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            white-space: nowrap;
+            transition: 0.2s;
+        }
+        .btn-reset-filter:hover { background: #30363d; color: #fff; }
+
         .pov-list {
             display: flex;
             flex-direction: column;
             gap: 10px;
-            max-height: calc(100vh - 220px);
+            max-height: calc(100vh - 460px);
             overflow-y: auto;
             padding-right: 4px;
         }
@@ -214,6 +279,7 @@
         }
 
         .pov-actions {
+            (max-width: 900px)
             display: flex;
             align-items: center;
             gap: 8px;
@@ -255,13 +321,22 @@
 </head>
 <body>
 
+    <!-- KIỂM TRA ĐĂNG NHẬP NGAY KHI TẢI TRANG -->
+    <script>
+        // Kiểm tra nếu chưa đăng nhập (giả sử key trong sessionStorage là 'isLoggedIn' hoặc chỉnh sửa lại cho phù hợp với trang chính của bạn)
+        if (!sessionStorage.getItem('isLoggedIn')) {
+            alert('Vui lòng đăng nhập để truy cập trang quản lý!');
+            window.location.href = 'index.html'; // Chuyển hướng về trang đăng nhập hoặc trang chủ
+        }
+    </script>
+
     <div class="title-banner">
         <span><i class="fa-solid fa-video"></i> Quản Lý POV Bang Chiến</span>
         <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Về Sơ Đồ</a>
     </div>
 
     <div class="main-container">
-        <!-- CỘT TRÁI: THÊM TRẬN ĐẤU MỚI -->
+        <!-- CỘT TRÁI: THÊM TRẬN ĐẤU MỚI & RESET MÙA GIẢI -->
         <div class="form-card">
             <h3><i class="fa-solid fa-plus-circle"></i> Thêm Trận Đấu Mới</h3>
             <div class="input-group">
@@ -297,13 +372,48 @@
                 <input type="text" id="youtubeLinkInput" placeholder="Dán link YouTube vào đây">
             </div>
             <button class="btn-submit" onclick="addPovMatch()"><i class="fa-solid fa-check"></i> Thêm Vào Danh Sách</button>
+            
+            <button class="btn-reset-season" onclick="resetSeason()"><i class="fa-solid fa-triangle-exclamation"></i> Reset Mùa Giải</button>
         </div>
 
-        <!-- CỘT PHẢI: DANH SÁCH TRẬN ĐẤU -->
+        <!-- CỘT PHẢI: THỐNG KÊ, BIỂU ĐỒ & DANH SÁCH TRẬN ĐẤU -->
         <div class="list-card">
             <h3><i class="fa-solid fa-list"></i> Danh Sách Bang Chiến</h3>
+            
+            <!-- THỐNG KÊ TỔNG QUAN (DASHBOARD STATS) -->
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-label">Tổng Trận</div>
+                    <div class="stat-value" id="statTotal">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Thắng / Thua</div>
+                    <div class="stat-value" id="statWinLoss">0 / 0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Tỷ Lệ Thắng</div>
+                    <div class="stat-value" id="statWinRate" style="color: #3fb950;">0%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Phong Độ</div>
+                    <div class="stat-value" id="statStreak" style="font-size: 13px;">-</div>
+                </div>
+            </div>
+
+            <!-- BIỂU ĐỒ XU HƯỚNG / VECTOR PHONG ĐỘ (HIỂN THỊ TOÀN BỘ MÙA GIẢI) -->
+            <div class="chart-container" style="background: #0d1117; border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; margin-bottom: 15px;">
+                <h4 style="color: #58a6ff; font-size: 13px; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+                    <span><i class="fa-solid fa-chart-line"></i> Biểu Đồ Vector Phong Độ Toàn Mùa Giải</span>
+                    <span style="font-size: 11px; color: #8b949e; font-weight: normal;">(Bấm vào điểm để lọc)</span>
+                </h4>
+                <div style="position: relative; height: 160px; width: 100%;">
+                    <canvas id="winRateChart"></canvas>
+                </div>
+            </div>
+
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Tìm kiếm theo tên bang, trận..." oninput="renderPovList()">
+                <input type="text" id="searchInput" placeholder="Tìm kiếm theo tên bang, trận, ngày..." oninput="renderPovList()">
+                <button class="btn-reset-filter" onclick="resetSearch()"><i class="fa-solid fa-rotate-left"></i> Tất cả</button>
             </div>
             <div class="pov-list" id="povListContainer">
                 <!-- Danh sách sẽ được render tự động qua JavaScript -->
@@ -312,21 +422,20 @@
     </div>
 
     <script>
-        // KẾT NỐI SUPABASE CHUNG CÙNG HỆ THỐNG
         const SUPABASE_URL = 'https://shblqenkrzjuklzrvoie.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYmxxZW5rcnpqdWtsenJ2b2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NzA4MjMsImV4cCI6MjEwNDU0NjgyM30.I8bsjcbR3dNYm99kHan8mLj9X7jcNuPEzFQTk9jUups'; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let povList = [];
+        let allMatchesForChart = []; 
+        let myChart = null;
 
-        // Khởi tạo ngày mặc định là hôm nay
         document.getElementById('matchDate').valueAsDate = new Date();
 
         async function initPOV() {
             await loadPOVFromCloud();
         }
 
-        // Tải dữ liệu từ Cloud lên mọi máy tính
         async function loadPOVFromCloud() {
             try {
                 let { data, error } = await supabaseClient
@@ -340,13 +449,14 @@
                 } else {
                     povList = [];
                 }
+                updateDashboardStats();
                 renderPovList();
+                updateWinRateChart();
             } catch (err) {
                 console.log("Lỗi tải dữ liệu POV từ cloud:", err);
             }
         }
 
-        // Lưu dữ liệu lên Cloud
         async function savePOVToCloud() {
             const payload = { povList: povList };
             await supabaseClient
@@ -354,7 +464,6 @@
                 .upsert({ id: 'pov_config', content: payload });
         }
 
-        // Thêm trận đấu mới
         async function addPovMatch() {
             const date = document.getElementById('matchDate').value;
             const round = document.getElementById('matchRound').value;
@@ -382,25 +491,157 @@
                 link: link
             };
 
-            povList.unshift(newMatch); // Đưa lên đầu danh sách
+            povList.unshift(newMatch);
             await savePOVToCloud();
+            updateDashboardStats();
             renderPovList();
+            updateWinRateChart();
 
-            // Reset form input link và đối thủ
             document.getElementById('clan2Input').value = '';
             document.getElementById('youtubeLinkInput').value = '';
         }
 
-        // Xóa trận đấu
         async function deletePovMatch(id) {
             if (confirm("Bạn có chắc chắn muốn xóa trận đấu này không?")) {
                 povList = povList.filter(item => item.id !== id);
                 await savePOVToCloud();
+                updateDashboardStats();
                 renderPovList();
+                updateWinRateChart();
             }
         }
 
-        // Hiển thị danh sách ra giao diện
+        async function resetSeason() {
+            const confirmMsg = "CẢNH BÁO: Thao tác này sẽ XÓA TOÀN BỘ danh sách các trận đấu của mùa giải hiện tại trên hệ thống đám mây! Bạn có chắc chắn muốn bắt đầu mùa giải mới không?";
+            if (confirm(confirmMsg)) {
+                povList = [];
+                await savePOVToCloud();
+                updateDashboardStats();
+                renderPovList();
+                updateWinRateChart();
+                alert("Đã reset mùa giải thành công! Dữ liệu đã được làm sạch.");
+            }
+        }
+
+        function updateDashboardStats() {
+            const total = povList.length;
+            const wins = povList.filter(item => item.winner === 'Bang 1 Win').length;
+            const losses = total - wins;
+            const winRate = total > 0 ? ((wins / total) * 100).toFixed(1) + '%' : '0%';
+
+            let streakText = '-';
+            if (total > 0) {
+                const latestResult = povList[0].winner;
+                let count = 0;
+                for (let i = 0; i < povList.length; i++) {
+                    if (povList[i].winner === latestResult) {
+                        count++;
+                    } else {
+                        break;
+                    }
+                }
+                if (latestResult === 'Bang 1 Win') {
+                    streakText = `🔥 Thắng ${count}`;
+                } else {
+                    streakText = `❄️ Thua ${count}`;
+                }
+            }
+
+            document.getElementById('statTotal').innerText = total;
+            document.getElementById('statWinLoss').innerText = `${wins} / ${losses}`;
+            document.getElementById('statWinRate').innerText = winRate;
+            document.getElementById('statStreak').innerText = streakText;
+        }
+
+        function updateWinRateChart() {
+            allMatchesForChart = [...povList].reverse();
+
+            const labels = allMatchesForChart.map(item => `${item.date} (${item.clan2})`);
+            const dataPoints = allMatchesForChart.map(item => (item.winner === 'Bang 1 Win' ? 1 : 0));
+
+            const ctx = document.getElementById('winRateChart').getContext('2d');
+
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Kết quả',
+                        data: dataPoints,
+                        borderColor: '#58a6ff',
+                        backgroundColor: 'rgba(88, 166, 255, 0.1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: dataPoints.map(val => val === 1 ? '#238636' : '#da3633'),
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        fill: true,
+                        tension: 0.2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            const clickedMatch = allMatchesForChart[index];
+                            document.getElementById('searchInput').value = clickedMatch.clan2;
+                            renderPovList();
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: -0.2,
+                            max: 1.2,
+                            ticks: {
+                                stepSize: 1,
+                                callback: function(value) {
+                                    if (value === 1) return 'Thắng';
+                                    if (value === 0) return 'Thua';
+                                    return '';
+                                },
+                                color: '#8b949e',
+                                font: { size: 10 }
+                            },
+                            grid: { color: '#30363d' }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#8b949e',
+                                font: { size: 9 },
+                                maxRotation: 25,
+                                minRotation: 25
+                            },
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    const match = allMatchesForChart[context[0].dataIndex];
+                                    return `${match.date} - ${match.round} (${match.clan1} vs ${match.clan2})`;
+                                },
+                                label: function(context) {
+                                    return context.raw === 1 ? ' Kết quả: Thắng (Win)' : ' Kết quả: Thua (Lose)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function resetSearch() {
+            document.getElementById('searchInput').value = '';
+            renderPovList();
+        }
+
         function renderPovList() {
             const container = document.getElementById('povListContainer');
             const keyword = document.getElementById('searchInput').value.toLowerCase();
@@ -414,7 +655,7 @@
             );
 
             if (filteredList.length === 0) {
-                container.innerHTML = `<div class="empty-msg">Chưa có trận đấu nào được lưu trữ.</div>`;
+                container.innerHTML = `<div class="empty-msg">Không tìm thấy trận đấu phù hợp.</div>`;
                 return;
             }
 
@@ -441,7 +682,6 @@
             });
         }
 
-        // Chạy khởi tạo tải dữ liệu khi vừa mở trang
         initPOV();
     </script>
 </body>
