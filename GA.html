@@ -8,6 +8,9 @@
     <!-- FontAwesome Icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Thư viện SheetJS (XLSX) để xuất file Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
     <style>
         :root {
             --bg-main: #0d1117;
@@ -29,7 +32,7 @@
             padding: 15px;
         }
 
-        /* KHUNG LOGIN OVERLAY (CHỈ HIỆN KHI CHƯA ĐĂNG NHẬP Ở TRANG CHÍNH) */
+        /* KHUNG LOGIN OVERLAY (CHỈ HIỆN KHI CHƯA ĐĂNG NHẬP) */
         #loginOverlay {
             position: fixed;
             top: 0;
@@ -41,7 +44,7 @@
                               url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=1920&q=80');
             background-size: cover;
             background-position: center;
-            display: none; /* Mặc định ẩn, sẽ check bằng JS */
+            display: none;
             justify-content: center;
             align-items: center;
             z-index: 9999;
@@ -424,7 +427,7 @@
 
         <div class="panel">
             <div class="panel-title">
-                <span id="rightTitle">LỊCH SỬ TRÚNG THƯỞNG ( 0 )</span>
+                <span id="rightTitle">DANH SACH THAM GIA GA ( 0 )</span>
                 <div class="right-toolbar">
                     <button class="btn-mini" onclick="exportExcel()"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button>
                     <button class="btn-mini danger" onclick="clearHistory()"><i class="fa-solid fa-trash"></i> Xóa Hết</button>
@@ -479,15 +482,13 @@
             { key: 'bc', label: 'Bang Chiến' }
         ];
 
-        // Tự động kiểm tra trạng thái đăng nhập ngay khi load trang
+        // Tự động kiểm tra trạng thái đăng nhập
         window.addEventListener('DOMContentLoaded', () => {
             const isLoggedIn = sessionStorage.getItem("isLoggedIn");
             if (isLoggedIn === "true") {
-                // Đã đăng nhập ở trang chính -> Ẩn khung login, chạy luôn app
                 document.getElementById('loginOverlay').style.display = 'none';
                 loadSupabaseAndInit();
             } else {
-                // Chưa đăng nhập -> Hiện khung login dự phòng
                 document.getElementById('loginOverlay').style.display = 'flex';
             }
         });
@@ -699,8 +700,36 @@
             }
         }
 
+        // HÀM XUẤT FILE EXCEL THỰC TẾ
         function exportExcel() {
-            alert("Tính năng xuất Excel đang được tích hợp!");
+            let historyItems = [];
+            membersList.forEach(m => {
+                const state = checkedState[m.name];
+                if (state) {
+                    matchTypes.forEach(type => {
+                        if (state[type.key]) {
+                            historyItems.push({
+                                "Tên Thành Viên": m.name,
+                                "Môn Phái": classNamesMap[m.classType] || m.classType,
+                                "Loại Sự Kiện / Trận": type.label
+                            });
+                        }
+                    });
+                }
+            });
+
+            if (historyItems.length === 0) {
+                alert("⚠️ Không có dữ liệu lịch sử để xuất Excel!");
+                return;
+            }
+
+            // Tạo bảng dữ liệu và file Excel thông qua SheetJS
+            const worksheet = XLSX.utils.json_to_sheet(historyItems);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "LichSuGA");
+
+            // Tải xuống file
+            XLSX.writeFile(workbook, "DanhSach_TruongThuong_GA.xlsx");
         }
     </script>
 </body>
