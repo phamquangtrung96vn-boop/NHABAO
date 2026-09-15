@@ -427,7 +427,8 @@
 
         <div class="panel">
             <div class="panel-title">
-                <span id="rightTitle">DANH SACH THAM GIA GA ( 0 )</span>
+                <!-- ĐÃ ĐỔI TIÊU ĐỀ Ở ĐÂY -->
+                <span id="rightTitle">DANH SÁCH THAM GIA GA ( 0 )</span>
                 <div class="right-toolbar">
                     <button class="btn-mini" onclick="exportExcel()"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button>
                     <button class="btn-mini danger" onclick="clearHistory()"><i class="fa-solid fa-trash"></i> Xóa Hết</button>
@@ -649,7 +650,8 @@
                 }
             });
 
-            document.getElementById('rightTitle').innerText = `LỊCH SỬ TRÚNG THƯỞNG ( ${historyItems.length} )`;
+            // Cập nhật lại số lượng trên tiêu đề
+            document.getElementById('rightTitle').innerText = `DANH SÁCH THAM GIA GA ( ${historyItems.length} )`;
 
             if (historyItems.length === 0) {
                 container.innerHTML = '<div class="empty-history">Chưa có dữ liệu. Hãy tích chọn ở bên trái.</div>';
@@ -673,7 +675,7 @@
         }
 
         async function clearHistory() {
-            if (confirm("Bạn có chắc chắn muốn xóa hết các tích chọn lịch sử không?")) {
+            if (confirm("Bạn có chắc chắn muốn xóa hết các tích chọn không?")) {
                 checkedState = {};
                 renderAll();
 
@@ -700,7 +702,6 @@
             }
         }
 
-        // HÀM XUẤT FILE EXCEL THỰC TẾ
         function exportExcel() {
             let historyItems = [];
             membersList.forEach(m => {
@@ -719,17 +720,15 @@
             });
 
             if (historyItems.length === 0) {
-                alert("⚠️ Không có dữ liệu lịch sử để xuất Excel!");
+                alert("⚠️ Không có dữ liệu để xuất Excel!");
                 return;
             }
 
-            // Tạo bảng dữ liệu và file Excel thông qua SheetJS
             const worksheet = XLSX.utils.json_to_sheet(historyItems);
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "LichSuGA");
+            XLSX.utils.book_append_sheet(workbook, worksheet, "DanhSachGA");
 
-            // Tải xuống file
-            XLSX.writeFile(workbook, "DanhSach_TruongThuong_GA.xlsx");
+            XLSX.writeFile(workbook, "DanhSach_ThamGia_GA.xlsx");
         }
     </script>
 </body>
