@@ -212,7 +212,6 @@
         .class-LongNgam  { background-color: #166534 !important; color: #fff; }
         .class-HuyenCo   { background-color: #475569 !important; color: #fff; }
         .class-TrieuQuang{ background-color: #0284c7 !important; color: #fff; }
-        .class-Khac      { background-color: #374151 !important; color: #fff; }
 
         .custom-spear-icon {
             width: 12px;
@@ -269,8 +268,7 @@
             CuuLinh: "fa-solid fa-skull",
             LongNgam: "fa-solid fa-bolt",
             HuyenCo: "fa-solid fa-gear",
-            TrieuQuang: "fa-solid fa-droplet",
-            Khac: "fa-solid fa-user"
+            TrieuQuang: "fa-solid fa-droplet"
         };
 
         const classNamesMap = {
@@ -282,8 +280,7 @@
             CuuLinh: "Cửu Linh",
             LongNgam: "Long Ngâm",
             HuyenCo: "Huyền Cơ",
-            TrieuQuang: "Triều Quang",
-            Khac: "Khác"
+            TrieuQuang: "Triều Quang"
         };
 
         function getIconHTML(classType) {
@@ -297,7 +294,6 @@
         let checkedState = {}; 
         let supabaseClient = null;
 
-        // Chỉ giữ lại Scrim 1, Scrim 2, Scrim 3 và Bang Chiến (BC)
         const matchTypes = [
             { key: 'scrim1', label: 'Scrim 1' },
             { key: 'scrim2', label: 'Scrim 2' },
@@ -319,7 +315,8 @@
 
                 if (data && data.content) {
                     if (data.content.members) {
-                        membersList = data.content.members;
+                        // Lọc bỏ ngay các thành viên thuộc hệ phái 'Khac' hoặc không có classType
+                        membersList = data.content.members.filter(m => m.classType && m.classType !== 'Khac');
                     }
                     if (data.content.gaCheckedState) {
                         checkedState = data.content.gaCheckedState;
@@ -340,15 +337,15 @@
         function renderLeftList(list) {
             const container = document.getElementById('leftMemberList');
             container.innerHTML = '';
-            document.getElementById('leftTitle').innerText = `THÀNH VIÊN BANG ( ${membersList.length} )`;
+            document.getElementById('leftTitle').innerText = `THÀNH VIÊN BANG ( ${list.length} )`;
 
             if (!list || list.length === 0) {
-                container.innerHTML = '<div class="empty-history">Không tìm thấy thành viên nào từ trang Index.</div>';
+                container.innerHTML = '<div class="empty-history">Không có thành viên phái chính thức nào.</div>';
                 return;
             }
 
             list.forEach(m => {
-                const classType = m.classType || 'Khac';
+                const classType = m.classType;
                 const name = m.name;
                 if (!checkedState[name]) checkedState[name] = {};
 
@@ -368,7 +365,7 @@
                     <div class="member-info-left">
                         <span class="member-name">${name}</span>
                         <span class="member-class-tag class-${classType}">
-                            ${getIconHTML(classType)} ${classNamesMap[classType] || 'Khác'}
+                            ${getIconHTML(classType)} ${classNamesMap[classType]}
                         </span>
                     </div>
                     <div class="member-actions">
@@ -403,7 +400,6 @@
 
                     let currentContent = data && data.content ? data.content : {};
                     currentContent.gaCheckedState = checkedState;
-                    currentContent.members = membersList;
 
                     await supabaseClient
                         .from('squad_data')
@@ -443,8 +439,8 @@
                 card.innerHTML = `
                     <div class="member-info-left">
                         <span class="member-name">${item.name}</span>
-                        <span class="member-class-tag class-${item.classType || 'Khac'}">
-                            ${getIconHTML(item.classType)} ${classNamesMap[item.classType] || 'Khác'}
+                        <span class="member-class-tag class-${item.classType}">
+                            ${getIconHTML(item.classType)} ${classNamesMap[item.classType]}
                         </span>
                     </div>
                     <span style="font-size: 12px; color: #58a6ff; font-weight: bold;">[${item.type}]</span>
