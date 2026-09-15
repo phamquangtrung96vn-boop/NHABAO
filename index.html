@@ -418,9 +418,9 @@
         }
         .sub-table th input.col-name-input { width: 45px; font-size: 11px; }
 
-        /* Style cho thẻ tiêu đề cột Extra bên trái */
+        /* Cột Extra tiêu đề */
         .squad-table th.extra-col-header input.col-name-input {
-            width: 45px;
+            width: 55px;
             color: #e3b341;
         }
 
@@ -433,7 +433,7 @@
         .sub-table td { padding: 2px; height: 34px; }
         .squad-table td.stt { width: 3%; background: #0d1117; color: #6e7681; font-size: 12px; font-weight: bold; }
 
-        /* CSS tạo khoảng cách tách biệt giữa hàng 6 và 2 hàng dưới */
+        /* CSS phân cách giữa hàng 6 và 2 hàng dưới */
         .squad-table tr.separator-row td {
             border-top: 4px solid #388bfd;
             background: rgba(56, 139, 253, 0.05);
@@ -669,7 +669,7 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                         <tr id="headerRow1">
                             <th class="extra-col-header">
                                 <div class="pt-header-cell">
-                                    <input type="text" class="col-name-input" id="g1_extra" value="NOTS" oninput="saveData()" onclick="event.stopPropagation()">
+                                    <input type="text" class="col-name-input" id="g1_extra1" value="NOTS" oninput="saveData()" onclick="event.stopPropagation()">
                                 </div>
                             </th>
                             <th></th>
@@ -705,7 +705,7 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                         <tr id="headerRow2">
                             <th class="extra-col-header">
                                 <div class="pt-header-cell">
-                                    <input type="text" class="col-name-input" id="g2_extra" value="NOTS" oninput="saveData()" onclick="event.stopPropagation()">
+                                    <input type="text" class="col-name-input" id="g2_extra1" value="NOTS" oninput="saveData()" onclick="event.stopPropagation()">
                                 </div>
                             </th>
                             <th></th>
@@ -859,7 +859,8 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
         
         let columnNames = {
             res_col1: "DB1", res_col2: "DB2",
-            g1_extra: "NOTS", g2_extra: "NOTS"
+            g1_extra1: "NOTS", g1_extra2: "NOTS",
+            g2_extra1: "NOTS", g2_extra2: "NOTS"
         };
         for(let i=1; i<=10; i++) {
             columnNames[`g1_col${i}`] = `PT${i}`;
@@ -911,8 +912,10 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
             subHeaders.sub2 = document.getElementById('subHeader2Input').value;
             bigNoteContent = document.getElementById('bigNoteTextarea').value;
 
-            if(document.getElementById('g1_extra')) columnNames['g1_extra'] = document.getElementById('g1_extra').value;
-            if(document.getElementById('g2_extra')) columnNames['g2_extra'] = document.getElementById('g2_extra').value;
+            if(document.getElementById('g1_extra1')) columnNames['g1_extra1'] = document.getElementById('g1_extra1').value;
+            if(document.getElementById('g1_extra2')) columnNames['g1_extra2'] = document.getElementById('g1_extra2').value;
+            if(document.getElementById('g2_extra1')) columnNames['g2_extra1'] = document.getElementById('g2_extra1').value;
+            if(document.getElementById('g2_extra2')) columnNames['g2_extra2'] = document.getElementById('g2_extra2').value;
 
             for (let i = 1; i <= 10; i++) {
                 if(document.getElementById(`g1_col${i}`)) columnNames[`g1_col${i}`] = document.getElementById(`g1_col${i}`).value;
@@ -1008,8 +1011,10 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
             document.getElementById('subHeader2Input').value = subHeaders.sub2 || "Đội hình 10 PT tham chiến";
             document.getElementById('bigNoteTextarea').value = bigNoteContent || "";
 
-            if(columnNames['g1_extra'] && document.getElementById('g1_extra')) document.getElementById('g1_extra').value = columnNames['g1_extra'];
-            if(columnNames['g2_extra'] && document.getElementById('g2_extra')) document.getElementById('g2_extra').value = columnNames['g2_extra'];
+            if(columnNames['g1_extra1'] && document.getElementById('g1_extra1')) document.getElementById('g1_extra1').value = columnNames['g1_extra1'];
+            if(columnNames['g1_extra2'] && document.getElementById('g1_extra2')) document.getElementById('g1_extra2').value = columnNames['g1_extra2'];
+            if(columnNames['g2_extra1'] && document.getElementById('g2_extra1')) document.getElementById('g2_extra1').value = columnNames['g2_extra1'];
+            if(columnNames['g2_extra2'] && document.getElementById('g2_extra2')) document.getElementById('g2_extra2').value = columnNames['g2_extra2'];
 
             for (let i = 1; i <= 10; i++) {
                 if(columnNames[`g1_col${i}`] && document.getElementById(`g1_col${i}`)) document.getElementById(`g1_col${i}`).value = columnNames[`g1_col${i}`];
@@ -1029,20 +1034,23 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
             const tbody = document.getElementById(containerId);
             tbody.innerHTML = '';
             
-            // 6 hàng đầu tiên (Trận 1: 1-6)
+            // 6 hàng Trận 1: Dùng chung 1 ô gộp (rowspan = 6) cho cột extra bên trái
             for (let row = 1; row <= 6; row++) {
                 const tr = document.createElement('tr');
                 
-                // Cột phụ bên trái ngoài cùng (Extra)
-                const tdExtra = document.createElement('td');
-                const slotExtra = `${prefix}_r${row}_extra`;
-                tdExtra.innerHTML = `
-                    <div class="drop-zone" id="zone_${slotExtra}" 
-                         ondragover="handleDragOver(event)" 
-                         ondragleave="handleDragLeave(event)" 
-                         ondrop="handleDropSlot(event, '${slotExtra}')">
-                    </div>`;
-                tr.appendChild(tdExtra);
+                // Ô extra bên trái (chỉ tạo ở hàng 1 và gộp 6 hàng)
+                if (row === 1) {
+                    const tdExtra = document.createElement('td');
+                    tdExtra.rowSpan = 6;
+                    const slotExtra = `${prefix}_extra1`;
+                    tdExtra.innerHTML = `
+                        <div class="drop-zone" id="zone_${slotExtra}" 
+                             ondragover="handleDragOver(event)" 
+                             ondragleave="handleDragLeave(event)" 
+                             ondrop="handleDropSlot(event, '${slotExtra}')">
+                        </div>`;
+                    tr.appendChild(tdExtra);
+                }
 
                 const tdStt = document.createElement('td');
                 tdStt.className = 'stt';
@@ -1066,8 +1074,6 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
             // Dòng phân cách giữa hàng 6 và hàng 7 (Trận 2)
             const sepTr = document.createElement('tr');
             sepTr.className = 'separator-row';
-            const sepExtraTd = document.createElement('td');
-            sepTr.appendChild(sepExtraTd);
             const sepStt = document.createElement('td');
             sepStt.className = 'stt';
             sepTr.appendChild(sepStt);
@@ -1077,19 +1083,22 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
             }
             tbody.appendChild(sepTr);
 
-            // 2 hàng tiếp theo (Trận 2: 7-8)
+            // 2 hàng Trận 2 (7-8): Dùng chung 1 ô gộp (rowspan = 2) cho cột extra bên trái
             for (let row = 7; row <= 8; row++) {
                 const tr = document.createElement('tr');
                 
-                const tdExtra = document.createElement('td');
-                const slotExtra = `${prefix}_r${row}_extra`;
-                tdExtra.innerHTML = `
-                    <div class="drop-zone" id="zone_${slotExtra}" 
-                         ondragover="handleDragOver(event)" 
-                         ondragleave="handleDragLeave(event)" 
-                         ondrop="handleDropSlot(event, '${slotExtra}')">
-                    </div>`;
-                tr.appendChild(tdExtra);
+                if (row === 7) {
+                    const tdExtra = document.createElement('td');
+                    tdExtra.rowSpan = 2;
+                    const slotExtra = `${prefix}_extra2`;
+                    tdExtra.innerHTML = `
+                        <div class="drop-zone" id="zone_${slotExtra}" 
+                             ondragover="handleDragOver(event)" 
+                             ondragleave="handleDragLeave(event)" 
+                             ondrop="handleDropSlot(event, '${slotExtra}')">
+                        </div>`;
+                    tr.appendChild(tdExtra);
+                }
 
                 const tdStt = document.createElement('td');
                 tdStt.className = 'stt';
@@ -1323,7 +1332,7 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                 const slotId = zone.id.replace('zone_', '');
                 const memberName = squadSelections[slotId];
                 const isReserve = slotId.startsWith('res_');
-                const isExtraCol = slotId.includes('_extra');
+                const isExtraCol = slotId.includes('extra');
 
                 if (memberName) {
                     const memberObj = members.find(m => m.name === memberName);
@@ -1510,7 +1519,7 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                 commanders = { c1: "Đạo Đạo", c2: "Minh Sói Trần" };
                 subHeaders = { sub1: "Đội hình 10 PT tham chiến", sub2: "Đội hình 10 PT tham chiến" };
                 bigNoteContent = "";
-                columnNames = { res_col1: "DB1", res_col2: "DB2", g1_extra: "NOTS", g2_extra: "NOTS" };
+                columnNames = { res_col1: "DB1", res_col2: "DB2", g1_extra1: "NOTS", g1_extra2: "NOTS", g2_extra1: "NOTS", g2_extra2: "NOTS" };
                 for(let i=1; i<=10; i++) {
                     columnNames[`g1_col${i}`] = `PT${i}`;
                     columnNames[`g2_col${i}`] = `PT${i}`;
