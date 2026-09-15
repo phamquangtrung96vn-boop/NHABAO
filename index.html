@@ -317,6 +317,7 @@
             flex-direction: column;
             gap: 20px;
             overflow-x: auto;
+            max-width: 100%;
         }
 
         .group-box {
@@ -324,7 +325,7 @@
             border: 1px solid var(--border-color);
             border-radius: 6px;
             overflow: hidden;
-            min-width: 950px;
+            width: 100%;
         }
 
         .group-header {
@@ -378,25 +379,28 @@
         .squad-table, .sub-table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed; /* Giúp chia đều kích thước các cột không bị lệch méo */
         }
 
         .squad-table th, .sub-table th {
             background: #161b22;
             color: #8b949e;
-            padding: 4px;
+            padding: 4px 2px;
             font-size: 13px;
             border: 1px solid var(--border-color);
             position: relative;
+            overflow: hidden;
         }
 
         .pt-header-cell {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 2px;
             cursor: grab;
             padding: 2px;
             border-radius: 4px;
+            width: 100%;
         }
         .pt-header-cell.dragging-col { opacity: 0.4; }
         .squad-table th.col-drag-over, .sub-table th.col-drag-over {
@@ -412,26 +416,26 @@
             padding: 4px 2px;
             border-radius: 4px;
             outline: none;
-            font-size: 12px;
-            width: 65px;
+            font-size: 11px;
+            width: 100%;
             text-align: center;
         }
-        .sub-table th input.col-name-input { width: 45px; font-size: 11px; }
+        .sub-table th input.col-name-input { font-size: 11px; }
 
         /* Cột Extra tiêu đề */
         .squad-table th.extra-col-header input.col-name-input {
-            width: 55px;
             color: #e3b341;
         }
 
         .squad-table td, .sub-table td {
             border: 1px solid var(--border-color);
-            padding: 3px;
+            padding: 2px;
             text-align: center;
             height: 38px;
+            overflow: hidden;
         }
         .sub-table td { padding: 2px; height: 34px; }
-        .squad-table td.stt { width: 3%; background: #0d1117; color: #6e7681; font-size: 12px; font-weight: bold; }
+        .squad-table td.stt { width: 35px !important; background: #0d1117; color: #6e7681; font-size: 11px; font-weight: bold; }
 
         /* CSS phân cách giữa hàng 6 và 2 hàng dưới */
         .squad-table tr.separator-row td {
@@ -452,10 +456,11 @@
             background: rgba(255, 255, 255, 0.02);
             border: 1px dashed transparent;
             transition: all 0.2s;
+            overflow: hidden;
         }
         .sub-table .drop-zone { min-height: 28px; }
         .drop-zone.drag-over { border-color: #58a6ff; background: rgba(88, 166, 255, 0.15); }
-        .drop-zone .empty-text { color: #484f58; font-size: 11px; font-weight: bold; }
+        .drop-zone .empty-text { color: #484f58; font-size: 10px; font-weight: bold; }
 
         .class-ThietY    { background-color: #facc15 !important; color: #111; }
         .class-HuyetHa   { background-color: #dc2626 !important; color: #fff; }
@@ -667,12 +672,12 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                 <table class="squad-table">
                     <thead>
                         <tr id="headerRow1">
-                            <th class="extra-col-header">
+                            <th style="width: 50px;" class="extra-col-header">
                                 <div class="pt-header-cell">
                                     <input type="text" class="col-name-input" id="g1_extra1" value="NOTS" oninput="saveData()" onclick="event.stopPropagation()">
                                 </div>
                             </th>
-                            <th></th>
+                            <th style="width: 35px;"></th>
                             <script>
                                 for(let i=1; i<=10; i++) {
                                     document.write(`
@@ -703,12 +708,12 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                 <table class="squad-table">
                     <thead>
                         <tr id="headerRow2">
-                            <th class="extra-col-header">
+                            <th style="width: 50px;" class="extra-col-header">
                                 <div class="pt-header-cell">
                                     <input type="text" class="col-name-input" id="g2_extra1" value="NOTS" oninput="saveData()" onclick="event.stopPropagation()">
                                 </div>
                             </th>
-                            <th></th>
+                            <th style="width: 35px;"></th>
                             <script>
                                 for(let i=1; i<=10; i++) {
                                     document.write(`
@@ -1034,11 +1039,9 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
             const tbody = document.getElementById(containerId);
             tbody.innerHTML = '';
             
-            // 6 hàng Trận 1: Dùng chung 1 ô gộp (rowspan = 6) cho cột extra bên trái
             for (let row = 1; row <= 6; row++) {
                 const tr = document.createElement('tr');
                 
-                // Ô extra bên trái (chỉ tạo ở hàng 1 và gộp 6 hàng)
                 if (row === 1) {
                     const tdExtra = document.createElement('td');
                     tdExtra.rowSpan = 6;
@@ -1071,7 +1074,6 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                 tbody.appendChild(tr);
             }
 
-            // Dòng phân cách giữa hàng 6 và hàng 7 (Trận 2)
             const sepTr = document.createElement('tr');
             sepTr.className = 'separator-row';
             const sepStt = document.createElement('td');
@@ -1083,7 +1085,6 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
             }
             tbody.appendChild(sepTr);
 
-            // 2 hàng Trận 2 (7-8): Dùng chung 1 ô gộp (rowspan = 2) cho cột extra bên trái
             for (let row = 7; row <= 8; row++) {
                 const tr = document.createElement('tr');
                 
@@ -1341,11 +1342,11 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                         zone.innerHTML = `
                             <div class="member-card class-${memberObj.classType}" 
                                  draggable="true" 
-                                 style="width: 100%; height: 100%; font-size: ${isExtraCol ? '11px' : 'inherit'}; padding: ${isExtraCol ? '2px 4px' : '6px 10px'};"
+                                 style="width: 100%; height: 100%; font-size: ${isExtraCol ? '10px' : '11px'}; padding: ${isExtraCol ? '2px' : '4px'};"
                                  ondragstart="handleDragStart(event, '${memberObj.name}')" 
                                  ondragend="handleDragEnd(event)">
                                 <span>${iconHtml} <span class="member-name-text">${memberObj.name}</span></span>
-                                <i class="fa-solid fa-xmark" style="cursor:pointer; font-size: ${isReserve || isExtraCol ? '10px' : 'inherit'}" title="Bỏ khỏi đội" onclick="removeFromSlot('${slotId}')"></i>
+                                <i class="fa-solid fa-xmark" style="cursor:pointer; font-size: 10px;" title="Bỏ khỏi đội" onclick="removeFromSlot('${slotId}')"></i>
                             </div>
                         `;
                     } else {
