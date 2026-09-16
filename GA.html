@@ -10,9 +10,6 @@
     
     <!-- Thư viện SheetJS (XLSX) để xuất file Excel -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    
-    <!-- Supabase Library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         :root {
@@ -35,7 +32,7 @@
             padding: 15px;
         }
 
-        /* KHUNG LOGIN OVERLAY */
+        /* KHUNG LOGIN OVERLAY (CHỈ HIỆN KHI CHƯA ĐĂNG NHẬP) */
         #loginOverlay {
             position: fixed;
             top: 0;
@@ -99,6 +96,7 @@
             color: #2ea043;
             text-transform: uppercase;
             letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(46, 160, 67, 0.4);
         }
 
         .subtitle {
@@ -107,6 +105,7 @@
             color: #8b949e;
             margin-bottom: 20px;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .input-group {
@@ -133,6 +132,11 @@
             font-size: 13px;
         }
 
+        .input-group input:focus {
+            border-color: #2ea043;
+            box-shadow: 0 0 5px rgba(35, 134, 54, 0.5);
+        }
+
         button[type="submit"] {
             width: 100%;
             padding: 11px;
@@ -144,6 +148,13 @@
             border-radius: 4px;
             cursor: pointer;
             text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(35, 134, 54, 0.4);
+            transition: 0.2s;
+        }
+
+        button[type="submit"]:hover {
+            background: linear-gradient(to bottom, #2ea043, #238636);
         }
 
         .error {
@@ -179,6 +190,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            transition: 0.2s;
         }
         .btn-back:hover { background: #30363d; color: #fff; }
 
@@ -233,8 +245,10 @@
         }
 
         .search-input { flex: 1; }
-        .filter-select { width: 150px; }
+        .filter-select { width: 100%; }
+        .search-input:focus, .filter-select:focus { outline: none; border-color: #58a6ff; }
 
+        /* KHU VỰC CHỌN TẤT CẢ THEO CỘT */
         .select-all-bar {
             background: #1f242c;
             border: 1px dashed var(--border-color);
@@ -308,7 +322,7 @@
             align-items: center;
             cursor: pointer;
             color: #c9d1d9;
-            width: 58px;
+            width: 58px; /* Cố định chiều rộng để các cột thẳng hàng */
         }
 
         .checkbox-group input {
@@ -379,7 +393,7 @@
     <div id="loginOverlay">
         <div class="login-container">
             <div class="badge-image-container">
-                <img src="dragon.png" alt="Biểu Tượng Rồng Xanh" onerror="this.src='https://via.placeholder.com/110'">
+                <img src="dragon.png" alt="Biểu Tượng Rồng Xanh">
             </div>
 
             <div class="login-box">
@@ -407,7 +421,7 @@
     <!-- NỘI DUNG QUẢN LÝ GA -->
     <div class="header-banner">
         <span><i class="fa-solid fa-users-gear"></i> QUẢN LÝ DANH SÁCH GA & THÀNH VIÊN BANG</span>
-        <a href="index (3).html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Về Sơ Đồ</a>
+        <a href="index.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Về Sơ Đồ</a>
     </div>
 
     <div class="main-layout">
@@ -419,7 +433,7 @@
             <div class="filter-container">
                 <div class="filter-row">
                     <input type="text" class="search-input" id="searchInput" placeholder="Tìm kiếm tên thành viên..." oninput="filterMembers()">
-                    <select class="filter-select" id="classFilter" onchange="filterMembers()">
+                    <select class="filter-select" id="classFilter" style="width: 150px;" onchange="filterMembers()">
                         <option value="">Tất cả môn phái</option>
                         <option value="ThietY">Thiết Y</option>
                         <option value="HuyetHa">Huyết Hà</option>
@@ -433,19 +447,20 @@
                     </select>
                 </div>
                 
+                <!-- THANH CHỌN TẤT CẢ THEO KẾT QUẢ LỌC -->
                 <div class="select-all-bar">
                     <span><i class="fa-solid fa-check-double"></i> Chọn nhanh theo lọc:</span>
                     <div class="select-all-group">
-                        <label class="checkbox-group" title="Chọn tất cả Scrim 1">
+                        <label class="checkbox-group" title="Chọn tất cả Scrim 1 cho danh sách đang lọc">
                             <input type="checkbox" id="checkAll_scrim1" onchange="toggleSelectAllColumn('scrim1', this.checked)"> S1
                         </label>
-                        <label class="checkbox-group" title="Chọn tất cả Scrim 2">
+                        <label class="checkbox-group" title="Chọn tất cả Scrim 2 cho danh sách đang lọc">
                             <input type="checkbox" id="checkAll_scrim2" onchange="toggleSelectAllColumn('scrim2', this.checked)"> S2
                         </label>
-                        <label class="checkbox-group" title="Chọn tất cả Scrim 3">
+                        <label class="checkbox-group" title="Chọn tất cả Scrim 3 cho danh sách đang lọc">
                             <input type="checkbox" id="checkAll_scrim3" onchange="toggleSelectAllColumn('scrim3', this.checked)"> S3
                         </label>
-                        <label class="checkbox-group" title="Chọn tất cả Bang Chiến">
+                        <label class="checkbox-group" title="Chọn tất cả Bang Chiến cho danh sách đang lọc">
                             <input type="checkbox" id="checkAll_bc" onchange="toggleSelectAllColumn('bc', this.checked)"> BC
                         </label>
                     </div>
@@ -505,7 +520,7 @@
 
         let membersList = [];
         let checkedState = {}; 
-        let currentFilteredList = []; 
+        let currentFilteredList = []; // Lưu danh sách đang được lọc trên màn hình
         let supabaseClient = null;
 
         const matchTypes = [
@@ -515,11 +530,12 @@
             { key: 'bc', label: 'BC' }
         ];
 
+        // Tự động kiểm tra trạng thái đăng nhập
         window.addEventListener('DOMContentLoaded', () => {
             const isLoggedIn = sessionStorage.getItem("isLoggedIn");
             if (isLoggedIn === "true") {
                 document.getElementById('loginOverlay').style.display = 'none';
-                initSupabaseAndLoadData();
+                loadSupabaseAndInit();
             } else {
                 document.getElementById('loginOverlay').style.display = 'flex';
             }
@@ -536,36 +552,38 @@
             if (user === correctUser && pass === correctPass) {
                 sessionStorage.setItem("isLoggedIn", "true");
                 document.getElementById('loginOverlay').style.display = 'none';
-                initSupabaseAndLoadData();
+                loadSupabaseAndInit();
             } else {
                 document.getElementById('errorMsg').innerText = "Sai tài khoản hoặc mật khẩu!";
             }
         }
 
-        async function initSupabaseAndLoadData() {
+        function loadSupabaseAndInit() {
+            const script = document.createElement('script');
+            script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+            script.onload = initApp;
+            document.head.appendChild(script);
+        }
+
+        async function initApp() {
             try {
                 const SUPABASE_URL = 'https://shblqenkrzjuklzrvoie.supabase.co';
                 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYmxxZW5rcnpqdWtsenJ2b2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NzA4MjMsImV4cCI6MjEwNDU0NjgyM30.I8bsjcbR3dNYm99kHan8mLj9X7jcNuPEzFQTk9jUups';
-                
-                if (window.supabase) {
-                    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                }
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-                if (supabaseClient) {
-                    let { data, error } = await supabaseClient
-                        .from('squad_data')
-                        .select('*')
-                        .eq('id', 'main_config')
-                        .maybeSingle();
+                let { data, error } = await supabaseClient
+                    .from('squad_data')
+                    .select('*')
+                    .eq('id', 'main_config')
+                    .maybeSingle();
 
-                    if (data && data.content) {
-                        if (data.content.members) {
-                            membersList = data.content.members.filter(m => m.classType && m.classType !== 'Khac');
-                            membersList.sort((a, b) => a.classType.localeCompare(b.classType));
-                        }
-                        if (data.content.gaCheckedState) {
-                            checkedState = data.content.gaCheckedState;
-                        }
+                if (data && data.content) {
+                    if (data.content.members) {
+                        membersList = data.content.members.filter(m => m.classType && m.classType !== 'Khac');
+                        membersList.sort((a, b) => a.classType.localeCompare(b.classType));
+                    }
+                    if (data.content.gaCheckedState) {
+                        checkedState = data.content.gaCheckedState;
                     }
                 }
             } catch (err) {
@@ -625,7 +643,7 @@
                     <div class="member-info-left">
                         <span class="member-name">${name}</span>
                         <span class="member-class-tag class-${classType}">
-                            ${getIconHTML(classType)} ${classNamesMap[classType] || classType}
+                            ${getIconHTML(classType)} ${classNamesMap[classType]}
                         </span>
                     </div>
                     <div class="member-actions">
@@ -636,6 +654,7 @@
             });
         }
 
+        // Xử lý chọn tất cả cho toàn bộ danh sách đang hiển thị (lọc)
         async function toggleSelectAllColumn(scrimType, isChecked) {
             if (currentFilteredList.length === 0) return;
 
@@ -648,9 +667,10 @@
 
             renderLeftList(currentFilteredList);
             renderRightHistory();
-            await saveStateToCloud();
+            saveStateToCloud();
         }
 
+        // Cập nhật trạng thái hiển thị của ô checkbox "Chọn tất cả" phía trên
         function updateSelectAllCheckboxesState() {
             matchTypes.forEach(type => {
                 const checkbox = document.getElementById(`checkAll_${type.key}`);
@@ -669,7 +689,7 @@
                     checkbox.indeterminate = false;
                 } else if (checkedCount > 0) {
                     checkbox.checked = false;
-                    checkbox.indeterminate = true; 
+                    checkbox.indeterminate = true; // Hiển thị trạng thái bán phần nếu chọn một số người
                 } else {
                     checkbox.checked = false;
                     checkbox.indeterminate = false;
@@ -685,26 +705,27 @@
             
             renderRightHistory();
             updateSelectAllCheckboxesState();
-            await saveStateToCloud();
+            saveStateToCloud();
         }
 
         async function saveStateToCloud() {
-            if (!supabaseClient) return;
-            try {
-                let { data } = await supabaseClient
-                    .from('squad_data')
-                    .select('*')
-                    .eq('id', 'main_config')
-                    .maybeSingle();
+            if (supabaseClient) {
+                try {
+                    let { data } = await supabaseClient
+                        .from('squad_data')
+                        .select('*')
+                        .eq('id', 'main_config')
+                        .maybeSingle();
 
-                let currentContent = data && data.content ? data.content : {};
-                currentContent.gaCheckedState = checkedState;
+                    let currentContent = data && data.content ? data.content : {};
+                    currentContent.gaCheckedState = checkedState;
 
-                await supabaseClient
-                    .from('squad_data')
-                    .upsert({ id: 'main_config', content: currentContent });
-            } catch (err) {
-                console.log("Lỗi lưu cloud:", err);
+                    await supabaseClient
+                        .from('squad_data')
+                        .upsert({ id: 'main_config', content: currentContent });
+                } catch (err) {
+                    console.log("Lỗi lưu cloud:", err);
+                }
             }
         }
 
@@ -745,7 +766,7 @@
                     <div class="member-info-left">
                         <span class="member-name">${item.name}</span>
                         <span class="member-class-tag class-${item.classType}">
-                            ${getIconHTML(item.classType)} ${classNamesMap[item.classType] || item.classType}
+                            ${getIconHTML(item.classType)} ${classNamesMap[item.classType]}
                         </span>
                     </div>
                     <span style="font-size: 12px; color: #58a6ff; font-weight: bold;">[${item.type}]</span>
@@ -758,7 +779,7 @@
             if (confirm("Bạn có chắc chắn muốn xóa hết các tích chọn không?")) {
                 checkedState = {};
                 renderAll();
-                await saveStateToCloud();
+                saveStateToCloud();
                 alert("🗑️ Đã xóa và cập nhật lên Cloud thành công!");
             }
         }
