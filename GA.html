@@ -364,6 +364,7 @@
         let checkedState = {}; 
         let currentFilteredList = []; 
         let supabaseClient = null;
+        let cloudRawData = null; // Biến lưu toàn bộ object từ DB để tránh làm mất các cấu hình khác của index.html
 
         const matchTypes = [
             { key: 'scrim1', label: 'S1' },
@@ -372,7 +373,6 @@
             { key: 'bc', label: 'BC' }
         ];
 
-        // BỎ XÁC MINH ĐĂNG NHẬP, TỰ ĐỘNG TẢI TRỰC TIẾP KHI VỪA VÀO TRANG
         window.addEventListener('DOMContentLoaded', () => {
             loadSupabaseAndInit();
         });
@@ -396,13 +396,16 @@
                     .eq('id', 'main_config')
                     .maybeSingle();
 
-                if (data && data.content) {
-                    if (data.content.members) {
-                        membersList = data.content.members.filter(m => m.classType && m.classType !== 'Khac');
-                        membersList.sort((a, b) => a.classType.localeCompare(b.classType));
-                    }
-                    if (data.content.gaCheckedState) {
-                        checkedState = data.content.gaCheckedState;
+                if (data) {
+                    cloudRawData = data; // Giữ lại nguyên bản record từ DB
+                    if (data.content) {
+                        if (data.content.members) {
+                            membersList = data.content.members.filter(m => m.classType && m.classType !== 'Khac');
+                            membersList.sort((a, b) => a.classType.localeCompare(b.classType));
+                        }
+                        if (data.content.gaCheckedState) {
+                            checkedState = data.content.gaCheckedState;
+                        }
                     }
                 }
             } catch (err) {
@@ -530,13 +533,16 @@
             }
 
             try {
-                let { data, error: fetchError } = await supabaseClient
+                // Lấy mới nhất từ database để bảo vệ các dữ liệu do index.html quản lý
+                let { data } = await supabaseClient
                     .from('squad_data')
                     .select('*')
                     .eq('id', 'main_config')
                     .maybeSingle();
 
                 let currentContent = data && data.content ? data.content : {};
+                
+                // Cập nhật riêng phần tích chọn GA vào cấu trúc content chung
                 currentContent.gaCheckedState = checkedState;
 
                 let { error: upsertError } = await supabaseClient
