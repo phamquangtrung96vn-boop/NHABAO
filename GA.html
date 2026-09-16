@@ -413,13 +413,13 @@
                     .maybeSingle();
 
                 if (data && data.content) {
-                    // Ưu tiên tải danh sách thành viên GA riêng đã lưu trên Cloud (nếu có)
+                    // CHỈ LẤY danh sách riêng của GA (`gaMembersList`), KHÔNG tự động lấy từ index nữa
                     if (data.content.gaMembersList && data.content.gaMembersList.length > 0) {
                         membersList = data.content.gaMembersList;
-                    } else if (data.content.members) {
-                        // Fallback lần đầu tiên lấy từ index nếu chưa lưu riêng
-                        membersList = data.content.members.filter(m => m.classType && m.classType !== 'Khac');
+                    } else {
+                        membersList = [];
                     }
+                    
                     membersList.sort((a, b) => a.classType.localeCompare(b.classType));
 
                     if (data.content.gaCheckedState) {
@@ -436,7 +436,7 @@
         // Nút đồng bộ thủ công từ trang Sơ đồ (index)
         async function syncMembersFromIndex() {
             if (!supabaseClient) return;
-            if (!confirm("Bạn có muốn cập nhật lại danh sách thành viên từ trang Sơ đồ không?")) return;
+            if (!confirm("Bạn có muốn cập nhật danh sách thành viên mới từ trang Sơ đồ không?")) return;
 
             try {
                 let { data } = await supabaseClient
@@ -449,7 +449,7 @@
                     membersList = data.content.members.filter(m => m.classType && m.classType !== 'Khac');
                     membersList.sort((a, b) => a.classType.localeCompare(b.classType));
                     renderAll();
-                    alert("🔄 Đồng bộ danh sách thành viên thành công! Hãy bấm 'Lưu Cloud' để giữ lại.");
+                    alert("🔄 Đồng bộ thành viên thành công! Hãy bấm nút 'Lưu Cloud' màu xanh lá bên phải để lưu lại chính thức.");
                 } else {
                     alert("⚠️ Không tìm thấy dữ liệu thành viên ở Sơ đồ.");
                 }
@@ -483,7 +483,7 @@
             document.getElementById('leftTitle').innerText = `THÀNH VIÊN BANG ( ${list.length} )`;
 
             if (!list || list.length === 0) {
-                container.innerHTML = '<div class="empty-history">Không tìm thấy thành viên phù hợp.</div>';
+                container.innerHTML = '<div class="empty-history">Chưa có danh sách thành viên. Hãy bấm nút "Đồng bộ DS" ở trên để lấy danh sách từ Sơ đồ.</div>';
                 return;
             }
 
@@ -584,7 +584,7 @@
 
                 let currentContent = data && data.content ? data.content : {};
                 
-                // Lưu độc lập cả danh sách thành viên hiện tại của GA và các trạng thái tích
+                // Lưu độc lập danh sách thành viên GA và các tích chọn lên Cloud
                 currentContent.gaMembersList = membersList;
                 currentContent.gaCheckedState = checkedState;
 
