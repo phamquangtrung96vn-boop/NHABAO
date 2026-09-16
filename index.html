@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sơ Đồ Đội Hình Bang Chiến - Nghịch Thủy Hàn</title>
     
-    <!-- ĐÃ ĐỔI SANG localStorage ĐỂ DÙNG CHUNG PHIÊN ĐĂNG NHẬP VỚI TRANG GA -->
+    <!-- ĐOẠN CODE BẢO VỆ TRANG CHỦ -->
     <script>
-        if (localStorage.getItem("isLoggedIn") !== "true") {
+        if (sessionStorage.getItem("isLoggedIn") !== "true") {
             window.location.href = "login.html";
         }
     </script>
@@ -593,7 +593,7 @@
     <div class="title-banner">
         <span><i class="fa-solid fa-shield-halved"></i> ĐỘI HÌNH BANG CHIẾN - NGHỊCH THỦY HÀN</span>
         <div class="toolbar-btns">
-            <!-- Đã đổi tên file GA khớp với dự án của bạn (GA.html hoặc GA (1).html) -->
+            <!-- Đã thêm nút GA màu vàng nằm cạnh nút Lưu Lên Cloud -->
             <a href="GA.html" class="btn-action btn-ga"><i class="fa-solid fa-bolt"></i> GA</a>
             <button class="btn-action btn-save-cloud" onclick="manualSaveToCloud()"><i class="fa-solid fa-cloud-arrow-up"></i> Lưu Lên Cloud</button>
             <button class="btn-action btn-discord" onclick="openDiscordModal()"><i class="fa-brands fa-discord"></i> Gửi Discord</button>
@@ -774,7 +774,7 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                                     </div>
                                 </th>
                                 <th id="th_res_col2" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'res', 2)">
-                                    <div class="pt-header-cell" draggable="true" ondragstart="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'res', 2)">
+                                    <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'res', 2)" ondragend="handleColDragEnd(event)">
                                         <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 9px;"></i>
                                         <input type="text" class="col-name-input" id="res_col2" value="DB2" oninput="saveData()" onclick="event.stopPropagation()">
                                     </div>
@@ -801,7 +801,7 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                     <div class="stats-grid" id="statsGridContainer"></div>
                 </div>
 
-                <!-- KHUNG TỔNG SỐ NGOÀI PHÁI KHÁC -->
+                <!-- THÊM KHUNG TỔNG SỐ NGOÀI PHÁI KHÁC Ở VỊ TRÍ BẠN YÊU CẦU -->
                 <div class="stats-box" style="margin-top: 4px;">
                     <h4><i class="fa-solid fa-users"></i> TỔNG SỐ (NGOÀI PHÁI KHÁC)</h4>
                     <div style="text-align: center; padding: 5px; font-size: 13px; font-weight: bold; color: #58a6ff;" id="nonKhacStatsCount">
@@ -1420,7 +1420,7 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                 const total = counts[classKey];
 
                 if (classKey !== 'Khac') {
-                    nonKhacTotal += total; 
+                    nonKhacTotal += total; // Tính tổng số lượng thành viên hiện có ngoài phái Khác
                 }
 
                 const item = document.createElement('div');
@@ -1434,6 +1434,7 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                 container.appendChild(item);
             });
 
+            // Cập nhật giá trị vào khung tổng số ngoài phái Khác (/80)
             document.getElementById('nonKhacStatsCount').innerText = `${nonKhacTotal} / 80`;
         }
 
