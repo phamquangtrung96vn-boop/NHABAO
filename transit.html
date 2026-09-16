@@ -183,13 +183,13 @@
     </footer>
 
     <script>
-        // Kiểm tra bảo mật dùng chung localStorage để giữ phiên đăng nhập
-        window.addEventListener('DOMContentLoaded', () => {
+        // --- BẢO MẬT: KIỂM TRA ĐĂNG NHẬP ---
+        (function checkAuth() {
             const isLoggedIn = localStorage.getItem('isLoggedIn');
-            if (!isLoggedIn) {
-                window.location.href = 'login.html';
+            if (!isLoggedIn || isLoggedIn !== 'true') {
+                window.location.href = 'index.html';
             }
-        });
+        })();
 
         // Hàm điều hướng mở trang khi click vào card
         function openPage(pageName) {
