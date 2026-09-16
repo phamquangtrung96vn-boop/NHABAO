@@ -91,9 +91,6 @@
         .btn-reset { background: #da3633; color: #fff; border: none; }
         .btn-reset:hover { background: #f85149; }
 
-        .btn-logout { background: #8957e5; color: #fff; border: none; }
-        .btn-logout:hover { background: #6f42c1; }
-
         .layout-container {
             display: grid;
             grid-template-columns: 290px 1fr 310px;
@@ -576,7 +573,6 @@
             <button class="btn-action" onclick="document.getElementById('importFileInput').click()"><i class="fa-solid fa-upload"></i> Nhập File</button>
             <input type="file" id="importFileInput" style="display:none" accept=".json" onchange="importData(event)">
             <button class="btn-action btn-reset" onclick="resetAllData()"><i class="fa-solid fa-rotate-right"></i> Reset</button>
-            <button class="btn-action btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất</button>
         </div>
     </div>
 
@@ -748,7 +744,7 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                                     </div>
                                 </th>
                                 <th id="th_res_col2" ondragover="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'res', 2)">
-                                    <div class="pt-header-cell" draggable="true" ondragstart="handleColDragOver(event)" ondragleave="handleColDragLeave(event)" ondrop="handleColDrop(event, 'res', 2)">
+                                    <div class="pt-header-cell" draggable="true" ondragstart="handleColDragStart(event, 'res', 2)" ondragend="handleColDragEnd(event)">
                                         <i class="fa-solid fa-grip-vertical" style="color: #484f58; font-size: 9px;"></i>
                                         <input type="text" class="col-name-input" id="res_col2" value="DB2" oninput="saveData()" onclick="event.stopPropagation()">
                                     </div>
@@ -868,27 +864,7 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
         let draggedMemberName = null;
         let draggedColInfo = null;
 
-        // KIỂM TRA ĐĂNG NHẬP (BẢO VỆ TRANG)
-        async function checkAuth() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                // Nếu chưa đăng nhập, đá về trang login (thay thế bằng tên file login của bạn nếu khác)
-                window.location.href = 'login.html';
-                return false;
-            }
-            return true;
-        }
-
-        async function logout() {
-            await supabaseClient.auth.signOut();
-            window.location.href = 'login.html';
-        }
-
         async function initApp() {
-            // Kiểm tra bảo mật trước tiên
-            const isLogged = await checkAuth();
-            if (!isLogged) return;
-
             await loadDataFromCloud();
             initTables();
             loadSavedInputs();
