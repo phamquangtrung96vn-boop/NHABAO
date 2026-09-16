@@ -302,7 +302,7 @@
                             <input type="checkbox" id="checkAll_scrim3" onchange="toggleSelectAllColumn('scrim3', this.checked)"> S3
                         </label>
                         <label class="checkbox-group" title="Chọn tất cả Bang Chiến cho danh sách đang lọc">
-                            <input type="checkbox" id="checkAll_bc" onchange="toggleSelectAllColumn('bc', this.checked)"> BC
+                            <input type="checkbox" id="checkAll_bc" onchange="toggleSelectAllColumn('scrim3', this.checked)"> BC
                         </label>
                     </div>
                 </div>
@@ -364,7 +364,6 @@
         let checkedState = {}; 
         let currentFilteredList = []; 
         let supabaseClient = null;
-        let cloudRawData = null; // Biến lưu toàn bộ object từ DB để tránh làm mất các cấu hình khác của index.html
 
         const matchTypes = [
             { key: 'scrim1', label: 'S1' },
@@ -396,23 +395,22 @@
                     .eq('id', 'main_config')
                     .maybeSingle();
 
-                if (data) {
-                    cloudRawData = data; // Giữ lại nguyên bản record từ DB
-                    if (data.content) {
-                        if (data.content.members) {
-                            membersList = data.content.members.filter(m => m.classType && m.classType !== 'Khac');
-                            membersList.sort((a, b) => a.classType.localeCompare(b.classType));
-                        }
-                        if (data.content.gaCheckedState) {
-                            checkedState = data.content.gaCheckedState;
-                        }
+                if (data && data.content) {
+                    if (data.content.members) {
+                        membersList = data.content.members.filter(m => m.classType && m.classType !== 'Khac');
+                        membersList.sort((a, b) => a.classType.localeCompare(b.classType));
+                    }
+                    if (data.content.gaCheckedState) {
+                        checkedState = data.content.gaCheckedState; // Nạp chính xác dữ liệu tích cũ từ Cloud lên
+                    } else {
+                        checkedState = {};
                     }
                 }
             } catch (err) {
                 console.log("Lỗi tải dữ liệu cloud:", err);
             }
 
-            renderAll();
+            renderAll(); // Vẽ lại giao diện sau khi đã có dữ liệu chuẩn từ Cloud
         }
 
         function renderAll() {
@@ -533,7 +531,7 @@
             }
 
             try {
-                // Lấy mới nhất từ database để bảo vệ các dữ liệu do index.html quản lý
+                // Tải dữ liệu mới nhất trên cloud về trước để không làm mất các thông tin cấu hình khác
                 let { data } = await supabaseClient
                     .from('squad_data')
                     .select('*')
@@ -541,9 +539,7 @@
                     .maybeSingle();
 
                 let currentContent = data && data.content ? data.content : {};
-                
-                // Cập nhật riêng phần tích chọn GA vào cấu trúc content chung
-                currentContent.gaCheckedState = checkedState;
+                currentContent.gaCheckedState = checkedState; // Gán danh sách tích hiện tại vào gói dữ liệu chung
 
                 let { error: upsertError } = await supabaseClient
                     .from('squad_data')
