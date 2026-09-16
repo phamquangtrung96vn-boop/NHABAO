@@ -90,7 +90,7 @@
             color: var(--text-muted);
         }
 
-        /* Grid Cards */
+        /* Grid Cards - Cho phép tự động co giãn 2 hàng nếu nhiều hơn 4 ô */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -154,6 +154,7 @@
         .card-chien-thuat { --card-accent: #f59e0b; --accent-glow: rgba(245, 158, 11, 0.3); }
         .card-pov { --card-accent: #ec4899; --accent-glow: rgba(236, 72, 153, 0.3); }
         .card-ga { --card-accent: #10b981; --accent-glow: rgba(16, 185, 129, 0.3); }
+        .card-vong-quay { --card-accent: #8b5cf6; --accent-glow: rgba(139, 92, 246, 0.3); } /* Màu tím cho vòng quay */
 
         /* Footer */
         footer {
@@ -204,6 +205,13 @@
                 <i class="fa-solid fa-clipboard-check"></i>
                 <h3>GA</h3>
                 <p>Quản lý danh sách điểm danh, phần thưởng và hoạt động tương tác.</p>
+            </div>
+
+            <!-- Vòng Quay May Mắn (Thêm mới đúng vị trí yêu cầu) -->
+            <div class="nav-card card-vong-quay" onclick="openPage('vongquaymayman.html')">
+                <i class="fa-solid fa-dharmachakra"></i>
+                <h3>Vòng Quay May Mắn</h3>
+                <p>Quay thưởng trực tiếp chọn ngẫu nhiên tên thành viên tham gia sự kiện.</p>
             </div>
         </div>
     </div>
