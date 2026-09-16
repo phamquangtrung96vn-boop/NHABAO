@@ -342,6 +342,9 @@
                     </div>
                     <button class="btn-mini success" onclick="saveToCloudCustom()"><i class="fa-solid fa-cloud-arrow-up"></i> Lưu Cloud</button>
                     <button class="btn-mini" onclick="exportExcel()"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button>
+                    <button class="btn-mini" onclick="exportJson()"><i class="fa-solid fa-file-arrow-down"></i> Xuất JSON</button>
+                    <button class="btn-mini" onclick="document.getElementById('importJsonFile').click()"><i class="fa-solid fa-file-arrow-up"></i> Nhập JSON</button>
+                    <input type="file" id="importJsonFile" style="display:none" accept=".json" onchange="importJson(event)">
                     <button class="btn-mini danger" onclick="clearHistory()"><i class="fa-solid fa-trash"></i> Xóa Hết</button>
                 </div>
             </div>
@@ -400,15 +403,12 @@
             loadSupabaseAndInit();
         });
 
-        // 1. Copy danh sách thành viên trực tiếp từ localStorage của trang index
+        // Copy danh sách thành viên trực tiếp từ localStorage của trang index
         function loadMembersFromIndexLocal() {
             try {
-                // Kiểm tra các key lưu trữ dữ liệu sơ đồ thường dùng trên index (ví dụ: squad_members hoặc tương tự)
-                // Hoặc quét qua localStorage tìm dữ liệu thành viên
                 let rawData = localStorage.getItem('squad_members') || localStorage.getItem('members') || localStorage.getItem('bang_members');
                 
                 if (!rawData) {
-                    // Thử tìm trong các key khác nếu index lưu theo cấu trúc cũ
                     for (let i = 0; i < localStorage.length; i++) {
                         let key = localStorage.key(i);
                         let val = localStorage.getItem(key);
@@ -460,7 +460,6 @@
                     .maybeSingle();
 
                 if (data && data.content) {
-                    // Nếu localStorage trống, có thể fallback lấy từ Cloud của index nếu trang index có lưu lên đó
                     if (membersList.length === 0) {
                         if (data.content.members && data.content.members.length > 0) {
                             membersList = data.content.members.filter(m => m.classType && m.classType !== 'Khac');
@@ -790,6 +789,45 @@
 
             const currentKey = getCurrentCustomName().replace(/[^a-zA-Z0-9]/g, '_');
             XLSX.writeFile(workbook, `DanhSach_GA_${currentKey}.xlsx`);
+        }
+
+        // Xuất file JSON toàn bộ dữ liệu lịch sử tích chọn
+        function exportJson() {
+            const dataToExport = {
+                historyByDate: historyByDate
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "quan_ly_ga_data.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        // Nhập file JSON vào ứng dụng
+        function importJson(event) {
+            const fileReader = new FileReader();
+            if (event.target.files && event.target.files[0]) {
+                fileReader.readAsText(event.target.files[0], "UTF-8");
+                fileReader.onload = (e) => {
+                    try {
+                        const parsedData = JSON.parse(e.target.result);
+                        if (parsedData.historyByDate) {
+                            historyByDate = parsedData.historyByDate;
+                            updateComboboxOptions();
+                            renderAll();
+                            alert("✅ Nhập file JSON thành công!");
+                        } else {
+                            alert("⚠️ Định dạng file JSON không hợp lệ!");
+                        }
+                    } catch (error) {
+                        alert("❌ Lỗi đọc file JSON: " + error.message);
+                    }
+                    // Reset input file để có thể chọn lại file cũ nếu cần
+                    event.target.value = '';
+                };
+            }
         }
     </script>
 </body>
