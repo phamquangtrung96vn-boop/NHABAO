@@ -322,7 +322,7 @@
             align-items: center;
             cursor: pointer;
             color: #c9d1d9;
-            width: 58px; /* Cố định chiều rộng để các cột thẳng hàng */
+            width: 58px;
         }
 
         .checkbox-group input {
@@ -332,7 +332,7 @@
             height: 14px;
         }
 
-        .right-toolbar { display: flex; gap: 8px; }
+        .right-toolbar { display: flex; gap: 6px; }
 
         .btn-mini {
             background: #21262d;
@@ -346,6 +346,8 @@
             align-items: center;
             gap: 4px;
         }
+        .btn-mini.success { color: #3fb950; border-color: rgba(63, 185, 80, 0.4); }
+        .btn-mini.success:hover { background: #238636; color: #fff; }
         .btn-mini.danger { color: #f85149; border-color: rgba(248,81,73,0.4); }
         .btn-mini:hover { background: #30363d; }
 
@@ -476,6 +478,7 @@
             <div class="panel-title">
                 <span id="rightTitle">DANH SÁCH THAM GIA GA ( 0 )</span>
                 <div class="right-toolbar">
+                    <button class="btn-mini success" onclick="manualSaveToCloud()"><i class="fa-solid fa-cloud-arrow-up"></i> Lưu Cloud</button>
                     <button class="btn-mini" onclick="exportExcel()"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button>
                     <button class="btn-mini danger" onclick="clearHistory()"><i class="fa-solid fa-trash"></i> Xóa Hết</button>
                 </div>
@@ -520,7 +523,7 @@
 
         let membersList = [];
         let checkedState = {}; 
-        let currentFilteredList = []; // Lưu danh sách đang được lọc trên màn hình
+        let currentFilteredList = []; 
         let supabaseClient = null;
 
         const matchTypes = [
@@ -530,7 +533,6 @@
             { key: 'bc', label: 'BC' }
         ];
 
-        // Tự động kiểm tra trạng thái đăng nhập
         window.addEventListener('DOMContentLoaded', () => {
             const isLoggedIn = sessionStorage.getItem("isLoggedIn");
             if (isLoggedIn === "true") {
@@ -566,7 +568,6 @@
         }
 
         async function initApp() {
-            // Đọc tạm từ localStorage trước để hiển thị ngay lập tức không cần đợi mạng
             const localState = localStorage.getItem('gaCheckedState');
             if (localState) {
                 try {
@@ -665,7 +666,6 @@
             });
         }
 
-        // Xử lý chọn tất cả cho toàn bộ danh sách đang hiển thị (lọc)
         async function toggleSelectAllColumn(scrimType, isChecked) {
             if (currentFilteredList.length === 0) return;
 
@@ -678,10 +678,9 @@
 
             renderLeftList(currentFilteredList);
             renderRightHistory();
-            saveStateToCloud();
+            autoSaveLocal();
         }
 
-        // Cập nhật trạng thái hiển thị của ô checkbox "Chọn tất cả" phía trên
         function updateSelectAllCheckboxesState() {
             matchTypes.forEach(type => {
                 const checkbox = document.getElementById(`checkAll_${type.key}`);
@@ -700,7 +699,7 @@
                     checkbox.indeterminate = false;
                 } else if (checkedCount > 0) {
                     checkbox.checked = false;
-                    checkbox.indeterminate = true; // Hiển thị trạng thái bán phần nếu chọn một số người
+                    checkbox.indeterminate = true;
                 } else {
                     checkbox.checked = false;
                     checkbox.indeterminate = false;
@@ -716,30 +715,44 @@
             
             renderRightHistory();
             updateSelectAllCheckboxesState();
-            saveStateToCloud();
+            autoSaveLocal();
         }
 
-        async function saveStateToCloud() {
-            // Lưu tức thì vào localStorage thiết bị để chống mất dữ liệu khi chuyển trang ngay lập tức
+        function autoSaveLocal() {
             localStorage.setItem('gaCheckedState', JSON.stringify(checkedState));
+        }
 
-            if (supabaseClient) {
-                try {
-                    let { data } = await supabaseClient
-                        .from('squad_data')
-                        .select('*')
-                        .eq('id', 'main_config')
-                        .maybeSingle();
+        // Nút lưu thủ công lên Cloud để bạn kiểm soát và hiện thông báo
+        async function manualSaveToCloud() {
+            autoSaveLocal();
+            if (!supabaseClient) {
+                alert("⚠️ Chưa kết nối được tới Supabase!");
+                return;
+            }
 
-                    let currentContent = data && data.content ? data.content : {};
-                    currentContent.gaCheckedState = checkedState;
+            try {
+                let { data, error: fetchError } = await supabaseClient
+                    .from('squad_data')
+                    .select('*')
+                    .eq('id', 'main_config')
+                    .maybeSingle();
 
-                    await supabaseClient
-                        .from('squad_data')
-                        .upsert({ id: 'main_config', content: currentContent });
-                } catch (err) {
-                    console.log("Lỗi lưu cloud:", err);
+                let currentContent = data && data.content ? data.content : {};
+                currentContent.gaCheckedState = checkedState;
+
+                let { error: upsertError } = await supabaseClient
+                    .from('squad_data')
+                    .upsert({ id: 'main_config', content: currentContent });
+
+                if (upsertError) {
+                    console.error("Supabase error:", upsertError);
+                    alert("❌ Lỗi khi lưu lên Cloud: " + upsertError.message);
+                } else {
+                    alert("☁️ Lưu lên Cloud thành công! Dữ liệu đã an toàn tuyệt đối.");
                 }
+            } catch (err) {
+                console.error("Lỗi:", err);
+                alert("❌ Có lỗi xảy ra khi lưu: " + err.message);
             }
         }
 
@@ -792,10 +805,9 @@
         async function clearHistory() {
             if (confirm("Bạn có chắc chắn muốn xóa hết các tích chọn không?")) {
                 checkedState = {};
-                localStorage.removeItem('gaCheckedState'); // Xóa bộ nhớ đệm
+                localStorage.removeItem('gaCheckedState');
                 renderAll();
-                saveStateToCloud();
-                alert("🗑️ Đã xóa và cập nhật lên Cloud thành công!");
+                manualSaveToCloud();
             }
         }
 
