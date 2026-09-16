@@ -46,22 +46,6 @@
             align-items: center;
         }
 
-        .btn-back {
-            background: #21262d;
-            color: #c9d1d9;
-            border: 1px solid var(--border-color);
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: 0.2s;
-        }
-        .btn-back:hover { background: #30363d; color: #fff; }
-
         .main-layout {
             display: grid;
             grid-template-columns: 1.3fr 1fr;
@@ -280,7 +264,6 @@
     <!-- NỘI DUNG QUẢN LÝ GA -->
     <div class="header-banner">
         <span><i class="fa-solid fa-users-gear"></i> QUẢN LÝ DANH SÁCH GA & THÀNH VIÊN BANG</span>
-        <a href="index.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Về Sơ Đồ</a>
     </div>
 
     <div class="main-layout">
@@ -339,12 +322,10 @@
                         <select id="historySelect" class="custom-combobox" onchange="onCustomNameChange()">
                         </select>
                         <button class="btn-mini" onclick="addNewCustomName()" title="Thêm danh sách mới"><i class="fa-solid fa-plus"></i></button>
+                        <button class="btn-mini danger" onclick="deleteCurrentCustomName()" title="Xóa danh sách đang chọn"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                     <button class="btn-mini success" onclick="saveToCloudCustom()"><i class="fa-solid fa-cloud-arrow-up"></i> Lưu Cloud</button>
                     <button class="btn-mini" onclick="exportExcel()"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button>
-                    <button class="btn-mini" onclick="exportJson()"><i class="fa-solid fa-file-arrow-down"></i> Xuất JSON</button>
-                    <button class="btn-mini" onclick="document.getElementById('importJsonFile').click()"><i class="fa-solid fa-file-arrow-up"></i> Nhập JSON</button>
-                    <input type="file" id="importJsonFile" style="display:none" accept=".json" onchange="importJson(event)">
                     <button class="btn-mini danger" onclick="clearHistory()"><i class="fa-solid fa-trash"></i> Xóa Hết</button>
                 </div>
             </div>
@@ -490,6 +471,22 @@
 
             updateComboboxOptions(trimmedName);
             renderAll();
+        }
+
+        function deleteCurrentCustomName() {
+            const currentKey = getCurrentCustomName();
+            const keys = Object.keys(historyByDate);
+
+            if (keys.length <= 1) {
+                alert("⚠️ Phải giữ lại ít nhất một danh sách, không thể xóa!");
+                return;
+            }
+
+            if (confirm(`Bạn có chắc chắn muốn xóa hẳn danh sách "${currentKey}" này không?`)) {
+                delete historyByDate[currentKey];
+                updateComboboxOptions();
+                renderAll();
+            }
         }
 
         function getCurrentDateState() {
@@ -757,42 +754,6 @@
 
             const currentKey = getCurrentCustomName().replace(/[^a-zA-Z0-9]/g, '_');
             XLSX.writeFile(workbook, `DanhSach_GA_${currentKey}.xlsx`);
-        }
-
-        function exportJson() {
-            const dataToExport = {
-                historyByDate: historyByDate
-            };
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "quan_ly_ga_data.json");
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        }
-
-        function importJson(event) {
-            const fileReader = new FileReader();
-            if (event.target.files && event.target.files[0]) {
-                fileReader.readAsText(event.target.files[0], "UTF-8");
-                fileReader.onload = (e) => {
-                    try {
-                        const parsedData = JSON.parse(e.target.result);
-                        if (parsedData.historyByDate) {
-                            historyByDate = parsedData.historyByDate;
-                            updateComboboxOptions();
-                            renderAll();
-                            alert("✅ Nhập file JSON thành công!");
-                        } else {
-                            alert("⚠️ Định dạng file JSON không hợp lệ!");
-                        }
-                    } catch (error) {
-                        alert("❌ Lỗi đọc file JSON: " + error.message);
-                    }
-                    event.target.value = '';
-                };
-            }
         }
     </script>
 </body>
