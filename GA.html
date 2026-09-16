@@ -470,7 +470,7 @@
             </div>
 
             <div class="member-scroll-list" id="leftMemberList">
-                <div class="empty-history">Đang đồng bộ dữ liệu từ Cloud...</div>
+                <div class="empty-history">Đang tải dữ liệu từ Cloud...</div>
             </div>
         </div>
 
@@ -568,15 +568,6 @@
         }
 
         async function initApp() {
-            const localState = localStorage.getItem('gaCheckedState');
-            if (localState) {
-                try {
-                    checkedState = JSON.parse(localState);
-                } catch (e) {
-                    console.log("Lỗi đọc localStorage", e);
-                }
-            }
-
             try {
                 const SUPABASE_URL = 'https://shblqenkrzjuklzrvoie.supabase.co';
                 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYmxxZW5rcnpqdWtsenJ2b2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NzA4MjMsImV4cCI6MjEwNDU0NjgyM30.I8bsjcbR3dNYm99kHan8mLj9X7jcNuPEzFQTk9jUups';
@@ -595,11 +586,10 @@
                     }
                     if (data.content.gaCheckedState) {
                         checkedState = data.content.gaCheckedState;
-                        localStorage.setItem('gaCheckedState', JSON.stringify(checkedState));
                     }
                 }
             } catch (err) {
-                console.log("Lỗi đồng bộ cloud:", err);
+                console.log("Lỗi tải dữ liệu cloud:", err);
             }
 
             renderAll();
@@ -666,7 +656,7 @@
             });
         }
 
-        async function toggleSelectAllColumn(scrimType, isChecked) {
+        function toggleSelectAllColumn(scrimType, isChecked) {
             if (currentFilteredList.length === 0) return;
 
             currentFilteredList.forEach(m => {
@@ -678,7 +668,6 @@
 
             renderLeftList(currentFilteredList);
             renderRightHistory();
-            autoSaveLocal();
         }
 
         function updateSelectAllCheckboxesState() {
@@ -707,7 +696,7 @@
             });
         }
 
-        async function toggleScrim(name, scrimType, isChecked) {
+        function toggleScrim(name, scrimType, isChecked) {
             if (!checkedState[name]) {
                 checkedState[name] = {};
             }
@@ -715,15 +704,9 @@
             
             renderRightHistory();
             updateSelectAllCheckboxesState();
-            autoSaveLocal();
-        }
-
-        function autoSaveLocal() {
-            localStorage.setItem('gaCheckedState', JSON.stringify(checkedState));
         }
 
         async function manualSaveToCloud() {
-            autoSaveLocal();
             if (!supabaseClient) {
                 alert("⚠️ Chưa kết nối được tới Supabase!");
                 return;
@@ -747,7 +730,7 @@
                     console.error("Supabase error:", upsertError);
                     alert("❌ Lỗi khi lưu lên Cloud: " + upsertError.message);
                 } else {
-                    alert("☁️ Lưu lên Cloud thành công! Dữ liệu đã an toàn tuyệt đối.");
+                    alert("☁️ Lưu lên Cloud thành công! Dữ liệu đã được cập nhật chính thức.");
                 }
             } catch (err) {
                 console.error("Lỗi:", err);
@@ -801,12 +784,10 @@
             });
         }
 
-        async function clearHistory() {
-            if (confirm("Bạn có chắc chắn muốn xóa hết các tích chọn không?")) {
+        function clearHistory() {
+            if (confirm("Bạn có chắc chắn muốn xóa hết các tích chọn trên màn hình không? (Cần bấm 'Lưu Cloud' sau đó nếu muốn cập nhật lên server)")) {
                 checkedState = {};
-                localStorage.removeItem('gaCheckedState');
                 renderAll();
-                manualSaveToCloud();
             }
         }
 
