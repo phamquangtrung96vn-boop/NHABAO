@@ -386,6 +386,13 @@
         ];
 
         window.addEventListener('DOMContentLoaded', () => {
+            // KIỂM TRA KHÓA BẢO MẬT ĐĂNG NHẬP
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (!isLoggedIn) {
+                window.location.href = 'login_2.html'; // Hoặc 'login.html' tùy thuộc tên file trang đăng nhập của bạn
+                return;
+            }
+
             loadSupabaseAndInit();
         });
 
