@@ -6,6 +6,8 @@
     <title>Chiếc Nón Kỳ Diệu - Vòng Quay Tên</title>
     <!-- Thư viện hiệu ứng pháo giấy Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Thư viện Supabase để lấy dữ liệu từ GA -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -29,7 +31,7 @@
             display: inline-block;
             margin-top: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            max-width: 400px;
+            max-width: 420px;
             width: 100%;
         }
 
@@ -72,8 +74,8 @@
             background: rgba(0, 0, 0, 0.4);
             border: 2px solid #ffd700;
             border-radius: 12px;
-            width: 320px; /* Tăng chiều ngang */
-            height: 480px; /* Chiều dọc cố định vừa đúng khoảng 10 người */
+            width: 320px;
+            height: 480px;
             padding: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             text-align: left;
@@ -95,12 +97,11 @@
             list-style-type: none;
             padding: 0;
             margin: 0;
-            overflow-y: auto; /* Chỉ hiện thanh cuộn khi vượt quá 10 người */
+            overflow-y: auto;
             flex-grow: 1;
             padding-right: 5px;
         }
 
-        /* Tùy chỉnh thanh cuộn gọn gàng hơn */
         .winner-list::-webkit-scrollbar {
             width: 6px;
         }
@@ -123,7 +124,6 @@
             animation: fadeIn 0.5s ease-in-out;
         }
 
-        /* Hiệu ứng nổi bật cho người vừa trúng thưởng mới nhất */
         .winner-list li.latest-winner {
             background: rgba(255, 215, 0, 0.4);
             border: 1px solid #ffd700;
@@ -136,7 +136,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Cây kim chỉ vị trí */
         .pointer {
             width: 0;
             height: 0;
@@ -149,7 +148,6 @@
             filter: drop-shadow(0 -2px 2px rgba(0,0,0,0.5));
         }
 
-        /* Khung chứa vòng quay Canvas */
         .wheel-wrapper {
             position: relative;
             width: 400px;
@@ -176,8 +174,8 @@
             background-color: #ffd700;
             color: #333;
             border: none;
-            padding: 10px 25px;
-            font-size: 16px;
+            padding: 10px 20px;
+            font-size: 15px;
             font-weight: bold;
             border-radius: 30px;
             cursor: pointer;
@@ -196,12 +194,27 @@
             transform: none;
         }
 
+        .btn-secondary {
+            background-color: #238636;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #2ea043;
+        }
+
         .btn-back {
             background-color: #ff4757;
             color: white;
         }
         .btn-back:hover {
             background-color: #ff6b81;
+        }
+
+        .setup-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         .result-text {
@@ -231,13 +244,16 @@
     <!-- MÀN HÌNH NHẬP DANH SÁCH -->
     <div class="setup-screen" id="setupScreen">
         <h3>Nhập danh sách tên của bạn</h3>
-        <p style="font-size: 13px; color: #ddd; margin-top: -5px;">Mỗi người một dòng:</p>
+        <p style="font-size: 13px; color: #ddd; margin-top: -5px;">Mỗi người một dòng hoặc lấy từ trang GA:</p>
         <textarea id="nameListInput" placeholder="Nguyễn Văn A&#10;Trần Thị B&#10;Lê Văn C&#10;Phạm Thị D">Nguyễn Văn A
 Trần Thị B
 Lê Văn C
 Phạm Thị D</textarea>
         <br>
-        <button onclick="initGame()">Tạo Vòng Quay</button>
+        <div class="setup-buttons">
+            <button class="btn-secondary" onclick="loadListFromGA()"><i class="fa-solid fa-cloud-arrow-down"></i> Lấy DS từ GA</button>
+            <button onclick="initGame()">Tạo Vòng Quay</button>
+        </div>
     </div>
 
     <!-- MÀN HÌNH QUAY -->
@@ -268,12 +284,106 @@ Phạm Thị D</textarea>
         </div>
     </div>
 
+    <!-- Thêm FontAwesome icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <script>
         let names = [];
         let winners = [];
         let currentRotation = 0;
         let isSpinning = false;
         const colors = ['#ff4757', '#2ed573', '#1e90ff', '#ffa502', '#9b59b6', '#00d2d3', '#ff6b81', '#eccc68'];
+
+        let supabaseClient = null;
+
+        // Khởi tạo Supabase kết nối chung cơ sở dữ liệu
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                const SUPABASE_URL = 'https://shblqenkrzjuklzrvoie.supabase.co';
+                const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYmxxZW5rcnpqdWtsenJ2b2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NzA4MjMsImV4cCI6MjEwNDU0NjgyM30.I8bsjcbR3dNYm99kHan8mLj9X7jcNuPEzFQTk9jUups';
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } catch(e) {
+                console.log("Lỗi khởi tạo Supabase:", e);
+            }
+        });
+
+        // Hàm tự động lấy danh sách thành viên đã được tích chọn từ trang GA
+        async function loadListFromGA() {
+            if (!supabaseClient) {
+                alert("⚠️ Chưa kết nối được tới cơ sở dữ liệu Supabase!");
+                return;
+            }
+
+            try {
+                let { data: gaData, error } = await supabaseClient
+                    .from('ga_data')
+                    .select('*')
+                    .eq('id', 'main_ga_config')
+                    .maybeSingle();
+
+                if (error) {
+                    alert("❌ Lỗi tải dữ liệu GA: " + error.message);
+                    return;
+                }
+
+                if (gaData && gaData.content) {
+                    const historyByDate = gaData.content.historyByDate || {};
+                    const membersList = gaData.content.members || [];
+
+                    // Lấy tất cả tên các buổi/danh sách hiện có từ trang GA
+                    const keys = Object.keys(historyByDate);
+                    if (keys.length === 0) {
+                        alert("⚠️ Không tìm thấy buổi tích chọn nào trong dữ liệu GA!");
+                        return;
+                    }
+
+                    // Cho phép người dùng chọn buổi muốn lấy danh sách hoặc mặc định lấy buổi đầu tiên / mới nhất
+                    let targetKey = keys[keys.length - 1]; // Lấy buổi cuối cùng
+                    if (keys.length > 1) {
+                        let promptMsg = "Danh sách các buổi trong GA:\n" + keys.map((k, idx) => `${idx + 1}. ${k}`).join("\n") + "\n\nNhập tên hoặc số thứ tự buổi bạn muốn lấy:";
+                        let choice = prompt(promptMsg, targetKey);
+                        if (!choice) return;
+                        
+                        let trimmed = choice.trim();
+                        if (keys.includes(trimmed)) {
+                            targetKey = trimmed;
+                        } else {
+                            let idx = parseInt(trimmed) - 1;
+                            if (!isNaN(idx) && keys[idx]) {
+                                targetKey = keys[idx];
+                            } else {
+                                alert("⚠️ Buổi bạn nhập không tồn tại!");
+                                return;
+                            }
+                        }
+                    }
+
+                    const checkedState = historyByDate[targetKey] || {};
+                    let selectedNames = [];
+
+                    // Lọc ra những thành viên có tích chọn bất kỳ ô nào (S1, S2, S3, BC) trong buổi đó
+                    membersList.forEach(m => {
+                        const state = checkedState[m.name];
+                        if (state && (state.scrim1 || state.scrim2 || state.scrim3 || state.bc)) {
+                            selectedNames.push(m.name);
+                        }
+                    });
+
+                    if (selectedNames.length === 0) {
+                        alert(`⚠️ Không có thành viên nào được tích chọn trong danh sách "${targetKey}"!`);
+                        return;
+                    }
+
+                    // Điền danh sách vào ô textarea
+                    document.getElementById("nameListInput").value = selectedNames.join('\n');
+                    alert(`✅ Đã tải thành công ${selectedNames.length} thành viên từ danh sách [${targetKey}] của trang GA vào vòng quay!`);
+                } else {
+                    alert("⚠️ Chưa có dữ liệu GA được lưu trên Cloud.");
+                }
+            } catch (err) {
+                alert("❌ Lỗi kết nối lấy dữ liệu GA: " + err.message);
+            }
+        }
 
         // --- GIAI ĐIỆU ĐẦY ĐỦ XỔ SỐ KIẾN THIẾT MIỀN BẮC ---
         let audioCtx = null;
@@ -449,7 +559,6 @@ Phạm Thị D</textarea>
                 stopFullLottoMusic();
                 document.getElementById("result").innerText = `🎉 Chúc mừng: ${winner} đã trúng thưởng! 🎉`;
 
-                // Bắn pháo giấy hoành tráng
                 confetti({
                     particleCount: 120,
                     spread: 80,
@@ -482,9 +591,9 @@ Phạm Thị D</textarea>
                         document.getElementById("result").innerText = 'Hãy bấm "Quay Ngay" để tiếp tục!';
                     }
 
-                }, 3000); // 3 giây chờ trước khi xóa
+                }, 3000);
 
-            }, 6000); // 6 giây thời gian quay
+            }, 6000);
         }
 
         function updateWinnerBoard() {
@@ -492,7 +601,6 @@ Phạm Thị D</textarea>
             listEl.innerHTML = "";
             winners.forEach((person, index) => {
                 const li = document.createElement("li");
-                // Nếu là người vừa trúng thưởng mới nhất, thêm class hiệu ứng nổi bật
                 if (index === winners.length - 1) {
                     li.classList.add("latest-winner");
                 }
