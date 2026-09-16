@@ -386,12 +386,13 @@
         ];
 
         window.addEventListener('DOMContentLoaded', () => {
-            // KIỂM TRA KHÓA BẢO MẬT ĐĂNG NHẬP
+            // --- BẢO MẬT: KIỂM TRA ĐĂNG NHẬP ---
+        (function checkAuth() {
             const isLoggedIn = localStorage.getItem('isLoggedIn');
-            if (!isLoggedIn) {
-                window.location.href = 'index.html'; // Hoặc 'login.html' tùy thuộc tên file trang đăng nhập của bạn
-                return;
+            if (!isLoggedIn || isLoggedIn !== 'true') {
+                window.location.href = 'index.html';
             }
+        })();
 
             loadSupabaseAndInit();
         });
