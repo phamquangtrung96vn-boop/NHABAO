@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản Lý Danh Sách GA & Thành Viên Bang</title>
-    
+
     <!-- FontAwesome Icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- Thư viện SheetJS (XLSX) để xuất file Excel -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
     <style>
         :root {
             --bg-main: #0d1117;
@@ -29,786 +28,312 @@
         body {
             background-color: var(--bg-main);
             color: var(--text-color);
-            padding: 15px;
+            padding: 20px;
         }
 
-        /* GIAO DIỆN CHÍNH */
-        .header-banner {
-            background: #161b22;
+        .title-banner {
+            background: linear-gradient(90deg, #161b22, #21262d);
+            color: #f0f6fc;
             padding: 12px 20px;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
+            letter-spacing: 1px;
             border-radius: 6px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             border: 1px solid var(--border-color);
+            text-transform: uppercase;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .main-layout {
-            display: grid;
-            grid-template-columns: 1.3fr 1fr;
-            gap: 15px;
-            height: calc(100vh - 90px);
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
         }
 
-        .panel {
+        .action-btn {
+            background: #21262d;
+            color: #c9d1d9;
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+        .action-btn:hover { background: #30363d; color: #fff; }
+
+        .btn-cloud { background: #238636; color: white; border: none; }
+        .btn-cloud:hover { background: #2ea043; }
+
+        .btn-logout { background: #da3633; color: white; border: none; }
+        .btn-logout:hover { background: #f85149; }
+
+        .main-container {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            padding: 20px;
         }
 
-        .panel-title {
-            color: #58a6ff;
-            margin-bottom: 12px;
-            font-size: 15px;
-            font-weight: bold;
+        .controls-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
-        .filter-container {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-
-        .filter-row {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .search-input, .filter-select {
+        .search-box input {
+            width: 300px;
+            padding: 8px 12px;
             background: #0d1117;
             border: 1px solid var(--border-color);
             color: #fff;
-            padding: 8px 12px;
             border-radius: 4px;
             font-size: 13px;
+            outline: none;
         }
 
-        .search-input { flex: 1; }
-        .filter-select { width: 140px; }
-        .search-input:focus, .filter-select:focus { outline: none; border-color: #58a6ff; }
-
-        /* KHU VỰC CHỌN TẤT CẢ THEO CỘT */
-        .select-all-bar {
-            background: #1f242c;
-            border: 1px dashed var(--border-color);
-            padding: 8px 12px;
-            border-radius: 4px;
+        .toolbar-right {
             display: flex;
-            justify-content: space-between;
+            gap: 8px;
             align-items: center;
-            font-size: 12px;
-            color: #58a6ff;
-            margin-bottom: 8px;
         }
 
-        .select-all-group {
-            display: flex;
-            gap: 12px;
-        }
-
-        .member-scroll-list {
-            flex: 1;
-            overflow-y: auto;
+        .member-list {
             display: flex;
             flex-direction: column;
             gap: 8px;
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
             padding-right: 4px;
         }
 
-        .member-card {
-            background: #21262d;
+        .member-item {
+            background: #0d1117;
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 10px 12px;
+            padding: 10px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 13px;
         }
 
-        .member-info-left {
+        .member-name {
+            font-weight: bold;
+            color: #f0f6fc;
+            font-size: 14px;
             display: flex;
-            flex-direction: column;
-            gap: 4px;
-            min-width: 120px;
+            align-items: center;
+            gap: 10px;
         }
 
-        .member-name { font-weight: bold; color: #fff; }
-
-        .member-class-tag {
+        .member-role {
             font-size: 11px;
-            padding: 1px 6px;
+            background: #21262d;
+            border: 1px solid var(--border-color);
+            padding: 2px 6px;
             border-radius: 4px;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            width: fit-content;
-            font-weight: 600;
+            color: #8b949e;
         }
 
-        .member-actions {
+        .ga-checks {
             display: flex;
-            flex-wrap: wrap;
-            gap: 8px 12px;
-            max-width: 270px;
-            justify-content: flex-end;
+            gap: 15px;
+            align-items: center;
         }
 
-        .checkbox-group {
-            display: flex;
-            gap: 4px;
-            font-size: 11px;
-            align-items: center;
+        .ga-checks label {
+            font-size: 12px;
+            color: #8b949e;
             cursor: pointer;
-            color: #c9d1d9;
-            width: 58px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
-        .checkbox-group input {
+        .ga-checks input[type="checkbox"] {
             accent-color: #238636;
             cursor: pointer;
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
         }
 
-        .right-toolbar { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
-
-        .custom-select-group {
-            display: flex;
-            gap: 4px;
-            align-items: center;
-        }
-
-        .custom-combobox {
-            background: #0d1117;
-            border: 1px solid var(--border-color);
-            color: #fff;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-        }
-        .custom-combobox:focus { outline: none; border-color: #58a6ff; }
-
-        .btn-mini {
-            background: #21262d;
-            color: #c9d1d9;
-            border: 1px solid var(--border-color);
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 11px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .btn-mini.success { color: #3fb950; border-color: rgba(63, 185, 80, 0.4); }
-        .btn-mini.success:hover { background: #238636; color: #fff; }
-        .btn-mini.danger { color: #f85149; border-color: rgba(248,81,73,0.4); }
-        .btn-mini.info { color: #58a6ff; border-color: rgba(88, 166, 255, 0.4); }
-        .btn-mini.info:hover { background: #1f6feb; color: #fff; }
-        .btn-mini.warning { color: #d29922; border-color: rgba(210, 153, 34, 0.4); }
-        .btn-mini.warning:hover { background: #9e6a03; color: #fff; }
-        .btn-mini:hover { background: #30363d; }
-
-        .history-content {
-            flex: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .empty-history {
-            color: #8b949e;
-            font-style: italic;
+        .empty-msg {
             text-align: center;
-            margin-top: 40px;
+            color: #8b949e;
+            padding: 30px;
             font-size: 13px;
-        }
-
-        /* Màu sắc hệ phái chuẩn */
-        .class-ThietY    { background-color: #facc15 !important; color: #111; }
-        .class-HuyetHa   { background-color: #dc2626 !important; color: #fff; }
-        .class-ToaiMong  { background-color: #7dd3fc !important; color: #111; }
-        .class-ThanTuang { background-color: #1d4ed8 !important; color: #fff; }
-        .class-CuuLinh   { background-color: #831843 !important; color: #fff; }
-        .class-ToVan     { background-color: #ec4899 !important; color: #fff; }
-        .class-LongNgam  { background-color: #166534 !important; color: #fff; }
-        .class-HuyenCo   { background-color: #475569 !important; color: #fff; }
-        .class-TrieuQuang{ background-color: #0284c7 !important; color: #fff; }
-
-        .custom-spear-icon {
-            width: 12px;
-            height: 12px;
-            display: inline-block;
-            vertical-align: middle;
-            background-color: currentColor;
-            -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 250"><path d="M50 0 L85 45 L70 105 L60 115 L60 215 L70 225 L50 250 L30 225 L40 215 L40 115 L30 105 L15 45 Z M50 20 L35 55 L50 95 L65 55 Z"/></svg>') no-repeat center / contain;
-            mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 250"><path d="M50 0 L85 45 L70 105 L60 115 L60 215 L70 225 L50 250 L30 225 L40 215 L40 115 L30 105 L15 45 Z M50 20 L35 55 L50 95 L65 55 Z"/></svg>') no-repeat center / contain;
         }
     </style>
 </head>
 <body>
 
-    <!-- NỘI DUNG QUẢN LÝ GA -->
-    <div class="header-banner">
-        <span><i class="fa-solid fa-users-gear"></i> QUẢN LÝ DANH SÁCH GA & THÀNH VIÊN BANG</span>
-        <button class="btn-mini warning" onclick="syncMembersFromSquad()"><i class="fa-solid fa-sync"></i> Đồng bộ thành viên từ Đội Hình</button>
+    <!-- KIỂM TRA BẢO MẬT ĐĂNG NHẬP -->
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (!isLoggedIn) {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userRole');
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <div class="title-banner">
+        <span><i class="fa-solid fa-clipboard-check"></i> Quản Lý Danh Sách GA & Thành Viên Bang</span>
+        <div class="nav-buttons">
+            <a href="transit.html" class="action-btn"><i class="fa-solid fa-shuffle"></i> Trang Transit</a>
+            <a href="index.html" class="action-btn"><i class="fa-solid fa-arrow-left"></i> Về Đội Hình</a>
+            <button onclick="saveToCloud()" class="action-btn btn-cloud"><i class="fa-solid fa-cloud-arrow-up"></i> Lưu Cloud</button>
+            <button onclick="logout()" class="action-btn btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất</button>
+        </div>
     </div>
 
-    <div class="main-layout">
-        <div class="panel">
-            <div class="panel-title">
-                <span id="leftTitle">THÀNH VIÊN BANG ( 0 )</span>
+    <div class="main-container">
+        <div class="controls-bar">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Tìm kiếm tên thành viên..." oninput="renderMemberList()">
             </div>
-            
-            <div class="filter-container">
-                <div class="filter-row">
-                    <input type="text" class="search-input" id="searchInput" placeholder="Tìm kiếm tên thành viên..." oninput="filterMembers()">
-                    <select class="filter-select" id="classFilter" onchange="filterMembers()">
-                        <option value="">Tất cả phái</option>
-                        <option value="ThietY">Thiết Y</option>
-                        <option value="HuyetHa">Huyết Hà</option>
-                        <option value="ToaiMong">Toái Mộng</option>
-                        <option value="ThanTuang">Thần Tương</option>
-                        <option value="ToVan">Tố Vấn</option>
-                        <option value="CuuLinh">Cửu Linh</option>
-                        <option value="LongNgam">Long Ngâm</option>
-                        <option value="HuyenCo">Huyền Cơ</option>
-                        <option value="TrieuQuang">Triều Quang</option>
-                    </select>
-                </div>
-                
-                <!-- THANH CHỌN TẤT CẢ THEO KẾT QUẢ LỌC -->
-                <div class="select-all-bar">
-                    <span><i class="fa-solid fa-check-double"></i> Chọn nhanh theo lọc:</span>
-                    <div class="select-all-group">
-                        <label class="checkbox-group" title="Chọn tất cả Scrim 1">
-                            <input type="checkbox" id="checkAll_scrim1" onchange="toggleSelectAllColumn('scrim1', this.checked)"> S1
-                        </label>
-                        <label class="checkbox-group" title="Chọn tất cả Scrim 2">
-                            <input type="checkbox" id="checkAll_scrim2" onchange="toggleSelectAllColumn('scrim2', this.checked)"> S2
-                        </label>
-                        <label class="checkbox-group" title="Chọn tất cả Scrim 3">
-                            <input type="checkbox" id="checkAll_scrim3" onchange="toggleSelectAllColumn('scrim3', this.checked)"> S3
-                        </label>
-                        <label class="checkbox-group" title="Chọn tất cả Bang Chiến">
-                            <input type="checkbox" id="checkAll_bc" onchange="toggleSelectAllColumn('bc', this.checked)"> BC
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="member-scroll-list" id="leftMemberList">
-                <div class="empty-history">Đang tải dữ liệu...</div>
+            <div class="toolbar-right">
+                <span id="memberCount" style="font-size: 13px; color: #8b949e; font-weight: bold;">Tổng số: 0 thành viên</span>
             </div>
         </div>
 
-        <div class="panel">
-            <div class="panel-title">
-                <span id="rightTitle">DANH SÁCH THAM GIA ( 0 )</span>
-                <div class="right-toolbar">
-                    <div class="custom-select-group">
-                        <select id="historySelect" class="custom-combobox" onchange="onCustomNameChange()">
-                        </select>
-                        <button class="btn-mini" onclick="addNewCustomName()" title="Thêm danh sách mới"><i class="fa-solid fa-plus"></i></button>
-                        <button class="btn-mini danger" onclick="deleteCurrentCustomName()" title="Xóa danh sách đang chọn"><i class="fa-solid fa-trash-can"></i></button>
-                    </div>
-                    <button class="btn-mini success" onclick="saveToCloudCustom()"><i class="fa-solid fa-cloud-arrow-up"></i> Lưu Cloud</button>
-                    <button class="btn-mini info" onclick="exportJSON()" title="Xuất dữ liệu dự phòng ra file JSON"><i class="fa-solid fa-file-arrow-down"></i> JSON</button>
-                    <button class="btn-mini" onclick="exportExcel()"><i class="fa-solid fa-file-excel"></i> Excel</button>
-                    <button class="btn-mini danger" onclick="clearHistory()"><i class="fa-solid fa-trash"></i> Xóa Hết</button>
-                </div>
-            </div>
-            <div class="history-content" id="rightHistoryList">
-                <div class="empty-history">Chưa có dữ liệu.</div>
-            </div>
+        <div class="member-list" id="memberListContainer">
+            <!-- Danh sách thành viên sẽ được render tự động -->
         </div>
     </div>
 
     <script>
-        const classIcons = {
-            ThietY: "fa-solid fa-hand-fist",
-            HuyetHa: "custom-spear-icon",
-            ToaiMong: "fa-solid fa-burst",
-            ThanTuang: "fa-solid fa-guitar",
-            ToVan: "fa-solid fa-heart-pulse",
-            CuuLinh: "fa-solid fa-skull",
-            LongNgam: "fa-solid fa-bolt",
-            HuyenCo: "fa-solid fa-gear",
-            TrieuQuang: "fa-solid fa-droplet"
-        };
+        // Cấu hình Supabase (giữ đồng bộ với các trang khác)
+        const SUPABASE_URL = 'https://shblqenkrzjuklzrvoie.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYmxxZW5rcnpqdWtsenJ2b2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NzA4MjMsImV4cCI6MjEwNDU0NjgyM30.I8bsjcbR3dNYm99kHan8mLj9X7jcNuPEzFQTk9jUups'; 
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const classNamesMap = {
-            ThietY: "Thiết Y",
-            HuyetHa: "Huyết Hà",
-            ToaiMong: "Toái Mộng",
-            ThanTuang: "Thần Tương",
-            ToVan: "Tố Vấn",
-            CuuLinh: "Cửu Linh",
-            LongNgam: "Long Ngâm",
-            HuyenCo: "Huyền Cơ",
-            TrieuQuang: "Triều Quang"
-        };
+        let membersData = [];
+        let gaStatusData = {}; // Lưu trạng thái check GA theo id thành viên
 
-        function getIconHTML(classType) {
-            if (classType === 'HuyetHa') {
-                return `<i class="custom-spear-icon"></i>`;
-            }
-            return `<i class="${classIcons[classType] || 'fa-solid fa-user'}"></i>`;
+        async function initGA() {
+            await loadDataFromCloud();
         }
 
-        let membersList = [];
-        let historyByDate = {}; 
-        let currentFilteredList = []; 
-        let supabaseClient = null;
-
-        const matchTypes = [
-            { key: 'scrim1', label: 'S1' },
-            { key: 'scrim2', label: 'S2' },
-            { key: 'scrim3', label: 'S3' },
-            { key: 'bc', label: 'BC' }
-        ];
-
-        window.addEventListener('DOMContentLoaded', () => {
-            loadSupabaseAndInit();
-        });
-
-        async function loadSupabaseAndInit() {
-            const script = document.createElement('script');
-            script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-            script.onload = initApp;
-            document.head.appendChild(script);
-        }
-
-        async function initApp() {
+        async function loadDataFromCloud() {
             try {
-                const SUPABASE_URL = 'https://shblqenkrzjuklzrvoie.supabase.co';
-                const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYmxxZW5rcnpqdWtsenJ2b2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NzA4MjMsImV4cCI6MjEwNDU0NjgyM30.I8bsjcbR3dNYm99kHan8mLj9X7jcNuPEzFQTk9jUups';
-                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-                // 1. Tải lịch sử tích chọn từ bảng riêng ga_data
-                let { data: gaData } = await supabaseClient
-                    .from('ga_data')
+                // Tải danh sách thành viên từ squad_data và trạng thái GA từ ga_data (hoặc squad_data)
+                let { data, error } = await supabaseClient
+                    .from('squad_data')
                     .select('*')
-                    .eq('id', 'main_ga_config')
+                    .eq('id', 'main_config')
+                    .maybeSingle();
+
+                if (data && data.content) {
+                    // Lấy danh sách thành viên từ cấu hình đội hình nếu có
+                    membersData = data.content.members || [
+                        { id: 1, name: "Garo", role: "Thiết Y" },
+                        { id: 2, name: "Minh Sói Trần", role: "Thiết Y" },
+                        { id: 3, name: "Độc Tại Tâm", role: "Thiết Y" },
+                        { id: 4, name: "UHuyen", role: "Thiết Y" },
+                        { id: 5, name: "Kame", role: "Thiết Y" },
+                        { id: 6, name: "Ne Bồ Nông", role: "Thiết Y" }
+                    ];
+                } else {
+                    membersData = [
+                        { id: 1, name: "Garo", role: "Thiết Y" },
+                        { id: 2, name: "Minh Sói Trần", role: "Thiết Y" },
+                        { id: 3, name: "Độc Tại Tâm", role: "Thiết Y" }
+                    ];
+                }
+
+                // Tải trạng thái GA đã lưu
+                let { data: gaData, error: gaError } = await supabaseClient
+                    .from('squad_data')
+                    .select('*')
+                    .eq('id', 'ga_config')
                     .maybeSingle();
 
                 if (gaData && gaData.content) {
-                    if (gaData.content.historyByDate) {
-                        historyByDate = gaData.content.historyByDate;
-                    }
-                    if (gaData.content.members && gaData.content.members.length > 0) {
-                        membersList = gaData.content.members.filter(m => m.classType && m.classType !== 'Khac');
-                    }
+                    gaStatusData = gaData.content.gaStatus || {};
                 }
 
-                // 2. Tự động lấy danh sách thành viên mới nhất từ bảng đội hình (squad_data) nếu chưa có hoặc để cập nhật
-                let { data: squadData } = await supabaseClient
-                    .from('squad_data')
-                    .select('*')
-                    .eq('id', 'main_config')
-                    .maybeSingle();
-
-                if (squadData && squadData.content) {
-                    let squadMembers = [];
-                    if (squadData.content.members && squadData.content.members.length > 0) {
-                        squadMembers = squadData.content.members.filter(m => m.classType && m.classType !== 'Khac');
-                    } else if (squadData.content.gaMembersList && squadData.content.gaMembersList.length > 0) {
-                        squadMembers = squadData.content.gaMembersList;
-                    }
-
-                    if (squadMembers.length > 0) {
-                        membersList = squadMembers;
-                    }
-                }
-
-                membersList.sort((a, b) => a.classType.localeCompare(b.classType));
+                renderMemberList();
             } catch (err) {
                 console.log("Lỗi tải dữ liệu:", err);
             }
-
-            updateComboboxOptions();
-            renderAll();
         }
 
-        // Nút đồng bộ thủ công từ trang đội hình sang
-        async function syncMembersFromSquad() {
-            if (!supabaseClient) return;
+        async function saveToCloud() {
             try {
-                let { data: squadData, error } = await supabaseClient
+                const payload = { gaStatus: gaStatusData };
+                let { error } = await supabaseClient
                     .from('squad_data')
-                    .select('*')
-                    .eq('id', 'main_config')
-                    .maybeSingle();
+                    .upsert({ id: 'ga_config', content: payload });
 
                 if (error) {
-                    alert("❌ Lỗi khi tải dữ liệu từ Đội Hình: " + error.message);
-                    return;
-                }
-
-                if (squadData && squadData.content) {
-                    let squadMembers = [];
-                    if (squadData.content.members && squadData.content.members.length > 0) {
-                        squadMembers = squadData.content.members.filter(m => m.classType && m.classType !== 'Khac');
-                    }
-
-                    if (squadMembers.length > 0) {
-                        membersList = squadMembers;
-                        membersList.sort((a, b) => a.classType.localeCompare(b.classType));
-                        renderAll();
-                        alert(`✅ Đã đồng bộ thành công ${membersList.length} thành viên từ trang Đội Hình sang!`);
-                    } else {
-                        alert("⚠️ Không tìm thấy thành viên nào ở trang Đội Hình.");
-                    }
-                }
-            } catch (err) {
-                alert("❌ Lỗi đồng bộ: " + err.message);
-            }
-        }
-
-        function updateComboboxOptions(selectedName = null) {
-            const selectEl = document.getElementById('historySelect');
-            const keys = Object.keys(historyByDate);
-
-            if (keys.length === 0) {
-                const defaultKey = "Buổi 1";
-                historyByDate[defaultKey] = {};
-                keys.push(defaultKey);
-            }
-
-            selectEl.innerHTML = '';
-            keys.forEach(k => {
-                const opt = document.createElement('option');
-                opt.value = k;
-                opt.textContent = k;
-                selectEl.appendChild(opt);
-            });
-
-            if (selectedName && historyByDate[selectedName]) {
-                selectEl.value = selectedName;
-            } else {
-                selectEl.value = keys[0];
-            }
-        }
-
-        function getCurrentCustomName() {
-            const selectEl = document.getElementById('historySelect');
-            return selectEl.value || Object.keys(historyByDate)[0] || "Buổi 1";
-        }
-
-        function addNewCustomName() {
-            const newName = prompt("Nhập tên danh sách tùy chỉnh muốn tạo (Ví dụ: Scrim Tối Nay, Bang Chiến CN...):");
-            if (!newName) return;
-            
-            const trimmedName = newName.trim();
-            if (!trimmedName) return;
-
-            if (!historyByDate[trimmedName]) {
-                historyByDate[trimmedName] = {};
-            }
-
-            updateComboboxOptions(trimmedName);
-            renderAll();
-        }
-
-        function deleteCurrentCustomName() {
-            const currentKey = getCurrentCustomName();
-            const keys = Object.keys(historyByDate);
-
-            if (keys.length <= 1) {
-                alert("⚠️ Phải giữ lại ít nhất một danh sách, không thể xóa!");
-                return;
-            }
-
-            if (confirm(`Bạn có chắc chắn muốn xóa hẳn danh sách "${currentKey}" này không?`)) {
-                delete historyByDate[currentKey];
-                updateComboboxOptions();
-                renderAll();
-            }
-        }
-
-        function getCurrentDateState() {
-            const nameKey = getCurrentCustomName();
-            if (!historyByDate[nameKey]) {
-                historyByDate[nameKey] = {};
-            }
-            return historyByDate[nameKey];
-        }
-
-        function onCustomNameChange() {
-            renderAll();
-        }
-
-        async function saveToCloudCustom() {
-            if (!supabaseClient) {
-                alert("⚠️ Chưa kết nối được tới Supabase!");
-                return;
-            }
-
-            const currentKey = getCurrentCustomName();
-
-            try {
-                let payloadContent = {
-                    members: membersList,
-                    historyByDate: historyByDate,
-                    updated_at: new Date().toISOString()
-                };
-
-                let { error: upsertError } = await supabaseClient
-                    .from('ga_data')
-                    .upsert({ id: 'main_ga_config', content: payloadContent });
-
-                if (upsertError) {
-                    alert("❌ Lỗi khi lưu vào bảng ga_data: " + upsertError.message);
+                    alert("Lỗi khi lưu lên Cloud: " + error.message);
                 } else {
-                    alert(`☁️ Lưu danh sách [${currentKey}] vào bảng riêng [ga_data] thành công!`);
+                    alert("Đã lưu dữ liệu GA lên Cloud thành công!");
                 }
             } catch (err) {
-                alert("❌ Có lỗi xảy ra: " + err.message);
+                alert("Lỗi kết nối khi lưu!");
             }
         }
 
-        function exportJSON() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(historyByDate, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `ga_data_backup_${new Date().toISOString().slice(0,10)}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
+        function updateGAStatus(memberId, field, isChecked) {
+            if (!gaStatusData[memberId]) {
+                gaStatusData[memberId] = { s1: false, s2: false, s3: false, bc: false };
+            }
+            gaStatusData[memberId][field] = isChecked;
         }
 
-        function renderAll() {
-            filterMembers();
-            renderRightHistory();
-        }
-
-        function filterMembers() {
+        function renderMemberList() {
+            const container = document.getElementById('memberListContainer');
             const keyword = document.getElementById('searchInput').value.toLowerCase();
-            const selectedClass = document.getElementById('classFilter').value;
-
-            currentFilteredList = membersList.filter(m => {
-                const matchName = m.name.toLowerCase().includes(keyword);
-                const matchClass = selectedClass === "" || m.classType === selectedClass;
-                return matchName && matchClass;
-            });
-
-            renderLeftList(currentFilteredList);
-            updateSelectAllCheckboxesState();
-        }
-
-        function renderLeftList(list) {
-            const container = document.getElementById('leftMemberList');
-            container.innerHTML = '';
-            document.getElementById('leftTitle').innerText = `THÀNH VIÊN BANG ( ${list.length} )`;
-
-            if (!list || list.length === 0) {
-                container.innerHTML = '<div class="empty-history">Chưa có danh sách thành viên. Hãy bấm "Đồng bộ thành viên từ Đội Hình" ở trên.</div>';
-                return;
-            }
-
-            const checkedState = getCurrentDateState();
-
-            list.forEach(m => {
-                const classType = m.classType;
-                const name = m.name;
-                if (!checkedState[name]) checkedState[name] = {};
-
-                let checkboxesHTML = '';
-                matchTypes.forEach(type => {
-                    const isChecked = !!checkedState[name][type.key];
-                    checkboxesHTML += `
-                        <label class="checkbox-group">
-                            <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleScrim('${name}', '${type.key}', this.checked)"> ${type.label}
-                        </label>
-                    `;
-                });
-
-                const card = document.createElement('div');
-                card.className = 'member-card';
-                card.innerHTML = `
-                    <div class="member-info-left">
-                        <span class="member-name">${name}</span>
-                        <span class="member-class-tag class-${classType}">
-                            ${getIconHTML(classType)} ${classNamesMap[classType]}
-                        </span>
-                    </div>
-                    <div class="member-actions">
-                        ${checkboxesHTML}
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function toggleSelectAllColumn(scrimType, isChecked) {
-            if (currentFilteredList.length === 0) return;
-            const checkedState = getCurrentDateState();
-
-            currentFilteredList.forEach(m => {
-                if (!checkedState[m.name]) {
-                    checkedState[m.name] = {};
-                }
-                checkedState[m.name][scrimType] = isChecked;
-            });
-
-            renderLeftList(currentFilteredList);
-            renderRightHistory();
-        }
-
-        function updateSelectAllCheckboxesState() {
-            const checkedState = getCurrentDateState();
-            matchTypes.forEach(type => {
-                const checkbox = document.getElementById(`checkAll_${type.key}`);
-                if (!checkbox) return;
-
-                if (currentFilteredList.length === 0) {
-                    checkbox.checked = false;
-                    checkbox.indeterminate = false;
-                    return;
-                }
-
-                const checkedCount = currentFilteredList.filter(m => checkedState[m.name] && checkedState[m.name][type.key]).length;
-
-                if (checkedCount === currentFilteredList.length) {
-                    checkbox.checked = true;
-                    checkbox.indeterminate = false;
-                } else if (checkedCount > 0) {
-                    checkbox.checked = false;
-                    checkbox.indeterminate = true;
-                } else {
-                    checkbox.checked = false;
-                    checkbox.indeterminate = false;
-                }
-            });
-        }
-
-        function toggleScrim(name, scrimType, isChecked) {
-            const checkedState = getCurrentDateState();
-            if (!checkedState[name]) {
-                checkedState[name] = {};
-            }
-            checkedState[name][scrimType] = isChecked;
-            
-            renderRightHistory();
-            updateSelectAllCheckboxesState();
-        }
-
-        function renderRightHistory() {
-            const container = document.getElementById('rightHistoryList');
             container.innerHTML = '';
 
-            const fullMatchLabelMap = {
-                scrim1: 'Scrim 1',
-                scrim2: 'Scrim 2',
-                scrim3: 'Scrim 3',
-                bc: 'Bang Chiến'
-            };
+            const filtered = membersData.filter(m => m.name.toLowerCase().includes(keyword));
+            document.getElementById('memberCount').innerText = `Tổng số: ${filtered.length} thành viên`;
 
-            const checkedState = getCurrentDateState();
-            let historyItems = [];
-            
-            membersList.forEach(m => {
-                const state = checkedState[m.name];
-                if (state) {
-                    Object.keys(fullMatchLabelMap).forEach(key => {
-                        if (state[key]) {
-                            historyItems.push({ name: m.name, classType: m.classType, type: fullMatchLabelMap[key] });
-                        }
-                    });
-                }
-            });
-
-            const currentKey = getCurrentCustomName();
-            document.getElementById('rightTitle').innerText = `${currentKey.toUpperCase()} ( ${historyItems.length} )`;
-
-            if (historyItems.length === 0) {
-                container.innerHTML = `<div class="empty-history">Chưa có dữ liệu tích chọn trong "${currentKey}".</div>`;
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="empty-msg">Không tìm thấy thành viên phù hợp.</div>`;
                 return;
             }
 
-            historyItems.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'member-card';
-                card.innerHTML = `
-                    <div class="member-info-left">
-                        <span class="member-name">${item.name}</span>
-                        <span class="member-class-tag class-${item.classType}">
-                            ${getIconHTML(item.classType)} ${classNamesMap[item.classType]}
-                        </span>
+            filtered.forEach(m => {
+                const status = gaStatusData[m.id] || { s1: false, s2: false, s3: false, bc: false };
+
+                const div = document.createElement('div');
+                div.className = 'member-item';
+                div.innerHTML = `
+                    <div class="member-name">
+                        <span>${m.name}</span>
+                        <span class="member-role"><i class="fa-solid fa-shield"></i> ${m.role || 'Thành viên'}</span>
                     </div>
-                    <span style="font-size: 12px; color: #58a6ff; font-weight: bold;">[${item.type}]</span>
+                    <div class="ga-checks">
+                        <label><input type="checkbox" ${status.s1 ? 'checked' : ''} onchange="updateGAStatus(${m.id}, 's1', this.checked)"> S1</label>
+                        <label><input type="checkbox" ${status.s2 ? 'checked' : ''} onchange="updateGAStatus(${m.id}, 's2', this.checked)"> S2</label>
+                        <label><input type="checkbox" ${status.s3 ? 'checked' : ''} onchange="updateGAStatus(${m.id}, 's3', this.checked)"> S3</label>
+                        <label><input type="checkbox" ${status.bc ? 'checked' : ''} onchange="updateGAStatus(${m.id}, 'bc', this.checked)"> BC</label>
+                    </div>
                 `;
-                container.appendChild(card);
+                container.appendChild(div);
             });
         }
 
-        function clearHistory() {
-            const currentKey = getCurrentCustomName();
-            if (confirm(`Bạn có chắc chắn muốn xóa hết các tích chọn trong danh sách "${currentKey}" không?`)) {
-                const checkedState = getCurrentDateState();
-                Object.keys(checkedState).forEach(name => {
-                    checkedState[name] = {};
-                });
-                renderAll();
-            }
-        }
-
-        function exportExcel() {
-            const fullMatchLabelMap = {
-                scrim1: 'Scrim 1',
-                scrim2: 'Scrim 2',
-                scrim3: 'Scrim 3',
-                bc: 'Bang Chiến'
-            };
-
-            const checkedState = getCurrentDateState();
-            let historyItems = [];
-            
-            membersList.filter(m => m.classType && m.classType !== 'Khac').forEach(m => {
-                const state = checkedState[m.name];
-                if (state) {
-                    Object.keys(fullMatchLabelMap).forEach(key => {
-                        if (state[key]) {
-                            historyItems.push({
-                                "Danh Sách / Buổi": getCurrentCustomName(),
-                                "Tên Thành Viên": m.name,
-                                "Môn Phái": classNamesMap[m.classType] || m.classType,
-                                "Loại Sự Kiện / Trận": fullMatchLabelMap[key]
-                            });
-                        }
-                    });
-                }
-            });
-
-            if (historyItems.length === 0) {
-                alert("⚠️ Không có dữ liệu để xuất Excel!");
-                return;
-            }
-
-            const worksheet = XLSX.utils.json_to_sheet(historyItems);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "DanhSachGA");
-
-            const currentKey = getCurrentCustomName().replace(/[^a-zA-Z0-9]/g, '_');
-            XLSX.writeFile(workbook, `DanhSach_GA_${currentKey}.xlsx`);
-        }
+        initGA();
     </script>
 </body>
 </html>
