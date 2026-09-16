@@ -30,6 +30,32 @@
             flex-direction: column;
             justify-content: space-between;
             padding: 40px 20px;
+            position: relative;
+        }
+
+        /* Nút đăng xuất ở góc trên bên phải */
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid #ef4444;
+            color: #f87171;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            background: #ef4444;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
         }
 
         .container {
@@ -123,7 +149,7 @@
             line-height: 1.4;
         }
 
-        /* Màu riêng cho từng thẻ */
+        /* Màu riêng cho từng thẻ phân hệ */
         .card-doi-hinh { --card-accent: #3b82f6; --accent-glow: rgba(59, 130, 246, 0.3); }
         .card-chien-thuat { --card-accent: #f59e0b; --accent-glow: rgba(245, 158, 11, 0.3); }
         .card-pov { --card-accent: #ec4899; --accent-glow: rgba(236, 72, 153, 0.3); }
@@ -140,46 +166,50 @@
 </head>
 <body>
 
+    <!-- Nút Đăng Xuất góc trên bên phải -->
+    <button class="logout-btn" onclick="handleLogout()">
+        <i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất
+    </button>
+
     <div class="container">
         <header>
             <h1><i class="fa-solid fa-shield-halved"></i> Bang Chiến Nhà Báo</h1>
-            <div id="status"><i class="fa-solid fa-circle-check" style="color: #10b981;"></i> Phiên làm việc đã được xác thực</div>
+            <div id="status"><i class="fa-solid fa-circle-check" style="color: #10b981;"></i> Phiên làm việc đã được xác thực[cite: 10]</div>
         </header>
 
         <div class="dashboard-grid">
             <!-- Đội Hình -->
-            <!-- Đội Hình -->
-    <div class="nav-card card-doi-hinh" onclick="openPage('doihinh.html')">
-        <i class="fa-solid fa-users-rectangle"></i>
-        <h3>Đội Hình</h3>
-    <p>Sắp xếp vị trí, phân chia tổ đội và kiểm soát lực lượng tham chiến.</p>
-    </div>
+            <div class="nav-card card-doi-hinh" onclick="openPage('doihinh.html')">
+                <i class="fa-solid fa-users-rectangle"></i>
+                <h3>Đội Hình</h3>
+                <p>Sắp xếp vị trí, phân chia tổ đội và kiểm soát lực lượng tham chiến[cite: 10].</p>
+            </div>
 
             <!-- Chiến Thuật -->
             <div class="nav-card card-chien-thuat" onclick="openPage('ChienThuat.html')">
                 <i class="fa-solid fa-chess-board"></i>
                 <h3>Chiến Thuật</h3>
-                <p>Bản đồ chiến lược, mũi tấn công, phòng thủ và kế hoạch di chuyển.</p>
+                <p>Bản đồ chiến lược, mũi tấn công, phòng thủ và kế hoạch di chuyển[cite: 10].</p>
             </div>
 
             <!-- Xem Lại POV -->
             <div class="nav-card card-pov" onclick="openPage('PovBangChien.html')">
                 <i class="fa-solid fa-video"></i>
                 <h3>Xem Lại POV</h3>
-                <p>Tổng hợp video góc nhìn các thành viên để rút kinh nghiệm sau trận.</p>
+                <p>Tổng hợp video góc nhìn các thành viên để rút kinh nghiệm sau trận[cite: 10].</p>
             </div>
 
             <!-- GA -->
             <div class="nav-card card-ga" onclick="openPage('GA.html')">
                 <i class="fa-solid fa-clipboard-check"></i>
                 <h3>GA</h3>
-                <p>Quản lý danh sách điểm danh, phần thưởng và hoạt động tương tác.</p>
+                <p>Quản lý danh sách điểm danh, phần thưởng và hoạt động tương tác[cite: 10].</p>
             </div>
         </div>
     </div>
 
     <footer>
-        <p>Hệ thống quản lý Bang Hội - Phiên bản tối ưu hóa độc lập từng phân hệ.</p>
+        <p>Hệ thống quản lý Bang Hội - Phiên bản tối ưu hóa độc lập từng phân hệ[cite: 10].</p>
     </footer>
 
     <script>
@@ -190,6 +220,16 @@
                 window.location.href = 'index.html';
             }
         })();
+
+        // --- HÀM XỬ LÝ ĐĂNG XUẤT ---
+        function handleLogout() {
+            if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?')) {
+                // Xóa trạng thái đăng nhập trong localStorage
+                localStorage.removeItem('isLoggedIn');
+                // Đá tài khoản quay trở lại trang đăng nhập
+                window.location.href = 'index.html';
+            }
+        }
 
         // Hàm điều hướng mở trang khi click vào card
         function openPage(pageName) {
