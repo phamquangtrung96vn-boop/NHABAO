@@ -2,64 +2,199 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Đang chuyển hướng...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trung Tâm Điều Hành - Bang Chiến</title>
+    <!-- Font Awesome để dùng icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f7f6;
-            font-family: Arial, sans-serif;
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-glow: rgba(59, 130, 246, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .loader-container {
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Header */
+        header {
             text-align: center;
+            margin-bottom: 40px;
         }
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px auto;
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #60a5fa, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        #status {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid #334155;
+            border-radius: 20px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* Grid Cards */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .nav-card {
+            background-color: var(--card-bg);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--card-accent, #3b82f6);
+            transition: height 0.3s ease;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px var(--accent-glow);
+            border-color: var(--card-accent, #3b82f6);
+        }
+
+        .nav-card:hover::before {
+            height: 8px;
+        }
+
+        .nav-card i {
+            font-size: 40px;
+            color: var(--card-accent, #3b82f6);
+            margin-bottom: 15px;
+        }
+
+        .nav-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .nav-card p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Màu riêng cho từng thẻ */
+        .card-doi-hinh { --card-accent: #3b82f6; --accent-glow: rgba(59, 130, 246, 0.3); }
+        .card-chien-thuat { --card-accent: #f59e0b; --accent-glow: rgba(245, 158, 11, 0.3); }
+        .card-pov { --card-accent: #ec4899; --accent-glow: rgba(236, 72, 153, 0.3); }
+        .card-ga { --card-accent: #10b981; --accent-glow: rgba(16, 185, 129, 0.3); }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
-    <div class="loader-container">
-        <div class="spinner"></div>
-        <h3>Đang xác thực phiên làm việc, vui lòng chờ...</h3>
+    <div class="container">
+        <header>
+            <h1><i class="fa-solid fa-shield-halved"></i> Bang Chiến Hub</h1>
+            <div id="status"><i class="fa-solid fa-circle-check" style="color: #10b981;"></i> Phiên làm việc đã được xác thực</div>
+        </header>
+
+        <div class="dashboard-grid">
+            <!-- Đội Hình (index.html) -->
+            <div class="nav-card card-doi-hinh" onclick="openPage('index.html')">
+                <i class="fa-solid fa-users-rectangle"></i>
+                <h3>Đội Hình</h3>
+                <p>Sắp xếp vị trí, phân chia tổ đội và kiểm soát lực lượng tham chiến.</p>
+            </div>
+
+            <!-- Chiến Thuật (ChienThuat.html) -->
+            <div class="nav-card card-chien-thuat" onclick="openPage('ChienThuat.html')">
+                <i class="fa-solid fa-chess-board"></i>
+                <h3>Chiến Thuật</h3>
+                <p>Bản đồ chiến lược, mũi tấn công, phòng thủ và kế hoạch di chuyển.</p>
+            </div>
+
+            <!-- Xem Lại POV (PovBangChien.html) -->
+            <div class="nav-card card-pov" onclick="openPage('PovBangChien.html')">
+                <i class="fa-solid fa-video"></i>
+                <h3>Xem Lại POV</h3>
+                <p>Tổng hợp video góc nhìn các thành viên để rút kinh nghiệm sau trận.</p>
+            </div>
+
+            <!-- GA (GA.html) -->
+            <div class="nav-card card-ga" onclick="openPage('GA.html')">
+                <i class="fa-solid fa-clipboard-check"></i>
+                <h3>GA</h3>
+                <p>Quản lý danh sách điểm danh, phần thưởng và hoạt động tương tác.</p>
+            </div>
+        </div>
     </div>
 
+    <footer>
+        <p>Hệ thống quản lý Bang Hội - Phiên bản tối ưu hóa độc lập từng phân hệ.</p>
+    </footer>
+
     <script>
-        // Kiểm tra thông tin đăng nhập từ localStorage hoặc Session
+        // Kiểm tra bảo mật khi vào trang trung gian
         window.addEventListener('DOMContentLoaded', () => {
-            const userRole = localStorage.getItem('userRole') || 'user';
             const isLoggedIn = localStorage.getItem('isLoggedIn');
-
             if (!isLoggedIn) {
-                // Nếu chưa đăng nhập, đá về lại trang login
-                window.location.href = 'login_2.html';
-                return;
+                // Nếu chưa đăng nhập, bắt buộc quay lại trang login
+                window.location.href = 'login.html';
             }
-
-            // Giả lập thời gian chờ nhẹ của trang trung gian (0.8 giây)
-            setTimeout(() => {
-                if (userRole === 'admin') {
-                    window.location.href = 'GA_2.html';
-                } else {
-                    window.location.href = 'index_2.html';
-                }
-            }, 800);
         });
-    </script>
 
+        // Hàm điều hướng chuyển trang
+        function openPage(pageName) {
+            window.location.href = pageName;
+        }
+    </script>
 </body>
 </html>
