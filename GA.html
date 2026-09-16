@@ -219,6 +219,8 @@
         .btn-mini.success { color: #3fb950; border-color: rgba(63, 185, 80, 0.4); }
         .btn-mini.success:hover { background: #238636; color: #fff; }
         .btn-mini.danger { color: #f85149; border-color: rgba(248,81,73,0.4); }
+        .btn-mini.info { color: #58a6ff; border-color: rgba(88, 166, 255, 0.4); }
+        .btn-mini.info:hover { background: #1f6feb; color: #fff; }
         .btn-mini:hover { background: #30363d; }
 
         .history-content {
@@ -325,6 +327,9 @@
                         <button class="btn-mini danger" onclick="deleteCurrentCustomName()" title="Xóa danh sách đang chọn"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                     <button class="btn-mini success" onclick="saveToCloudCustom()"><i class="fa-solid fa-cloud-arrow-up"></i> Lưu Cloud</button>
+                    <button class="btn-mini info" onclick="exportJSON()" title="Xuất toàn bộ dữ liệu ra file JSON"><i class="fa-solid fa-file-arrow-down"></i> Xuất JSON</button>
+                    <button class="btn-mini info" onclick="triggerImportJSON()" title="Nhập dữ liệu từ file JSON"><i class="fa-solid fa-file-arrow-up"></i> Nhập JSON</button>
+                    <input type="file" id="importFileJSON" style="display: none;" accept=".json" onchange="importJSON(event)">
                     <button class="btn-mini" onclick="exportExcel()"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button>
                     <button class="btn-mini danger" onclick="clearHistory()"><i class="fa-solid fa-trash"></i> Xóa Hết</button>
                 </div>
@@ -539,6 +544,49 @@
                 alert("❌ Có lỗi xảy ra: " + err.message);
             }
         }
+
+        // --- XUẤT & NHẬP JSON ---
+        function exportJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(historyByDate, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `backup_ga_data_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function triggerImportJSON() {
+            document.getElementById('importFileJSON').click();
+        }
+
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsedData = JSON.parse(e.target.result);
+                    if (typeof parsedData === 'object' && parsedData !== null) {
+                        if (confirm("⚠️ Việc nhập file JSON sẽ thay thế toàn bộ dữ liệu các buổi hiện tại trên giao diện. Bạn có chắc chắn muốn tiếp tục?")) {
+                            historyByDate = parsedData;
+                            updateComboboxOptions();
+                            renderAll();
+                            alert("✅ Nhập file JSON thành công!");
+                        }
+                    } else {
+                        alert("❌ File JSON không hợp lệ!");
+                    }
+                } catch (err) {
+                    alert("❌ Lỗi đọc file JSON: " + err.message);
+                }
+                // Reset input file để có thể chọn lại cùng một file nếu cần
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+        // ------------------------
 
         function renderAll() {
             filterMembers();
