@@ -221,6 +221,8 @@
         .btn-mini.danger { color: #f85149; border-color: rgba(248,81,73,0.4); }
         .btn-mini.info { color: #58a6ff; border-color: rgba(88, 166, 255, 0.4); }
         .btn-mini.info:hover { background: #1f6feb; color: #fff; }
+        .btn-mini.warning { color: #d29922; border-color: rgba(210, 153, 34, 0.4); }
+        .btn-mini.warning:hover { background: #9e6a03; color: #fff; }
         .btn-mini:hover { background: #30363d; }
 
         .history-content {
@@ -265,7 +267,8 @@
 
     <!-- NỘI DUNG QUẢN LÝ GA -->
     <div class="header-banner">
-        <span><i class="fa-solid fa-users-gear"></i> QUẢN LÝ DANH SÁCH GA & THÀNH VIÊN BANG (Bảng Riêng: ga_data)</span>
+        <span><i class="fa-solid fa-users-gear"></i> QUẢN LÝ DANH SÁCH GA & THÀNH VIÊN BANG</span>
+        <button class="btn-mini warning" onclick="syncMembersFromSquad()"><i class="fa-solid fa-sync"></i> Đồng bộ thành viên từ Đội Hình</button>
     </div>
 
     <div class="main-layout">
@@ -312,7 +315,7 @@
             </div>
 
             <div class="member-scroll-list" id="leftMemberList">
-                <div class="empty-history">Đang tải dữ liệu từ bảng riêng ga_data...</div>
+                <div class="empty-history">Đang tải dữ liệu...</div>
             </div>
         </div>
 
@@ -399,32 +402,84 @@
                 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYmxxZW5rcnpqdWtsenJ2b2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NzA4MjMsImV4cCI6MjEwNDU0NjgyM30.I8bsjcbR3dNYm99kHan8mLj9X7jcNuPEzFQTk9jUups';
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-                // Tải trực tiếp từ bảng riêng 'ga_data'
-                let { data } = await supabaseClient
+                // 1. Tải lịch sử tích chọn từ bảng riêng ga_data
+                let { data: gaData } = await supabaseClient
                     .from('ga_data')
                     .select('*')
                     .eq('id', 'main_ga_config')
                     .maybeSingle();
 
-                if (data && data.content) {
-                    if (data.content.members && data.content.members.length > 0) {
-                        membersList = data.content.members.filter(m => m.classType && m.classType !== 'Khac');
-                    } else {
-                        membersList = [];
+                if (gaData && gaData.content) {
+                    if (gaData.content.historyByDate) {
+                        historyByDate = gaData.content.historyByDate;
                     }
-                    
-                    membersList.sort((a, b) => a.classType.localeCompare(b.classType));
-
-                    if (data.content.historyByDate) {
-                        historyByDate = data.content.historyByDate;
+                    if (gaData.content.members && gaData.content.members.length > 0) {
+                        membersList = gaData.content.members.filter(m => m.classType && m.classType !== 'Khac');
                     }
                 }
+
+                // 2. Tự động lấy danh sách thành viên mới nhất từ bảng đội hình (squad_data) nếu chưa có hoặc để cập nhật
+                let { data: squadData } = await supabaseClient
+                    .from('squad_data')
+                    .select('*')
+                    .eq('id', 'main_config')
+                    .maybeSingle();
+
+                if (squadData && squadData.content) {
+                    let squadMembers = [];
+                    if (squadData.content.members && squadData.content.members.length > 0) {
+                        squadMembers = squadData.content.members.filter(m => m.classType && m.classType !== 'Khac');
+                    } else if (squadData.content.gaMembersList && squadData.content.gaMembersList.length > 0) {
+                        squadMembers = squadData.content.gaMembersList;
+                    }
+
+                    if (squadMembers.length > 0) {
+                        membersList = squadMembers;
+                    }
+                }
+
+                membersList.sort((a, b) => a.classType.localeCompare(b.classType));
             } catch (err) {
-                console.log("Lỗi tải dữ liệu bảng ga_data:", err);
+                console.log("Lỗi tải dữ liệu:", err);
             }
 
             updateComboboxOptions();
             renderAll();
+        }
+
+        // Nút đồng bộ thủ công từ trang đội hình sang
+        async function syncMembersFromSquad() {
+            if (!supabaseClient) return;
+            try {
+                let { data: squadData, error } = await supabaseClient
+                    .from('squad_data')
+                    .select('*')
+                    .eq('id', 'main_config')
+                    .maybeSingle();
+
+                if (error) {
+                    alert("❌ Lỗi khi tải dữ liệu từ Đội Hình: " + error.message);
+                    return;
+                }
+
+                if (squadData && squadData.content) {
+                    let squadMembers = [];
+                    if (squadData.content.members && squadData.content.members.length > 0) {
+                        squadMembers = squadData.content.members.filter(m => m.classType && m.classType !== 'Khac');
+                    }
+
+                    if (squadMembers.length > 0) {
+                        membersList = squadMembers;
+                        membersList.sort((a, b) => a.classType.localeCompare(b.classType));
+                        renderAll();
+                        alert(`✅ Đã đồng bộ thành công ${membersList.length} thành viên từ trang Đội Hình sang!`);
+                    } else {
+                        alert("⚠️ Không tìm thấy thành viên nào ở trang Đội Hình.");
+                    }
+                }
+            } catch (err) {
+                alert("❌ Lỗi đồng bộ: " + err.message);
+            }
         }
 
         function updateComboboxOptions(selectedName = null) {
@@ -515,7 +570,6 @@
                     updated_at: new Date().toISOString()
                 };
 
-                // Lưu trực tiếp vào bảng riêng 'ga_data'
                 let { error: upsertError } = await supabaseClient
                     .from('ga_data')
                     .upsert({ id: 'main_ga_config', content: payloadContent });
@@ -565,7 +619,7 @@
             document.getElementById('leftTitle').innerText = `THÀNH VIÊN BANG ( ${list.length} )`;
 
             if (!list || list.length === 0) {
-                container.innerHTML = '<div class="empty-history">Chưa có danh sách thành viên. Vui lòng thêm dữ liệu thành viên.</div>';
+                container.innerHTML = '<div class="empty-history">Chưa có danh sách thành viên. Hãy bấm "Đồng bộ thành viên từ Đội Hình" ở trên.</div>';
                 return;
             }
 
