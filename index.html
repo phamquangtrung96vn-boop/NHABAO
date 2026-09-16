@@ -4,13 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sơ Đồ Đội Hình Bang Chiến - Nghịch Thủy Hàn</title>
-    
-    <!-- ĐOẠN CODE BẢO VỆ TRANG CHỦ -->
-    <script>
-        if (sessionStorage.getItem("isLoggedIn") !== "true") {
-            window.location.href = "login.html";
-        }
-    </script>
 
     <!-- FontAwesome Icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -81,18 +74,6 @@
 
         .btn-action:hover { background: #30363d; color: #fff; }
 
-        /* Nút GA màu vàng */
-        .btn-ga {
-            background-color: #e3b341;
-            color: #111;
-            border: none;
-            font-weight: bold;
-        }
-        .btn-ga:hover {
-            background-color: #f0883e;
-            color: #fff;
-        }
-
         .btn-save-cloud {
             background-color: #238636;
             color: #fff;
@@ -106,13 +87,6 @@
             border: none;
         }
         .btn-discord:hover { background-color: #4752C4; color: #fff; }
-
-        .btn-strategy {
-            background: #1f6beb;
-            color: #fff;
-            border: none;
-        }
-        .btn-strategy:hover { background: #388bfd; }
 
         .btn-reset { background: #da3633; color: #fff; border: none; }
         .btn-reset:hover { background: #f85149; }
@@ -593,12 +567,9 @@
     <div class="title-banner">
         <span><i class="fa-solid fa-shield-halved"></i> ĐỘI HÌNH BANG CHIẾN - NGHỊCH THỦY HÀN</span>
         <div class="toolbar-btns">
-            <!-- Nút GA cập nhật mở tab mới với đường dẫn đầy đủ -->
-            <a href="https://phamquangtrung96vn-boop.github.io/NHABAO/GA.html" target="_blank" class="btn-action btn-ga"><i class="fa-solid fa-bolt"></i> GA</a>
+            <!-- Đã gỡ bỏ nút GA, Chiến Thuật và Xem POV theo yêu cầu -->
             <button class="btn-action btn-save-cloud" onclick="manualSaveToCloud()"><i class="fa-solid fa-cloud-arrow-up"></i> Lưu Lên Cloud</button>
             <button class="btn-action btn-discord" onclick="openDiscordModal()"><i class="fa-brands fa-discord"></i> Gửi Discord</button>
-            <a href="https://phamquangtrung96vn-boop.github.io/NHABAO/ChienThuat.html" class="btn-action btn-strategy"><i class="fa-solid fa-chess-knight"></i> Chiến Thuật</a>
-            <a href="PovBangChien.html" class="btn-action"><i class="fa-solid fa-video"></i> Xem POV</a>
             <button class="btn-action" onclick="exportData()"><i class="fa-solid fa-download"></i> Xuất File Máy</button>
             <button class="btn-action" onclick="document.getElementById('importFileInput').click()"><i class="fa-solid fa-upload"></i> Nhập File</button>
             <input type="file" id="importFileInput" style="display:none" accept=".json" onchange="importData(event)">
