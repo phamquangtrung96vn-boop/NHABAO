@@ -265,7 +265,7 @@
 
     <!-- NỘI DUNG QUẢN LÝ GA -->
     <div class="header-banner">
-        <span><i class="fa-solid fa-users-gear"></i> QUẢN LÝ DANH SÁCH GA & THÀNH VIÊN BANG</span>
+        <span><i class="fa-solid fa-users-gear"></i> QUẢN LÝ DANH SÁCH GA & THÀNH VIÊN BANG (Bảng Riêng: ga_data)</span>
     </div>
 
     <div class="main-layout">
@@ -312,7 +312,7 @@
             </div>
 
             <div class="member-scroll-list" id="leftMemberList">
-                <div class="empty-history">Đang tải dữ liệu từ Cloud...</div>
+                <div class="empty-history">Đang tải dữ liệu từ bảng riêng ga_data...</div>
             </div>
         </div>
 
@@ -327,10 +327,8 @@
                         <button class="btn-mini danger" onclick="deleteCurrentCustomName()" title="Xóa danh sách đang chọn"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                     <button class="btn-mini success" onclick="saveToCloudCustom()"><i class="fa-solid fa-cloud-arrow-up"></i> Lưu Cloud</button>
-                    <button class="btn-mini info" onclick="exportJSON()" title="Xuất toàn bộ dữ liệu ra file JSON"><i class="fa-solid fa-file-arrow-down"></i> Xuất JSON</button>
-                    <button class="btn-mini info" onclick="triggerImportJSON()" title="Nhập dữ liệu từ file JSON"><i class="fa-solid fa-file-arrow-up"></i> Nhập JSON</button>
-                    <input type="file" id="importFileJSON" style="display: none;" accept=".json" onchange="importJSON(event)">
-                    <button class="btn-mini" onclick="exportExcel()"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button>
+                    <button class="btn-mini info" onclick="exportJSON()" title="Xuất dữ liệu dự phòng ra file JSON"><i class="fa-solid fa-file-arrow-down"></i> JSON</button>
+                    <button class="btn-mini" onclick="exportExcel()"><i class="fa-solid fa-file-excel"></i> Excel</button>
                     <button class="btn-mini danger" onclick="clearHistory()"><i class="fa-solid fa-trash"></i> Xóa Hết</button>
                 </div>
             </div>
@@ -401,17 +399,16 @@
                 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYmxxZW5rcnpqdWtsenJ2b2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NzA4MjMsImV4cCI6MjEwNDU0NjgyM30.I8bsjcbR3dNYm99kHan8mLj9X7jcNuPEzFQTk9jUups';
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+                // Tải trực tiếp từ bảng riêng 'ga_data'
                 let { data } = await supabaseClient
-                    .from('squad_data')
+                    .from('ga_data')
                     .select('*')
-                    .eq('id', 'main_config')
+                    .eq('id', 'main_ga_config')
                     .maybeSingle();
 
                 if (data && data.content) {
                     if (data.content.members && data.content.members.length > 0) {
                         membersList = data.content.members.filter(m => m.classType && m.classType !== 'Khac');
-                    } else if (data.content.gaMembersList && data.content.gaMembersList.length > 0) {
-                        membersList = data.content.gaMembersList;
                     } else {
                         membersList = [];
                     }
@@ -420,13 +417,10 @@
 
                     if (data.content.historyByDate) {
                         historyByDate = data.content.historyByDate;
-                    } else if (data.content.gaCheckedState) {
-                        const defaultKey = "Buổi 1";
-                        historyByDate[defaultKey] = data.content.gaCheckedState;
                     }
                 }
             } catch (err) {
-                console.log("Lỗi tải dữ liệu cloud:", err);
+                console.log("Lỗi tải dữ liệu bảng ga_data:", err);
             }
 
             updateComboboxOptions();
@@ -515,78 +509,36 @@
             const currentKey = getCurrentCustomName();
 
             try {
-                let { data } = await supabaseClient
-                    .from('squad_data')
-                    .select('*')
-                    .eq('id', 'main_config')
-                    .maybeSingle();
+                let payloadContent = {
+                    members: membersList,
+                    historyByDate: historyByDate,
+                    updated_at: new Date().toISOString()
+                };
 
-                let currentContent = data && data.content ? data.content : {};
-                
-                if (currentContent.members) {
-                    membersList = currentContent.members.filter(m => m.classType && m.classType !== 'Khac');
-                    membersList.sort((a, b) => a.classType.localeCompare(b.classType));
-                }
-                
-                currentContent.gaMembersList = membersList;
-                currentContent.historyByDate = historyByDate;
-
+                // Lưu trực tiếp vào bảng riêng 'ga_data'
                 let { error: upsertError } = await supabaseClient
-                    .from('squad_data')
-                    .upsert({ id: 'main_config', content: currentContent });
+                    .from('ga_data')
+                    .upsert({ id: 'main_ga_config', content: payloadContent });
 
                 if (upsertError) {
-                    alert("❌ Lỗi khi lưu lên Cloud: " + upsertError.message);
+                    alert("❌ Lỗi khi lưu vào bảng ga_data: " + upsertError.message);
                 } else {
-                    alert(`☁️ Lưu danh sách [${currentKey}] lên Cloud thành công!`);
+                    alert(`☁️ Lưu danh sách [${currentKey}] vào bảng riêng [ga_data] thành công!`);
                 }
             } catch (err) {
                 alert("❌ Có lỗi xảy ra: " + err.message);
             }
         }
 
-        // --- XUẤT & NHẬP JSON ---
         function exportJSON() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(historyByDate, null, 2));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `backup_ga_data_${new Date().toISOString().slice(0,10)}.json`);
+            downloadAnchor.setAttribute("download", `ga_data_backup_${new Date().toISOString().slice(0,10)}.json`);
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
         }
-
-        function triggerImportJSON() {
-            document.getElementById('importFileJSON').click();
-        }
-
-        function importJSON(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const parsedData = JSON.parse(e.target.result);
-                    if (typeof parsedData === 'object' && parsedData !== null) {
-                        if (confirm("⚠️ Việc nhập file JSON sẽ thay thế toàn bộ dữ liệu các buổi hiện tại trên giao diện. Bạn có chắc chắn muốn tiếp tục?")) {
-                            historyByDate = parsedData;
-                            updateComboboxOptions();
-                            renderAll();
-                            alert("✅ Nhập file JSON thành công!");
-                        }
-                    } else {
-                        alert("❌ File JSON không hợp lệ!");
-                    }
-                } catch (err) {
-                    alert("❌ Lỗi đọc file JSON: " + err.message);
-                }
-                // Reset input file để có thể chọn lại cùng một file nếu cần
-                event.target.value = '';
-            };
-            reader.readAsText(file);
-        }
-        // ------------------------
 
         function renderAll() {
             filterMembers();
@@ -613,7 +565,7 @@
             document.getElementById('leftTitle').innerText = `THÀNH VIÊN BANG ( ${list.length} )`;
 
             if (!list || list.length === 0) {
-                container.innerHTML = '<div class="empty-history">Chưa có danh sách thành viên. Vui lòng cập nhật sơ đồ ở trang chủ (index.html).</div>';
+                container.innerHTML = '<div class="empty-history">Chưa có danh sách thành viên. Vui lòng thêm dữ liệu thành viên.</div>';
                 return;
             }
 
@@ -775,7 +727,7 @@
             const checkedState = getCurrentDateState();
             let historyItems = [];
             
-            membersList.forEach(m => {
+            membersList.filter(m => m.classType && m.classType !== 'Khac').forEach(m => {
                 const state = checkedState[m.name];
                 if (state) {
                     Object.keys(fullMatchLabelMap).forEach(key => {
