@@ -182,16 +182,15 @@
     </footer>
 
     <script>
-        // Kiểm tra bảo mật khi vào trang trung gian
+        // Kiểm tra bảo mật dùng chung localStorage để giữ phiên đăng nhập
         window.addEventListener('DOMContentLoaded', () => {
             const isLoggedIn = localStorage.getItem('isLoggedIn');
             if (!isLoggedIn) {
-                // Nếu chưa đăng nhập, bắt buộc quay lại trang login
                 window.location.href = 'login.html';
             }
         });
 
-        // Hàm điều hướng chuyển trang
+        // Hàm điều hướng mở trang khi click vào card
         function openPage(pageName) {
             window.location.href = pageName;
         }
