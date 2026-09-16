@@ -101,6 +101,7 @@
         .filter-row {
             display: flex;
             gap: 8px;
+            align-items: center;
         }
 
         .search-input, .filter-select {
@@ -115,22 +116,6 @@
         .search-input { flex: 1; }
         .filter-select { width: 140px; }
         .search-input:focus, .filter-select:focus { outline: none; border-color: #58a6ff; }
-
-        .btn-sync {
-            background: #1f6feb;
-            color: #fff;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            white-space: nowrap;
-            font-weight: 600;
-        }
-        .btn-sync:hover { background: #388bfd; }
 
         /* KHU VỰC CHỌN TẤT CẢ THEO CỘT */
         .select-all-bar {
@@ -216,13 +201,30 @@
             height: 14px;
         }
 
-        .right-toolbar { display: flex; gap: 5px; flex-wrap: wrap; }
+        .right-toolbar { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+
+        .custom-select-group {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .custom-combobox {
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .custom-combobox:focus { outline: none; border-color: #58a6ff; }
 
         .btn-mini {
             background: #21262d;
             color: #c9d1d9;
             border: 1px solid var(--border-color);
-            padding: 3px 8px;
+            padding: 4px 10px;
             border-radius: 4px;
             font-size: 11px;
             cursor: pointer;
@@ -232,10 +234,6 @@
         }
         .btn-mini.success { color: #3fb950; border-color: rgba(63, 185, 80, 0.4); }
         .btn-mini.success:hover { background: #238636; color: #fff; }
-        .btn-mini.warning { color: #d29922; border-color: rgba(210, 153, 34, 0.4); }
-        .btn-mini.warning:hover { background: #9e6a03; color: #fff; }
-        .btn-mini.info { color: #58a6ff; border-color: rgba(88, 166, 255, 0.4); }
-        .btn-mini.info:hover { background: #1f6feb; color: #fff; }
         .btn-mini.danger { color: #f85149; border-color: rgba(248,81,73,0.4); }
         .btn-mini:hover { background: #30363d; }
 
@@ -306,7 +304,6 @@
                         <option value="HuyenCo">Huyền Cơ</option>
                         <option value="TrieuQuang">Triều Quang</option>
                     </select>
-                    <button class="btn-sync" onclick="syncMembersFromIndex()" title="Lấy danh sách thành viên mới nhất từ Sơ đồ"><i class="fa-solid fa-rotate"></i> Đồng bộ DS</button>
                 </div>
                 
                 <!-- THANH CHỌN TẤT CẢ THEO KẾT QUẢ LỌC -->
@@ -330,19 +327,22 @@
             </div>
 
             <div class="member-scroll-list" id="leftMemberList">
-                <div class="empty-history">Đang tải dữ liệu...</div>
+                <div class="empty-history">Đang tải dữ liệu từ Cloud...</div>
             </div>
         </div>
 
         <div class="panel">
             <div class="panel-title">
-                <span id="rightTitle">DANH SÁCH THAM GIA GA ( 0 )</span>
+                <span id="rightTitle">DANH SÁCH THAM GIA ( 0 )</span>
                 <div class="right-toolbar">
-                    <button class="btn-mini success" onclick="manualSaveToCloud()"><i class="fa-solid fa-cloud-arrow-up"></i> Lưu Cloud</button>
-                    <button class="btn-mini warning" onclick="exportJSON()"><i class="fa-solid fa-file-code"></i> Xuất JSON</button>
-                    <button class="btn-mini info" onclick="triggerImportJSON()"><i class="fa-solid fa-file-import"></i> Nhập JSON</button>
-                    <!-- Input ẩn để xử lý chọn file JSON từ máy -->
-                    <input type="file" id="importFileinput" accept=".json" style="display: none;" onchange="importJSON(event)">
+                    <!-- COMBOBOX CHỌN TÊN TÙY CHỈNH & NÚT THÊM -->
+                    <div class="custom-select-group">
+                        <select id="historySelect" class="custom-combobox" onchange="onCustomNameChange()">
+                            <!-- Dữ liệu sẽ tự load vào đây -->
+                        </select>
+                        <button class="btn-mini" onclick="addNewCustomName()" title="Thêm danh sách mới"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                    <button class="btn-mini success" onclick="saveToCloudCustom()"><i class="fa-solid fa-cloud-arrow-up"></i> Lưu Cloud</button>
                     <button class="btn-mini" onclick="exportExcel()"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button>
                     <button class="btn-mini danger" onclick="clearHistory()"><i class="fa-solid fa-trash"></i> Xóa Hết</button>
                 </div>
@@ -386,7 +386,7 @@
         }
 
         let membersList = [];
-        let checkedState = {}; 
+        let historyByDate = {}; // Dùng chung cấu trúc lưu trữ theo key tùy chỉnh
         let currentFilteredList = []; 
         let supabaseClient = null;
 
@@ -401,7 +401,7 @@
             loadSupabaseAndInit();
         });
 
-        function loadSupabaseAndInit() {
+        async function loadSupabaseAndInit() {
             const script = document.createElement('script');
             script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
             script.onload = initApp;
@@ -421,7 +421,9 @@
                     .maybeSingle();
 
                 if (data && data.content) {
-                    if (data.content.gaMembersList && data.content.gaMembersList.length > 0) {
+                    if (data.content.members && data.content.members.length > 0) {
+                        membersList = data.content.members.filter(m => m.classType && m.classType !== 'Khac');
+                    } else if (data.content.gaMembersList && data.content.gaMembersList.length > 0) {
                         membersList = data.content.gaMembersList;
                     } else {
                         membersList = [];
@@ -429,20 +431,86 @@
                     
                     membersList.sort((a, b) => a.classType.localeCompare(b.classType));
 
-                    if (data.content.gaCheckedState) {
-                        checkedState = data.content.gaCheckedState;
+                    if (data.content.historyByDate) {
+                        historyByDate = data.content.historyByDate;
+                    } else if (data.content.gaCheckedState) {
+                        const defaultKey = new Date().toISOString().split('T')[0];
+                        historyByDate[defaultKey] = data.content.gaCheckedState;
                     }
                 }
             } catch (err) {
                 console.log("Lỗi tải dữ liệu cloud:", err);
             }
 
+            updateComboboxOptions();
             renderAll();
         }
 
-        async function syncMembersFromIndex() {
-            if (!supabaseClient) return;
-            if (!confirm("Bạn có muốn cập nhật danh sách thành viên mới từ trang Sơ đồ không?")) return;
+        // Cập nhật các lựa chọn trong Combobox từ keys của historyByDate
+        function updateComboboxOptions(selectedName = null) {
+            const selectEl = document.getElementById('historySelect');
+            const keys = Object.keys(historyByDate);
+
+            if (keys.length === 0) {
+                const defaultKey = "Buổi 1";
+                historyByDate[defaultKey] = {};
+                keys.push(defaultKey);
+            }
+
+            selectEl.innerHTML = '';
+            keys.forEach(k => {
+                const opt = document.createElement('option');
+                opt.value = k;
+                opt.textContent = k;
+                selectEl.appendChild(opt);
+            });
+
+            if (selectedName && historyByDate[selectedName]) {
+                selectEl.value = selectedName;
+            } else {
+                selectEl.value = keys[0];
+            }
+        }
+
+        function getCurrentCustomName() {
+            const selectEl = document.getElementById('historySelect');
+            return selectEl.value || Object.keys(historyByDate)[0] || "Buổi 1";
+        }
+
+        function addNewCustomName() {
+            const newName = prompt("Nhập tên danh sách tùy chỉnh muốn tạo (Ví dụ: Scrim Tối Nay, Bang Chiến CN...):");
+            if (!newName) return;
+            
+            const trimmedName = newName.trim();
+            if (!trimmedName) return;
+
+            if (!historyByDate[trimmedName]) {
+                historyByDate[trimmedName] = {};
+            }
+
+            updateComboboxOptions(trimmedName);
+            renderAll();
+        }
+
+        function getCurrentDateState() {
+            const nameKey = getCurrentCustomName();
+            if (!historyByDate[nameKey]) {
+                historyByDate[nameKey] = {};
+            }
+            return historyByDate[nameKey];
+        }
+
+        function onCustomNameChange() {
+            renderAll();
+        }
+
+        async function saveToCloudCustom() {
+            if (!supabaseClient) {
+                alert("⚠️ Chưa kết nối được tới Supabase!");
+                return;
+            }
+
+            const currentKey = getCurrentCustomName();
 
             try {
                 let { data } = await supabaseClient
@@ -451,16 +519,27 @@
                     .eq('id', 'main_config')
                     .maybeSingle();
 
-                if (data && data.content && data.content.members) {
-                    membersList = data.content.members.filter(m => m.classType && m.classType !== 'Khac');
+                let currentContent = data && data.content ? data.content : {};
+                
+                if (currentContent.members) {
+                    membersList = currentContent.members.filter(m => m.classType && m.classType !== 'Khac');
                     membersList.sort((a, b) => a.classType.localeCompare(b.classType));
-                    renderAll();
-                    alert("🔄 Đồng bộ thành viên thành công! Hãy bấm nút 'Lưu Cloud' để lưu lại chính thức.");
+                }
+                
+                currentContent.gaMembersList = membersList;
+                currentContent.historyByDate = historyByDate;
+
+                let { error: upsertError } = await supabaseClient
+                    .from('squad_data')
+                    .upsert({ id: 'main_config', content: currentContent });
+
+                if (upsertError) {
+                    alert("❌ Lỗi khi lưu lên Cloud: " + upsertError.message);
                 } else {
-                    alert("⚠️ Không tìm thấy dữ liệu thành viên ở Sơ đồ.");
+                    alert(`☁️ Lưu danh sách [${currentKey}] lên Cloud thành công!`);
                 }
             } catch (err) {
-                alert("❌ Lỗi đồng bộ: " + err.message);
+                alert("❌ Có lỗi xảy ra: " + err.message);
             }
         }
 
@@ -489,9 +568,11 @@
             document.getElementById('leftTitle').innerText = `THÀNH VIÊN BANG ( ${list.length} )`;
 
             if (!list || list.length === 0) {
-                container.innerHTML = '<div class="empty-history">Chưa có danh sách thành viên. Hãy bấm nút "Đồng bộ DS" ở trên để lấy danh sách từ Sơ đồ.</div>';
+                container.innerHTML = '<div class="empty-history">Chưa có danh sách thành viên. Vui lòng cập nhật sơ đồ ở trang chủ (index.html).</div>';
                 return;
             }
+
+            const checkedState = getCurrentDateState();
 
             list.forEach(m => {
                 const classType = m.classType;
@@ -527,6 +608,7 @@
 
         function toggleSelectAllColumn(scrimType, isChecked) {
             if (currentFilteredList.length === 0) return;
+            const checkedState = getCurrentDateState();
 
             currentFilteredList.forEach(m => {
                 if (!checkedState[m.name]) {
@@ -540,6 +622,7 @@
         }
 
         function updateSelectAllCheckboxesState() {
+            const checkedState = getCurrentDateState();
             matchTypes.forEach(type => {
                 const checkbox = document.getElementById(`checkAll_${type.key}`);
                 if (!checkbox) return;
@@ -566,6 +649,7 @@
         }
 
         function toggleScrim(name, scrimType, isChecked) {
+            const checkedState = getCurrentDateState();
             if (!checkedState[name]) {
                 checkedState[name] = {};
             }
@@ -573,38 +657,6 @@
             
             renderRightHistory();
             updateSelectAllCheckboxesState();
-        }
-
-        async function manualSaveToCloud() {
-            if (!supabaseClient) {
-                alert("⚠️ Chưa kết nối được tới Supabase!");
-                return;
-            }
-
-            try {
-                let { data } = await supabaseClient
-                    .from('squad_data')
-                    .select('*')
-                    .eq('id', 'main_config')
-                    .maybeSingle();
-
-                let currentContent = data && data.content ? data.content : {};
-                
-                currentContent.gaMembersList = membersList;
-                currentContent.gaCheckedState = checkedState;
-
-                let { error: upsertError } = await supabaseClient
-                    .from('squad_data')
-                    .upsert({ id: 'main_config', content: currentContent });
-
-                if (upsertError) {
-                    alert("❌ Lỗi khi lưu lên Cloud: " + upsertError.message);
-                } else {
-                    alert("☁️ Lưu lên Cloud thành công!");
-                }
-            } catch (err) {
-                alert("❌ Có lỗi xảy ra: " + err.message);
-            }
         }
 
         function renderRightHistory() {
@@ -618,7 +670,9 @@
                 bc: 'Bang Chiến'
             };
 
+            const checkedState = getCurrentDateState();
             let historyItems = [];
+            
             membersList.forEach(m => {
                 const state = checkedState[m.name];
                 if (state) {
@@ -630,10 +684,11 @@
                 }
             });
 
-            document.getElementById('rightTitle').innerText = `DANH SÁCH THAM GIA GA ( ${historyItems.length} )`;
+            const currentKey = getCurrentCustomName();
+            document.getElementById('rightTitle').innerText = `${currentKey.toUpperCase()} ( ${historyItems.length} )`;
 
             if (historyItems.length === 0) {
-                container.innerHTML = '<div class="empty-history">Chưa có dữ liệu. Hãy tích chọn ở bên trái.</div>';
+                container.innerHTML = `<div class="empty-history">Chưa có dữ liệu tích chọn trong "${currentKey}".</div>`;
                 return;
             }
 
@@ -654,58 +709,14 @@
         }
 
         function clearHistory() {
-            if (confirm("Bạn có chắc chắn muốn xóa hết các tích chọn trên màn hình không?")) {
-                checkedState = {};
+            const currentKey = getCurrentCustomName();
+            if (confirm(`Bạn có chắc chắn muốn xóa hết các tích chọn trong danh sách "${currentKey}" không?`)) {
+                const checkedState = getCurrentDateState();
+                Object.keys(checkedState).forEach(name => {
+                    checkedState[name] = {};
+                });
                 renderAll();
             }
-        }
-
-        // Xuất file JSON về máy tính
-        function exportJSON() {
-            const exportData = {
-                gaMembersList: membersList,
-                gaCheckedState: checkedState,
-                exportTime: new Date().toISOString()
-            };
-
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "DanhSach_GA_Backup.json");
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        }
-
-        // Kích hoạt hộp thoại chọn file để Nhập JSON
-        function triggerImportJSON() {
-            document.getElementById('importFileinput').click();
-        }
-
-        // Xử lý đọc file JSON từ máy tính đưa vào giao diện
-        function importJSON(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const content = JSON.parse(e.target.result);
-                    if (content.gaMembersList) {
-                        membersList = content.gaMembersList;
-                    }
-                    if (content.gaCheckedState) {
-                        checkedState = content.gaCheckedState;
-                    }
-                    renderAll();
-                    alert("📥 Nhập file JSON thành công! Hãy bấm 'Lưu Cloud' nếu bạn muốn lưu trực tuyến.");
-                } catch (err) {
-                    alert("❌ File JSON không hợp lệ hoặc bị lỗi định dạng!");
-                }
-                // Reset lại input để có thể chọn lại chính file đó lần sau nếu cần
-                event.target.value = '';
-            };
-            reader.readAsText(file);
         }
 
         function exportExcel() {
@@ -716,13 +727,16 @@
                 bc: 'Bang Chiến'
             };
 
+            const checkedState = getCurrentDateState();
             let historyItems = [];
+            
             membersList.forEach(m => {
                 const state = checkedState[m.name];
                 if (state) {
                     Object.keys(fullMatchLabelMap).forEach(key => {
                         if (state[key]) {
                             historyItems.push({
+                                "Danh Sách / Buổi": getCurrentCustomName(),
                                 "Tên Thành Viên": m.name,
                                 "Môn Phái": classNamesMap[m.classType] || m.classType,
                                 "Loại Sự Kiện / Trận": fullMatchLabelMap[key]
@@ -741,7 +755,8 @@
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "DanhSachGA");
 
-            XLSX.writeFile(workbook, "DanhSach_ThamGia_GA.xlsx");
+            const currentKey = getCurrentCustomName().replace(/[^a-zA-Z0-9]/g, '_');
+            XLSX.writeFile(workbook, `DanhSach_GA_${currentKey}.xlsx`);
         }
     </script>
 </body>
