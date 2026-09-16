@@ -593,8 +593,8 @@
     <div class="title-banner">
         <span><i class="fa-solid fa-shield-halved"></i> ĐỘI HÌNH BANG CHIẾN - NGHỊCH THỦY HÀN</span>
         <div class="toolbar-btns">
-            <!-- Đã thêm nút GA màu vàng nằm cạnh nút Lưu Lên Cloud -->
-            <a href="GA.html" class="btn-action btn-ga"><i class="fa-solid fa-bolt"></i> GA</a>
+            <!-- Nút GA cập nhật mở tab mới với đường dẫn đầy đủ -->
+            <a href="https://phamquangtrung96vn-boop.github.io/NHABAO/GA.html" target="_blank" class="btn-action btn-ga"><i class="fa-solid fa-bolt"></i> GA</a>
             <button class="btn-action btn-save-cloud" onclick="manualSaveToCloud()"><i class="fa-solid fa-cloud-arrow-up"></i> Lưu Lên Cloud</button>
             <button class="btn-action btn-discord" onclick="openDiscordModal()"><i class="fa-brands fa-discord"></i> Gửi Discord</button>
             <a href="https://phamquangtrung96vn-boop.github.io/NHABAO/ChienThuat.html" class="btn-action btn-strategy"><i class="fa-solid fa-chess-knight"></i> Chiến Thuật</a>
@@ -801,7 +801,6 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                     <div class="stats-grid" id="statsGridContainer"></div>
                 </div>
 
-                <!-- THÊM KHUNG TỔNG SỐ NGOÀI PHÁI KHÁC Ở VỊ TRÍ BẠN YÊU CẦU -->
                 <div class="stats-box" style="margin-top: 4px;">
                     <h4><i class="fa-solid fa-users"></i> TỔNG SỐ (NGOÀI PHÁI KHÁC)</h4>
                     <div style="text-align: center; padding: 5px; font-size: 13px; font-weight: bold; color: #58a6ff;" id="nonKhacStatsCount">
@@ -1420,7 +1419,7 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                 const total = counts[classKey];
 
                 if (classKey !== 'Khac') {
-                    nonKhacTotal += total; // Tính tổng số lượng thành viên hiện có ngoài phái Khác
+                    nonKhacTotal += total; 
                 }
 
                 const item = document.createElement('div');
@@ -1434,7 +1433,6 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
                 container.appendChild(item);
             });
 
-            // Cập nhật giá trị vào khung tổng số ngoài phái Khác (/80)
             document.getElementById('nonKhacStatsCount').innerText = `${nonKhacTotal} / 80`;
         }
 
@@ -1638,7 +1636,6 @@ Chiến thuật mới cần sự tập trung và tuân thủ kỷ luật rất c
             if (e.key === 'Enter') addMember();
         });
 
-        // Khởi chạy ứng dụng
         initApp();
     </script>
 </body>
