@@ -722,7 +722,6 @@
             localStorage.setItem('gaCheckedState', JSON.stringify(checkedState));
         }
 
-        // HÀM LƯU CLOUD ĐÃ ĐƯỢC TỐI ƯU GỘP DỮ LIỆU CŨ VÀ MỚI AN TOÀN TUYỆT ĐỐI
         async function manualSaveToCloud() {
             autoSaveLocal();
             if (!supabaseClient) {
@@ -731,19 +730,15 @@
             }
 
             try {
-                // 1. Tải dữ liệu cũ trên Cloud xuống trước để không làm mất các bảng cấu hình khác
                 let { data, error: fetchError } = await supabaseClient
                     .from('squad_data')
-                    .select('content')
+                    .select('*')
                     .eq('id', 'main_config')
                     .maybeSingle();
 
-                let currentContent = (data && data.content) ? data.content : {};
-                
-                // 2. Cập nhật phần tích chọn mới của bạn vào gói dữ liệu chung
+                let currentContent = data && data.content ? data.content : {};
                 currentContent.gaCheckedState = checkedState;
 
-                // 3. Đẩy ngược lên Cloud
                 let { error: upsertError } = await supabaseClient
                     .from('squad_data')
                     .upsert({ id: 'main_config', content: currentContent });
