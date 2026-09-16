@@ -9,6 +9,16 @@
     <!-- Thư viện html2canvas để xuất file ảnh -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
+    <!-- --- BẢO MẬT: KIỂM TRA ĐĂNG NHẬP --- -->
+    <script>
+        (function checkAuth() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (!isLoggedIn || isLoggedIn !== 'true') {
+                window.location.href = 'index.html';
+            }
+        })();
+    </script>
+
     <style>
         :root {
             --bg-dark: #0f141d;
