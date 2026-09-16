@@ -103,26 +103,19 @@
 
     <script>
         document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault(); // Ngăn load lại trang
+            e.preventDefault(); 
 
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
 
-            // Kiểm tra thông tin tài khoản
             if (username === 'nhabao' && password === 'Pk123456*') {
-                // Lưu trạng thái và phân quyền admin
                 localStorage.setItem('isLoggedIn', 'true');
                 localStorage.setItem('userRole', 'admin');
-
-                // Chuyển hướng sang trang trung gian
                 window.location.href = 'transit.html';
 
             } else if (username === 'user' && password === '123456') {
-                // Lưu trạng thái và phân quyền user thường
                 localStorage.setItem('isLoggedIn', 'true');
                 localStorage.setItem('userRole', 'user');
-
-                // Chuyển hướng sang trang trung gian
                 window.location.href = 'transit.html';
 
             } else {
