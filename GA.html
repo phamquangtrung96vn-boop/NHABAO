@@ -533,7 +533,6 @@
             { key: 'bc', label: 'BC' }
         ];
 
-        // SỬ DỤNG localStorage THAY CHO sessionStorage ĐỂ GIỮ TRẠNG THÁI SAU KHI LOGOUT/LOGIN LẠI
         window.addEventListener('DOMContentLoaded', () => {
             const isLoggedIn = localStorage.getItem("isLoggedIn");
             if (isLoggedIn === "true") {
@@ -657,7 +656,7 @@
             });
         }
 
-        function toggleSelectAllColumn(scrimType, isChecked) {
+        async function toggleSelectAllColumn(scrimType, isChecked) {
             if (currentFilteredList.length === 0) return;
 
             currentFilteredList.forEach(m => {
@@ -669,6 +668,9 @@
 
             renderLeftList(currentFilteredList);
             renderRightHistory();
+
+            // Tự động lưu lên Cloud ngay khi dùng chọn nhanh
+            await autoSaveToCloud();
         }
 
         function updateSelectAllCheckboxesState() {
@@ -697,7 +699,7 @@
             });
         }
 
-        function toggleScrim(name, scrimType, isChecked) {
+        async function toggleScrim(name, scrimType, isChecked) {
             if (!checkedState[name]) {
                 checkedState[name] = {};
             }
@@ -705,6 +707,30 @@
             
             renderRightHistory();
             updateSelectAllCheckboxesState();
+
+            // Tự động lưu lên Cloud ngay khi tích chọn từng người
+            await autoSaveToCloud();
+        }
+
+        // Hàm hỗ trợ tự động lưu ngầm lên Cloud
+        async function autoSaveToCloud() {
+            if (!supabaseClient) return;
+            try {
+                let { data } = await supabaseClient
+                    .from('squad_data')
+                    .select('*')
+                    .eq('id', 'main_config')
+                    .maybeSingle();
+
+                let currentContent = data && data.content ? data.content : {};
+                currentContent.gaCheckedState = checkedState;
+
+                await supabaseClient
+                    .from('squad_data')
+                    .upsert({ id: 'main_config', content: currentContent });
+            } catch (err) {
+                console.error("Lỗi tự động lưu:", err);
+            }
         }
 
         async function manualSaveToCloud() {
@@ -785,10 +811,11 @@
             });
         }
 
-        function clearHistory() {
-            if (confirm("Bạn có chắc chắn muốn xóa hết các tích chọn trên màn hình không? (Cần bấm 'Lưu Cloud' sau đó nếu muốn cập nhật lên server)")) {
+        async function clearHistory() {
+            if (confirm("Bạn có chắc chắn muốn xóa hết các tích chọn trên màn hình không?")) {
                 checkedState = {};
                 renderAll();
+                await autoSaveToCloud();
             }
         }
 
