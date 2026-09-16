@@ -49,6 +49,11 @@
             align-items: center;
         }
 
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
         .back-btn {
             background: #21262d;
             color: #c9d1d9;
@@ -65,6 +70,13 @@
             transition: 0.2s;
         }
         .back-btn:hover { background: #30363d; color: #fff; }
+
+        .btn-logout {
+            background: #da3633;
+            color: white;
+            border: none;
+        }
+        .btn-logout:hover { background: #f85149; }
 
         .main-container {
             display: grid;
@@ -348,9 +360,31 @@
 </head>
 <body>
 
+    <!-- CHỐT CHẶN BẢO MẬT: CHẶN DÁN LINK TRỰC TIẾP -->
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const userRole = localStorage.getItem('userRole');
+
+            if (!isLoggedIn || userRole !== 'admin') {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userRole');
+            window.location.href = 'login.html';
+        }
+    </script>
+
     <div class="title-banner">
         <span><i class="fa-solid fa-video"></i> Quản Lý POV Bang Chiến</span>
-        <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Về Sơ Đồ</a>
+        <div class="nav-buttons">
+            <a href="transit.html" class="back-btn"><i class="fa-solid fa-shuffle"></i> Trang Transit</a>
+            <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Về Đội Hình</a>
+            <button onclick="logout()" class="back-btn btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất</button>
+        </div>
     </div>
 
     <div class="main-container">
