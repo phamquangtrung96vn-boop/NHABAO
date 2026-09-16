@@ -262,7 +262,7 @@
     <!-- NỘI DUNG QUẢN LÝ GA -->
     <div class="header-banner">
         <span><i class="fa-solid fa-users-gear"></i> QUẢN LÝ DANH SÁCH GA & THÀNH VIÊN BANG</span>
-        <a href="index.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Về Sơ Đồ</a>
+        <button class="btn-back" onclick="window.close()"><i class="fa-solid fa-xmark"></i> Về Sơ Đồ (Đóng)</button>
     </div>
 
     <div class="main-layout">
@@ -372,7 +372,6 @@
             { key: 'bc', label: 'BC' }
         ];
 
-        // BỎ XÁC MINH ĐĂNG NHẬP, TỰ ĐỘNG TẢI TRỰC TIẾP KHI VỪA VÀO TRANG
         window.addEventListener('DOMContentLoaded', () => {
             loadSupabaseAndInit();
         });
@@ -387,7 +386,7 @@
         async function initApp() {
             try {
                 const SUPABASE_URL = 'https://shblqenkrzjuklzrvoie.supabase.co';
-                const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYmxxZW5rcnpqdWtsenJ2b2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NzA4MjMsImV4cCI6MjEwNDU0NjgyM30.I8bsjcbR3dNYm99kHan8mLj9X7jcNuPEzFQTk9jUups';
+                const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYmxxZW5rcnpqdWtsenJ2b2llIiwicm9sZSI6InFub24iLCJpYXQiOjE3ODg5NzA4MjMsImV4cCI6MjEwNDU0NjgyM30.I8bsjcbR3dNYm99kHan8mLj9X7jcNuPEzFQTk9jUups';
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
                 let { data, error } = await supabaseClient
