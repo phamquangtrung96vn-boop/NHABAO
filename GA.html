@@ -327,7 +327,7 @@
             </div>
 
             <div class="member-scroll-list" id="leftMemberList">
-                <div class="empty-history">Đang tải dữ liệu từ Cloud...</div>
+                <div class="empty-history">Đang tải danh sách thành viên...</div>
             </div>
         </div>
 
@@ -335,10 +335,8 @@
             <div class="panel-title">
                 <span id="rightTitle">DANH SÁCH THAM GIA ( 0 )</span>
                 <div class="right-toolbar">
-                    <!-- COMBOBOX CHỌN TÊN TÙY CHỈNH & NÚT THÊM -->
                     <div class="custom-select-group">
                         <select id="historySelect" class="custom-combobox" onchange="onCustomNameChange()">
-                            <!-- Dữ liệu sẽ tự load vào đây -->
                         </select>
                         <button class="btn-mini" onclick="addNewCustomName()" title="Thêm danh sách mới"><i class="fa-solid fa-plus"></i></button>
                     </div>
@@ -386,7 +384,7 @@
         }
 
         let membersList = [];
-        let historyByDate = {}; // Dùng chung cấu trúc lưu trữ theo key tùy chỉnh
+        let historyByDate = {}; 
         let currentFilteredList = []; 
         let supabaseClient = null;
 
@@ -398,8 +396,49 @@
         ];
 
         window.addEventListener('DOMContentLoaded', () => {
+            loadMembersFromIndexLocal();
             loadSupabaseAndInit();
         });
+
+        // 1. Copy danh sách thành viên trực tiếp từ localStorage của trang index
+        function loadMembersFromIndexLocal() {
+            try {
+                // Kiểm tra các key lưu trữ dữ liệu sơ đồ thường dùng trên index (ví dụ: squad_members hoặc tương tự)
+                // Hoặc quét qua localStorage tìm dữ liệu thành viên
+                let rawData = localStorage.getItem('squad_members') || localStorage.getItem('members') || localStorage.getItem('bang_members');
+                
+                if (!rawData) {
+                    // Thử tìm trong các key khác nếu index lưu theo cấu trúc cũ
+                    for (let i = 0; i < localStorage.length; i++) {
+                        let key = localStorage.key(i);
+                        let val = localStorage.getItem(key);
+                        if (val && val.includes('classType')) {
+                            try {
+                                let parsed = JSON.parse(val);
+                                if (Array.isArray(parsed) && parsed.length > 0) {
+                                    membersList = parsed.filter(m => m.classType && m.classType !== 'Khac');
+                                    break;
+                                } else if (parsed.members && Array.isArray(parsed.members)) {
+                                    membersList = parsed.members.filter(m => m.classType && m.classType !== 'Khac');
+                                    break;
+                                }
+                            } catch (e) {}
+                        }
+                    }
+                } else {
+                    let parsed = JSON.parse(rawData);
+                    if (Array.isArray(parsed)) {
+                        membersList = parsed.filter(m => m.classType && m.classType !== 'Khac');
+                    } else if (parsed.members) {
+                        membersList = parsed.members.filter(m => m.classType && m.classType !== 'Khac');
+                    }
+                }
+
+                membersList.sort((a, b) => a.classType.localeCompare(b.classType));
+            } catch (err) {
+                console.log("Lỗi đọc localStorage từ index:", err);
+            }
+        }
 
         async function loadSupabaseAndInit() {
             const script = document.createElement('script');
@@ -421,32 +460,31 @@
                     .maybeSingle();
 
                 if (data && data.content) {
-                    if (data.content.members && data.content.members.length > 0) {
-                        membersList = data.content.members.filter(m => m.classType && m.classType !== 'Khac');
-                    } else if (data.content.gaMembersList && data.content.gaMembersList.length > 0) {
-                        membersList = data.content.gaMembersList;
-                    } else {
-                        membersList = [];
+                    // Nếu localStorage trống, có thể fallback lấy từ Cloud của index nếu trang index có lưu lên đó
+                    if (membersList.length === 0) {
+                        if (data.content.members && data.content.members.length > 0) {
+                            membersList = data.content.members.filter(m => m.classType && m.classType !== 'Khac');
+                        } else if (data.content.gaMembersList && data.content.gaMembersList.length > 0) {
+                            membersList = data.content.gaMembersList;
+                        }
+                        membersList.sort((a, b) => a.classType.localeCompare(b.classType));
                     }
-                    
-                    membersList.sort((a, b) => a.classType.localeCompare(b.classType));
 
                     if (data.content.historyByDate) {
                         historyByDate = data.content.historyByDate;
                     } else if (data.content.gaCheckedState) {
-                        const defaultKey = new Date().toISOString().split('T')[0];
+                        const defaultKey = "Buổi 1";
                         historyByDate[defaultKey] = data.content.gaCheckedState;
                     }
                 }
             } catch (err) {
-                console.log("Lỗi tải dữ liệu cloud:", err);
+                console.log("Lỗi tải dữ liệu cloud lịch sử:", err);
             }
 
             updateComboboxOptions();
             renderAll();
         }
 
-        // Cập nhật các lựa chọn trong Combobox từ keys của historyByDate
         function updateComboboxOptions(selectedName = null) {
             const selectEl = document.getElementById('historySelect');
             const keys = Object.keys(historyByDate);
@@ -520,11 +558,6 @@
                     .maybeSingle();
 
                 let currentContent = data && data.content ? data.content : {};
-                
-                if (currentContent.members) {
-                    membersList = currentContent.members.filter(m => m.classType && m.classType !== 'Khac');
-                    membersList.sort((a, b) => a.classType.localeCompare(b.classType));
-                }
                 
                 currentContent.gaMembersList = membersList;
                 currentContent.historyByDate = historyByDate;
