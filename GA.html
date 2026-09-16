@@ -327,7 +327,7 @@
             </div>
 
             <div class="member-scroll-list" id="leftMemberList">
-                <div class="empty-history">Đang tải danh sách thành viên...</div>
+                <div class="empty-history">Đang tải dữ liệu từ Cloud...</div>
             </div>
         </div>
 
@@ -399,46 +399,8 @@
         ];
 
         window.addEventListener('DOMContentLoaded', () => {
-            loadMembersFromIndexLocal();
             loadSupabaseAndInit();
         });
-
-        // Copy danh sách thành viên trực tiếp từ localStorage của trang index
-        function loadMembersFromIndexLocal() {
-            try {
-                let rawData = localStorage.getItem('squad_members') || localStorage.getItem('members') || localStorage.getItem('bang_members');
-                
-                if (!rawData) {
-                    for (let i = 0; i < localStorage.length; i++) {
-                        let key = localStorage.key(i);
-                        let val = localStorage.getItem(key);
-                        if (val && val.includes('classType')) {
-                            try {
-                                let parsed = JSON.parse(val);
-                                if (Array.isArray(parsed) && parsed.length > 0) {
-                                    membersList = parsed.filter(m => m.classType && m.classType !== 'Khac');
-                                    break;
-                                } else if (parsed.members && Array.isArray(parsed.members)) {
-                                    membersList = parsed.members.filter(m => m.classType && m.classType !== 'Khac');
-                                    break;
-                                }
-                            } catch (e) {}
-                        }
-                    }
-                } else {
-                    let parsed = JSON.parse(rawData);
-                    if (Array.isArray(parsed)) {
-                        membersList = parsed.filter(m => m.classType && m.classType !== 'Khac');
-                    } else if (parsed.members) {
-                        membersList = parsed.members.filter(m => m.classType && m.classType !== 'Khac');
-                    }
-                }
-
-                membersList.sort((a, b) => a.classType.localeCompare(b.classType));
-            } catch (err) {
-                console.log("Lỗi đọc localStorage từ index:", err);
-            }
-        }
 
         async function loadSupabaseAndInit() {
             const script = document.createElement('script');
@@ -460,14 +422,15 @@
                     .maybeSingle();
 
                 if (data && data.content) {
-                    if (membersList.length === 0) {
-                        if (data.content.members && data.content.members.length > 0) {
-                            membersList = data.content.members.filter(m => m.classType && m.classType !== 'Khac');
-                        } else if (data.content.gaMembersList && data.content.gaMembersList.length > 0) {
-                            membersList = data.content.gaMembersList;
-                        }
-                        membersList.sort((a, b) => a.classType.localeCompare(b.classType));
+                    if (data.content.members && data.content.members.length > 0) {
+                        membersList = data.content.members.filter(m => m.classType && m.classType !== 'Khac');
+                    } else if (data.content.gaMembersList && data.content.gaMembersList.length > 0) {
+                        membersList = data.content.gaMembersList;
+                    } else {
+                        membersList = [];
                     }
+                    
+                    membersList.sort((a, b) => a.classType.localeCompare(b.classType));
 
                     if (data.content.historyByDate) {
                         historyByDate = data.content.historyByDate;
@@ -477,7 +440,7 @@
                     }
                 }
             } catch (err) {
-                console.log("Lỗi tải dữ liệu cloud lịch sử:", err);
+                console.log("Lỗi tải dữ liệu cloud:", err);
             }
 
             updateComboboxOptions();
@@ -557,6 +520,11 @@
                     .maybeSingle();
 
                 let currentContent = data && data.content ? data.content : {};
+                
+                if (currentContent.members) {
+                    membersList = currentContent.members.filter(m => m.classType && m.classType !== 'Khac');
+                    membersList.sort((a, b) => a.classType.localeCompare(b.classType));
+                }
                 
                 currentContent.gaMembersList = membersList;
                 currentContent.historyByDate = historyByDate;
@@ -791,7 +759,6 @@
             XLSX.writeFile(workbook, `DanhSach_GA_${currentKey}.xlsx`);
         }
 
-        // Xuất file JSON toàn bộ dữ liệu lịch sử tích chọn
         function exportJson() {
             const dataToExport = {
                 historyByDate: historyByDate
@@ -805,7 +772,6 @@
             downloadAnchor.remove();
         }
 
-        // Nhập file JSON vào ứng dụng
         function importJson(event) {
             const fileReader = new FileReader();
             if (event.target.files && event.target.files[0]) {
@@ -824,7 +790,6 @@
                     } catch (error) {
                         alert("❌ Lỗi đọc file JSON: " + error.message);
                     }
-                    // Reset input file để có thể chọn lại file cũ nếu cần
                     event.target.value = '';
                 };
             }
