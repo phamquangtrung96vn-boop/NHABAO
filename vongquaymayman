@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chiếc Nón Kỳ Diệu - Vòng Quay Tên</title>
+    <!-- Thư viện hiệu ứng pháo giấy Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 15px;
+        }
+
+        .setup-screen {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 25px;
+            border-radius: 15px;
+            display: inline-block;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        textarea {
+            width: 90%;
+            height: 120px;
+            padding: 10px;
+            font-size: 15px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            resize: none;
+            margin-bottom: 15px;
+        }
+
+        .game-screen {
+            display: none;
+        }
+
+        /* Bố cục chia giao diện chính: Vòng quay ở giữa, bảng bên phải */
+        .main-layout {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 40px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Bảng danh sách trúng thưởng bên phải (Đã chỉnh chiều ngang và dọc rộng hơn để chứa vừa 10 người) */
+        .winner-board {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid #ffd700;
+            border-radius: 12px;
+            width: 320px; /* Tăng chiều ngang */
+            height: 480px; /* Chiều dọc cố định vừa đúng khoảng 10 người */
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .winner-board h3 {
+            color: #ffd700;
+            margin-top: 0;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 8px;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .winner-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto; /* Chỉ hiện thanh cuộn khi vượt quá 10 người */
+            flex-grow: 1;
+            padding-right: 5px;
+        }
+
+        /* Tùy chỉnh thanh cuộn gọn gàng hơn */
+        .winner-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .winner-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 215, 0, 0.4);
+            border-radius: 3px;
+        }
+
+        .winner-list li {
+            background: rgba(255, 215, 0, 0.15);
+            margin-bottom: 8px;
+            padding: 9px 12px;
+            border-radius: 6px;
+            font-size: 15px;
+            color: #00ffcc;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        /* Hiệu ứng nổi bật cho người vừa trúng thưởng mới nhất */
+        .winner-list li.latest-winner {
+            background: rgba(255, 215, 0, 0.4);
+            border: 1px solid #ffd700;
+            transform: scale(1.02);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cây kim chỉ vị trí */
+        .pointer {
+            width: 0;
+            height: 0;
+            border-left: 9px solid transparent;
+            border-right: 9px solid transparent;
+            border-top: 22px solid #ff4757;
+            margin-top: 2px;
+            margin-bottom: -10px;
+            z-index: 10;
+            filter: drop-shadow(0 -2px 2px rgba(0,0,0,0.5));
+        }
+
+        /* Khung chứa vòng quay Canvas */
+        .wheel-wrapper {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            border: 8px solid #ffd700;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+            overflow: hidden;
+            background: #222;
+        }
+
+        canvas {
+            display: block;
+            transition: transform 6s cubic-bezier(0.1, 0.7, 0.1, 1);
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            background-color: #ffd700;
+            color: #333;
+            border: none;
+            padding: 10px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background-color: #ffc107;
+            transform: scale(1.05);
+        }
+
+        button:disabled {
+            background-color: #7f8c8d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-back {
+            background-color: #ff4757;
+            color: white;
+        }
+        .btn-back:hover {
+            background-color: #ff6b81;
+        }
+
+        .result-text {
+            font-size: 20px;
+            margin-top: 15px;
+            min-height: 35px;
+            color: #00ffcc;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 20px;
+            border-radius: 10px;
+            display: inline-block;
+            animation: pulseText 1.5s infinite;
+        }
+
+        @keyframes pulseText {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎁 VÒNG QUAY TÊN - NÓN KỲ DIỆU 🎁</h1>
+
+    <!-- MÀN HÌNH NHẬP DANH SÁCH -->
+    <div class="setup-screen" id="setupScreen">
+        <h3>Nhập danh sách tên của bạn</h3>
+        <p style="font-size: 13px; color: #ddd; margin-top: -5px;">Mỗi người một dòng:</p>
+        <textarea id="nameListInput" placeholder="Nguyễn Văn A&#10;Trần Thị B&#10;Lê Văn C&#10;Phạm Thị D">Nguyễn Văn A
+Trần Thị B
+Lê Văn C
+Phạm Thị D</textarea>
+        <br>
+        <button onclick="initGame()">Tạo Vòng Quay</button>
+    </div>
+
+    <!-- MÀN HÌNH QUAY -->
+    <div class="game-screen" id="gameScreen">
+        <div class="main-layout">
+            <!-- Khu vực vòng quay và điều khiển bên trái -->
+            <div class="game-container">
+                <div class="pointer"></div>
+                <div class="wheel-wrapper">
+                    <canvas id="wheelCanvas" width="400" height="400"></canvas>
+                </div>
+                
+                <div class="controls">
+                    <button id="spinBtn" onclick="spinWheel()">QUAY NGAY</button>
+                    <button class="btn-back" onclick="resetSetup()">Nhập lại từ đầu</button>
+                </div>
+
+                <div class="result-text" id="result">Hãy bấm "Quay Ngay" để tìm người may mắn!</div>
+            </div>
+
+            <!-- Bảng danh sách trúng thưởng bên phải -->
+            <div class="winner-board">
+                <h3>🏆 Đã Trúng Thưởng</h3>
+                <ul class="winner-list" id="winnerList">
+                    <!-- Danh sách hiển thị ở đây -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let names = [];
+        let winners = [];
+        let currentRotation = 0;
+        let isSpinning = false;
+        const colors = ['#ff4757', '#2ed573', '#1e90ff', '#ffa502', '#9b59b6', '#00d2d3', '#ff6b81', '#eccc68'];
+
+        // --- GIAI ĐIỆU ĐẦY ĐỦ XỔ SỐ KIẾN THIẾT MIỀN BẮC ---
+        let audioCtx = null;
+        let activeTimeouts = [];
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        const fullLottoMelody = [
+            { f: 587.33, d: 0.12 }, { f: 659.25, d: 0.12 }, { f: 698.46, d: 0.12 }, { f: 880.00, d: 0.25 },
+            { f: 783.99, d: 0.12 }, { f: 698.46, d: 0.12 }, { f: 659.25, d: 0.12 }, { f: 587.33, d: 0.25 },
+            { f: 523.25, d: 0.12 }, { f: 587.33, d: 0.12 }, { f: 659.25, d: 0.12 }, { f: 698.46, d: 0.25 },
+            { f: 587.33, d: 0.12 }, { f: 523.25, d: 0.12 }, { f: 440.00, d: 0.35 },
+            { f: 880.00, d: 0.2 }, { f: 783.99, d: 0.12 }, { f: 698.46, d: 0.12 },
+            { f: 783.99, d: 0.2 }, { f: 659.25, d: 0.12 }, { f: 587.33, d: 0.12 },
+            { f: 659.25, d: 0.2 }, { f: 587.33, d: 0.12 }, { f: 523.25, d: 0.12 },
+            { f: 587.33, d: 0.3 }, { f: 440.00, d: 0.4 }
+        ];
+
+        function playNote(freq, duration) {
+            if (!audioCtx) return;
+            try {
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+                gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        function scheduleLoop() {
+            if (!isSpinning) return;
+
+            let totalDuration = 0;
+            fullLottoMelody.forEach(note => {
+                let t = setTimeout(() => {
+                    if (isSpinning) {
+                        playNote(note.f, note.d);
+                    }
+                }, totalDuration * 1000);
+                activeTimeouts.push(t);
+                totalDuration += note.d + 0.02;
+            });
+
+            let loopTimer = setTimeout(() => {
+                if (isSpinning) {
+                    scheduleLoop();
+                }
+            }, totalDuration * 1000);
+            activeTimeouts.push(loopTimer);
+        }
+
+        function startFullLottoMusic() {
+            initAudio();
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            isSpinning = true;
+            stopFullLottoMusic();
+            scheduleLoop();
+        }
+
+        function stopFullLottoMusic() {
+            isSpinning = false;
+            activeTimeouts.forEach(t => clearTimeout(t));
+            activeTimeouts = [];
+        }
+        // -------------------------------------------------------------
+
+        function initGame() {
+            initAudio();
+            const rawText = document.getElementById("nameListInput").value;
+            names = rawText.split('\n').map(name => name.trim()).filter(name => name !== "");
+
+            if (names.length < 2) {
+                alert("Vui lòng nhập ít nhất từ 2 tên trở lên để quay!");
+                return;
+            }
+
+            winners = []; 
+            updateWinnerBoard();
+
+            document.getElementById("setupScreen").style.display = "none";
+            document.getElementById("gameScreen").style.display = "block";
+            document.getElementById("result").innerText = 'Hãy bấm "Quay Ngay" để tìm người may mắn!';
+
+            currentRotation = 0;
+            document.getElementById("wheelCanvas").style.transform = `rotate(0deg)`;
+            drawWheel();
+        }
+
+        function drawWheel() {
+            const canvas = document.getElementById("wheelCanvas");
+            const ctx = canvas.getContext("2d");
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = canvas.width / 2;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (names.length === 0) return;
+
+            const arcSize = (2 * Math.PI) / names.length;
+
+            for (let i = 0; i < names.length; i++) {
+                const angle = i * arcSize;
+
+                ctx.beginPath();
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, angle, angle + arcSize);
+                ctx.lineTo(centerX, centerY);
+                ctx.fill();
+                ctx.save();
+
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 14px 'Segoe UI', sans-serif";
+                ctx.translate(centerX, centerY);
+                ctx.rotate(angle + arcSize / 2);
+                ctx.textAlign = "right";
+                ctx.fillText(names[i], radius - 20, 5);
+                
+                ctx.restore();
+            }
+        }
+
+        function spinWheel() {
+            if (isSpinning) return;
+            if (names.length === 0) {
+                alert("Tất cả mọi người trong danh sách đã trúng thưởng hết rồi!");
+                return;
+            }
+
+            document.getElementById("spinBtn").disabled = true;
+            document.getElementById("result").innerText = "Đang quay... Hồi hộp chờ kết quả!";
+
+            startFullLottoMusic();
+
+            const sliceDegree = 360 / names.length;
+            const winningIndex = Math.floor(Math.random() * names.length);
+            const winner = names[winningIndex];
+
+            const centerOfSlice = winningIndex * sliceDegree + (sliceDegree / 2);
+            const targetDegreeInCircle = (360 - centerOfSlice + 270) % 360;
+
+            const currentMod = currentRotation % 360;
+            let extraRotation = targetDegreeInCircle - currentMod;
+            if (extraRotation <= 0) {
+                extraRotation += 360;
+            }
+
+            const totalRounds = 2520; // 6 giây quay
+            const totalRotation = currentRotation + totalRounds + extraRotation;
+            
+            currentRotation = totalRotation;
+            const canvas = document.getElementById("wheelCanvas");
+            canvas.style.transform = `rotate(${currentRotation}deg)`;
+
+            // Sau 6 giây: Dừng vòng quay và KÍCH HOẠT HIỆU ỨNG PHÁO GIẤY 🎉
+            setTimeout(() => {
+                stopFullLottoMusic();
+                document.getElementById("result").innerText = `🎉 Chúc mừng: ${winner} đã trúng thưởng! 🎉`;
+
+                // Bắn pháo giấy hoành tráng
+                confetti({
+                    particleCount: 120,
+                    spread: 80,
+                    origin: { y: 0.6 }
+                });
+
+                // Sau đúng 3 giây tiếp theo: Xóa khỏi vòng quay và đưa lên bảng
+                setTimeout(() => {
+                    winners.push(winner);
+                    updateWinnerBoard();
+
+                    names.splice(winningIndex, 1);
+
+                    document.getElementById("spinBtn").disabled = false;
+
+                    currentRotation = currentRotation % 360; 
+                    canvas.style.transition = 'none'; 
+                    canvas.style.transform = `rotate(${currentRotation}deg)`;
+                    
+                    setTimeout(() => {
+                        canvas.style.transition = 'transform 6s cubic-bezier(0.1, 0.7, 0.1, 1)'; 
+                    }, 50);
+
+                    drawWheel();
+
+                    if (names.length === 0) {
+                        document.getElementById("spinBtn").disabled = true;
+                        document.getElementById("result").innerText = "🏁 Đã quay xong toàn bộ danh sách!";
+                    } else {
+                        document.getElementById("result").innerText = 'Hãy bấm "Quay Ngay" để tiếp tục!';
+                    }
+
+                }, 3000); // 3 giây chờ trước khi xóa
+
+            }, 6000); // 6 giây thời gian quay
+        }
+
+        function updateWinnerBoard() {
+            const listEl = document.getElementById("winnerList");
+            listEl.innerHTML = "";
+            winners.forEach((person, index) => {
+                const li = document.createElement("li");
+                // Nếu là người vừa trúng thưởng mới nhất, thêm class hiệu ứng nổi bật
+                if (index === winners.length - 1) {
+                    li.classList.add("latest-winner");
+                }
+                li.innerHTML = `⭐ ${index + 1}. ${person}`;
+                listEl.appendChild(li);
+            });
+        }
+
+        function resetSetup() {
+            stopFullLottoMusic();
+            document.getElementById("gameScreen").style.display = "none";
+            document.getElementById("setupScreen").style.display = "inline-block";
+            currentRotation = 0;
+            document.getElementById("wheelCanvas").style.transform = `rotate(0deg)`;
+        }
+    </script>
+</body>
+</html>
