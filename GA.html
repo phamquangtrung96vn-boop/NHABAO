@@ -533,8 +533,9 @@
             { key: 'bc', label: 'BC' }
         ];
 
+        // SỬ DỤNG localStorage THAY CHO sessionStorage ĐỂ GIỮ TRẠNG THÁI SAU KHI LOGOUT/LOGIN LẠI
         window.addEventListener('DOMContentLoaded', () => {
-            const isLoggedIn = sessionStorage.getItem("isLoggedIn");
+            const isLoggedIn = localStorage.getItem("isLoggedIn");
             if (isLoggedIn === "true") {
                 document.getElementById('loginOverlay').style.display = 'none';
                 loadSupabaseAndInit();
@@ -552,7 +553,7 @@
             const correctPass = "Pk123456*";
 
             if (user === correctUser && pass === correctPass) {
-                sessionStorage.setItem("isLoggedIn", "true");
+                localStorage.setItem("isLoggedIn", "true");
                 document.getElementById('loginOverlay').style.display = 'none';
                 loadSupabaseAndInit();
             } else {
