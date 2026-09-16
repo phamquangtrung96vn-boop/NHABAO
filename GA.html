@@ -566,6 +566,16 @@
         }
 
         async function initApp() {
+            // Đọc tạm từ localStorage trước để hiển thị ngay lập tức không cần đợi mạng
+            const localState = localStorage.getItem('gaCheckedState');
+            if (localState) {
+                try {
+                    checkedState = JSON.parse(localState);
+                } catch (e) {
+                    console.log("Lỗi đọc localStorage", e);
+                }
+            }
+
             try {
                 const SUPABASE_URL = 'https://shblqenkrzjuklzrvoie.supabase.co';
                 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYmxxZW5rcnpqdWtsenJ2b2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NzA4MjMsImV4cCI6MjEwNDU0NjgyM30.I8bsjcbR3dNYm99kHan8mLj9X7jcNuPEzFQTk9jUups';
@@ -584,6 +594,7 @@
                     }
                     if (data.content.gaCheckedState) {
                         checkedState = data.content.gaCheckedState;
+                        localStorage.setItem('gaCheckedState', JSON.stringify(checkedState));
                     }
                 }
             } catch (err) {
@@ -709,6 +720,9 @@
         }
 
         async function saveStateToCloud() {
+            // Lưu tức thì vào localStorage thiết bị để chống mất dữ liệu khi chuyển trang ngay lập tức
+            localStorage.setItem('gaCheckedState', JSON.stringify(checkedState));
+
             if (supabaseClient) {
                 try {
                     let { data } = await supabaseClient
@@ -778,6 +792,7 @@
         async function clearHistory() {
             if (confirm("Bạn có chắc chắn muốn xóa hết các tích chọn không?")) {
                 checkedState = {};
+                localStorage.removeItem('gaCheckedState'); // Xóa bộ nhớ đệm
                 renderAll();
                 saveStateToCloud();
                 alert("🗑️ Đã xóa và cập nhật lên Cloud thành công!");
