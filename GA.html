@@ -113,8 +113,24 @@
         }
 
         .search-input { flex: 1; }
-        .filter-select { width: 100%; }
+        .filter-select { width: 140px; }
         .search-input:focus, .filter-select:focus { outline: none; border-color: #58a6ff; }
+
+        .btn-sync {
+            background: #1f6feb;
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+        .btn-sync:hover { background: #388bfd; }
 
         /* KHU VỰC CHỌN TẤT CẢ THEO CỘT */
         .select-all-bar {
@@ -274,8 +290,8 @@
             <div class="filter-container">
                 <div class="filter-row">
                     <input type="text" class="search-input" id="searchInput" placeholder="Tìm kiếm tên thành viên..." oninput="filterMembers()">
-                    <select class="filter-select" id="classFilter" style="width: 150px;" onchange="filterMembers()">
-                        <option value="">Tất cả môn phái</option>
+                    <select class="filter-select" id="classFilter" onchange="filterMembers()">
+                        <option value="">Tất cả phái</option>
                         <option value="ThietY">Thiết Y</option>
                         <option value="HuyetHa">Huyết Hà</option>
                         <option value="ToaiMong">Toái Mộng</option>
@@ -286,30 +302,31 @@
                         <option value="HuyenCo">Huyền Cơ</option>
                         <option value="TrieuQuang">Triều Quang</option>
                     </select>
+                    <button class="btn-sync" onclick="syncMembersFromIndex()" title="Lấy danh sách thành viên mới nhất từ Sơ đồ"><i class="fa-solid fa-rotate"></i> Đồng bộ DS</button>
                 </div>
                 
                 <!-- THANH CHỌN TẤT CẢ THEO KẾT QUẢ LỌC -->
                 <div class="select-all-bar">
                     <span><i class="fa-solid fa-check-double"></i> Chọn nhanh theo lọc:</span>
                     <div class="select-all-group">
-                        <label class="checkbox-group" title="Chọn tất cả Scrim 1 cho danh sách đang lọc">
+                        <label class="checkbox-group" title="Chọn tất cả Scrim 1">
                             <input type="checkbox" id="checkAll_scrim1" onchange="toggleSelectAllColumn('scrim1', this.checked)"> S1
                         </label>
-                        <label class="checkbox-group" title="Chọn tất cả Scrim 2 cho danh sách đang lọc">
+                        <label class="checkbox-group" title="Chọn tất cả Scrim 2">
                             <input type="checkbox" id="checkAll_scrim2" onchange="toggleSelectAllColumn('scrim2', this.checked)"> S2
                         </label>
-                        <label class="checkbox-group" title="Chọn tất cả Scrim 3 cho danh sách đang lọc">
+                        <label class="checkbox-group" title="Chọn tất cả Scrim 3">
                             <input type="checkbox" id="checkAll_scrim3" onchange="toggleSelectAllColumn('scrim3', this.checked)"> S3
                         </label>
-                        <label class="checkbox-group" title="Chọn tất cả Bang Chiến cho danh sách đang lọc">
-                            <input type="checkbox" id="checkAll_bc" onchange="toggleSelectAllColumn('scrim3', this.checked)"> BC
+                        <label class="checkbox-group" title="Chọn tất cả Bang Chiến">
+                            <input type="checkbox" id="checkAll_bc" onchange="toggleSelectAllColumn('bc', this.checked)"> BC
                         </label>
                     </div>
                 </div>
             </div>
 
             <div class="member-scroll-list" id="leftMemberList">
-                <div class="empty-history">Đang tải dữ liệu từ Cloud...</div>
+                <div class="empty-history">Đang tải dữ liệu...</div>
             </div>
         </div>
 
@@ -389,28 +406,56 @@
                 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYmxxZW5rcnpqdWtsenJ2b2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NzA4MjMsImV4cCI6MjEwNDU0NjgyM30.I8bsjcbR3dNYm99kHan8mLj9X7jcNuPEzFQTk9jUups';
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-                let { data, error } = await supabaseClient
+                let { data } = await supabaseClient
                     .from('squad_data')
                     .select('*')
                     .eq('id', 'main_config')
                     .maybeSingle();
 
                 if (data && data.content) {
-                    if (data.content.members) {
+                    // Ưu tiên tải danh sách thành viên GA riêng đã lưu trên Cloud (nếu có)
+                    if (data.content.gaMembersList && data.content.gaMembersList.length > 0) {
+                        membersList = data.content.gaMembersList;
+                    } else if (data.content.members) {
+                        // Fallback lần đầu tiên lấy từ index nếu chưa lưu riêng
                         membersList = data.content.members.filter(m => m.classType && m.classType !== 'Khac');
-                        membersList.sort((a, b) => a.classType.localeCompare(b.classType));
                     }
+                    membersList.sort((a, b) => a.classType.localeCompare(b.classType));
+
                     if (data.content.gaCheckedState) {
-                        checkedState = data.content.gaCheckedState; // Nạp chính xác dữ liệu tích cũ từ Cloud lên
-                    } else {
-                        checkedState = {};
+                        checkedState = data.content.gaCheckedState;
                     }
                 }
             } catch (err) {
                 console.log("Lỗi tải dữ liệu cloud:", err);
             }
 
-            renderAll(); // Vẽ lại giao diện sau khi đã có dữ liệu chuẩn từ Cloud
+            renderAll();
+        }
+
+        // Nút đồng bộ thủ công từ trang Sơ đồ (index)
+        async function syncMembersFromIndex() {
+            if (!supabaseClient) return;
+            if (!confirm("Bạn có muốn cập nhật lại danh sách thành viên từ trang Sơ đồ không?")) return;
+
+            try {
+                let { data } = await supabaseClient
+                    .from('squad_data')
+                    .select('*')
+                    .eq('id', 'main_config')
+                    .maybeSingle();
+
+                if (data && data.content && data.content.members) {
+                    membersList = data.content.members.filter(m => m.classType && m.classType !== 'Khac');
+                    membersList.sort((a, b) => a.classType.localeCompare(b.classType));
+                    renderAll();
+                    alert("🔄 Đồng bộ danh sách thành viên thành công! Hãy bấm 'Lưu Cloud' để giữ lại.");
+                } else {
+                    alert("⚠️ Không tìm thấy dữ liệu thành viên ở Sơ đồ.");
+                }
+            } catch (err) {
+                alert("❌ Lỗi đồng bộ: " + err.message);
+            }
         }
 
         function renderAll() {
@@ -531,7 +576,6 @@
             }
 
             try {
-                // Tải dữ liệu mới nhất trên cloud về trước để không làm mất các thông tin cấu hình khác
                 let { data } = await supabaseClient
                     .from('squad_data')
                     .select('*')
@@ -539,21 +583,22 @@
                     .maybeSingle();
 
                 let currentContent = data && data.content ? data.content : {};
-                currentContent.gaCheckedState = checkedState; // Gán danh sách tích hiện tại vào gói dữ liệu chung
+                
+                // Lưu độc lập cả danh sách thành viên hiện tại của GA và các trạng thái tích
+                currentContent.gaMembersList = membersList;
+                currentContent.gaCheckedState = checkedState;
 
                 let { error: upsertError } = await supabaseClient
                     .from('squad_data')
                     .upsert({ id: 'main_config', content: currentContent });
 
                 if (upsertError) {
-                    console.error("Supabase error:", upsertError);
                     alert("❌ Lỗi khi lưu lên Cloud: " + upsertError.message);
                 } else {
-                    alert("☁️ Lưu lên Cloud thành công! Dữ liệu đã được cập nhật chính thức.");
+                    alert("☁️ Lưu lên Cloud thành công!");
                 }
             } catch (err) {
-                console.error("Lỗi:", err);
-                alert("❌ Có lỗi xảy ra khi lưu: " + err.message);
+                alert("❌ Có lỗi xảy ra: " + err.message);
             }
         }
 
@@ -604,7 +649,7 @@
         }
 
         function clearHistory() {
-            if (confirm("Bạn có chắc chắn muốn xóa hết các tích chọn trên màn hình không? (Cần bấm 'Lưu Cloud' sau đó nếu muốn cập nhật lên server)")) {
+            if (confirm("Bạn có chắc chắn muốn xóa hết các tích chọn trên màn hình không?")) {
                 checkedState = {};
                 renderAll();
             }
