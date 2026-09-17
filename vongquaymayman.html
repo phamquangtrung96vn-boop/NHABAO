@@ -8,8 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <!-- Thư viện Supabase để lấy dữ liệu từ GA -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- FontAwesome Icon -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -47,8 +45,6 @@
             outline: none;
             resize: none;
             margin-bottom: 15px;
-            background: #0d1117;
-            color: #fff;
         }
 
         .game-screen {
@@ -248,7 +244,7 @@
     <!-- MÀN HÌNH NHẬP DANH SÁCH -->
     <div class="setup-screen" id="setupScreen">
         <h3>Nhập danh sách tên của bạn</h3>
-        <p style="font-size: 13px; color: #ddd; margin-top: -5px;">Mỗi người một dòng hoặc lấy trực tiếp từ GA:</p>
+        <p style="font-size: 13px; color: #ddd; margin-top: -5px;">Mỗi người một dòng hoặc lấy từ trang GA:</p>
         <textarea id="nameListInput" placeholder="Nguyễn Văn A&#10;Trần Thị B&#10;Lê Văn C&#10;Phạm Thị D">Nguyễn Văn A
 Trần Thị B
 Lê Văn C
@@ -288,6 +284,9 @@ Phạm Thị D</textarea>
         </div>
     </div>
 
+    <!-- Thêm FontAwesome icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <script>
         let names = [];
         let winners = [];
@@ -308,7 +307,7 @@ Phạm Thị D</textarea>
             }
         });
 
-        // Hàm tự động lấy danh sách thành viên đã được tích chọn từ trang GA
+        // Hàm lấy trực tiếp danh sách các trận đấu ở cột bên phải từ trang GA (Giữ nguyên tên trùng lặp)
         async function loadListFromGA() {
             if (!supabaseClient) {
                 alert("⚠️ Chưa kết nối được tới cơ sở dữ liệu Supabase!");
@@ -328,29 +327,30 @@ Phạm Thị D</textarea>
                 }
 
                 if (gaData && gaData.content) {
-                    const historyByDate = gaData.content.historyByDate || {};
-                    const membersList = gaData.content.members || [];
+                    const content = gaData.content;
+                    const sessions = content.sessions || {};
+                    const checkedState = content.checkedState || {};
+                    const sessionKeys = Object.keys(sessions);
 
-                    const keys = Object.keys(historyByDate);
-                    if (keys.length === 0) {
-                        alert("⚠️ Không tìm thấy buổi tích chọn nào trong dữ liệu GA!");
+                    if (sessionKeys.length === 0) {
+                        alert("⚠️ Không tìm thấy buổi nào trong dữ liệu GA!");
                         return;
                     }
 
-                    // Cho phép người chọn buổi muốn lấy danh sách hoặc mặc định lấy buổi mới nhất
-                    let targetKey = keys[keys.length - 1]; 
-                    if (keys.length > 1) {
-                        let promptMsg = "Danh sách các buổi trong GA:\n" + keys.map((k, idx) => `${idx + 1}. ${k}`).join("\n") + "\n\nNhập tên hoặc số thứ tự buổi bạn muốn lấy:";
+                    // Cho phép người dùng chọn buổi hoặc lấy buổi mới nhất (cột bên phải)
+                    let targetKey = sessionKeys[sessionKeys.length - 1];
+                    if (sessionKeys.length > 1) {
+                        let promptMsg = "Danh sách các buổi:\n" + sessionKeys.map((k, idx) => `${idx + 1}. ${k}`).join("\n") + "\n\nNhập tên hoặc số thứ tự buổi bạn muốn lấy:";
                         let choice = prompt(promptMsg, targetKey);
                         if (!choice) return;
                         
                         let trimmed = choice.trim();
-                        if (keys.includes(trimmed)) {
+                        if (sessionKeys.includes(trimmed)) {
                             targetKey = trimmed;
                         } else {
                             let idx = parseInt(trimmed) - 1;
-                            if (!isNaN(idx) && keys[idx]) {
-                                targetKey = keys[idx];
+                            if (!isNaN(idx) && sessionKeys[idx]) {
+                                targetKey = sessionKeys[idx];
                             } else {
                                 alert("⚠️ Buổi bạn nhập không tồn tại!");
                                 return;
@@ -358,41 +358,39 @@ Phạm Thị D</textarea>
                         }
                     }
 
-                    const checkedState = historyByDate[targetKey] || {};
+                    const currentSessionData = sessions[targetKey] || [];
                     let selectedNames = [];
 
-                    // Lọc những thành viên có tick chọn bất kỳ ô nào (Scrim 1, Scrim 2, Scrim 3, Bang Chiến)
-                    membersList.forEach(m => {
-                        const state = checkedState[m.name];
-                        if (state && (state.scrim1 || state.scrim2 || state.scrim3 || state.bc)) {
-                            selectedNames.push(m.name);
+                    // Quét qua toàn bộ danh sách ở cột bên phải và lấy chính xác các dòng được hiển thị
+                    currentSessionData.forEach(item => {
+                        const memberName = item.name ? item.name.trim() : "";
+                        if (memberName) {
+                            const memberChecks = checkedState[memberName] || {};
+                            const matchType = item.type; // 'scrim1', 'scrim2', 'scrim3', 'bc'
+                            
+                            if (matchType && memberChecks[matchType]) {
+                                selectedNames.push(memberName);
+                            }
                         }
                     });
 
-                    // Fallback an toàn: Nếu không tìm thấy ai được tick chọn rõ ràng, lấy toàn bộ thành viên trong bảng
                     if (selectedNames.length === 0) {
-                        membersList.forEach(m => {
-                            selectedNames.push(m.name);
-                        });
-                    }
-
-                    if (selectedNames.length === 0) {
-                        alert(`⚠️ Không có thành viên nào trong danh sách "${targetKey}"!`);
+                        alert(`⚠️ Không có thành viên nào được tích chọn trong danh sách "${targetKey}"!`);
                         return;
                     }
 
-                    // Điền danh sách vào ô textarea
+                    // Điền danh sách vào ô textarea (giữ nguyên tất cả tên trùng lặp)
                     document.getElementById("nameListInput").value = selectedNames.join('\n');
-                    alert(`✅ Đã tải thành công ${selectedNames.length} thành viên từ danh sách [${targetKey}] của trang GA vào vòng quay!`);
+                    alert(`✅ Đã tải thành công ${selectedNames.length} mục từ cột bên phải [${targetKey}] của trang GA vào vòng quay!`);
                 } else {
-                    alert("⚠️ Chưa có dữ liệu GA được lưu trên Cloud. Hãy bấm 'Lưu Cloud' ở trang GA trước.");
+                    alert("⚠️ Chưa có dữ liệu GA được lưu trên Cloud. Hãy bấm 'Lưu Cloud' ở trang quản lý GA.");
                 }
             } catch (err) {
                 alert("❌ Lỗi kết nối lấy dữ liệu GA: " + err.message);
             }
         }
 
-        // --- ÂM THANH XỔ SỐ KIẾN THIẾT ---
+        // --- GIAI ĐIỆU ĐẦY ĐỦ XỔ SỐ KIẾN THIẾT MIỀN BẮC ---
         let audioCtx = null;
         let activeTimeouts = [];
 
@@ -561,7 +559,7 @@ Phạm Thị D</textarea>
             const canvas = document.getElementById("wheelCanvas");
             canvas.style.transform = `rotate(${currentRotation}deg)`;
 
-            // Sau 6 giây: Dừng vòng quay và kích hoạt hiệu ứng pháo giấy 🎉
+            // Sau 6 giây: Dừng vòng quay và KÍCH HOẠT HIỆU ỨNG PHÁO GIẤY 🎉
             setTimeout(() => {
                 stopFullLottoMusic();
                 document.getElementById("result").innerText = `🎉 Chúc mừng: ${winner} đã trúng thưởng! 🎉`;
@@ -572,7 +570,7 @@ Phạm Thị D</textarea>
                     origin: { y: 0.6 }
                 });
 
-                // Sau 3 giây tiếp theo: Cập nhật bảng và loại bỏ người đã trúng ra khỏi vòng quay
+                // Sau đúng 3 giây tiếp theo: Xóa khỏi vòng quay và đưa lên bảng
                 setTimeout(() => {
                     winners.push(winner);
                     updateWinnerBoard();
