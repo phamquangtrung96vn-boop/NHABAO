@@ -307,7 +307,7 @@ Phạm Thị D</textarea>
             }
         });
 
-        // Hàm lấy trực tiếp danh sách các trận đấu ở cột bên phải từ trang GA (Giữ nguyên tên trùng lặp)
+        // Hàm lấy trực tiếp danh sách các trận đấu ở cột bên phải từ trang GA (Tự động lấy buổi mới nhất)
         async function loadListFromGA() {
             if (!supabaseClient) {
                 alert("⚠️ Chưa kết nối được tới cơ sở dữ liệu Supabase!");
@@ -337,24 +337,23 @@ Phạm Thị D</textarea>
                         return;
                     }
 
-                    // Cho phép người dùng chọn buổi hoặc lấy buổi mới nhất (cột bên phải)
+                    // Tự động trỏ sẵn vào buổi mới nhất (ở cuối danh sách)
                     let targetKey = sessionKeys[sessionKeys.length - 1];
-                    if (sessionKeys.length > 1) {
-                        let promptMsg = "Danh sách các buổi:\n" + sessionKeys.map((k, idx) => `${idx + 1}. ${k}`).join("\n") + "\n\nNhập tên hoặc số thứ tự buổi bạn muốn lấy:";
-                        let choice = prompt(promptMsg, targetKey);
-                        if (!choice) return;
-                        
-                        let trimmed = choice.trim();
-                        if (sessionKeys.includes(trimmed)) {
-                            targetKey = trimmed;
+                    
+                    let promptMsg = "Danh sách các buổi:\n" + sessionKeys.map((k, idx) => `${idx + 1}. ${k}`).join("\n") + "\n\nNhập tên hoặc số thứ tự buổi bạn muốn lấy:";
+                    let choice = prompt(promptMsg, targetKey);
+                    if (!choice) return;
+                    
+                    let trimmed = choice.trim();
+                    if (sessionKeys.includes(trimmed)) {
+                        targetKey = trimmed;
+                    } else {
+                        let idx = parseInt(trimmed) - 1;
+                        if (!isNaN(idx) && sessionKeys[idx]) {
+                            targetKey = sessionKeys[idx];
                         } else {
-                            let idx = parseInt(trimmed) - 1;
-                            if (!isNaN(idx) && sessionKeys[idx]) {
-                                targetKey = sessionKeys[idx];
-                            } else {
-                                alert("⚠️ Buổi bạn nhập không tồn tại!");
-                                return;
-                            }
+                            alert("⚠️ Buổi bạn nhập không tồn tại!");
+                            return;
                         }
                     }
 
@@ -379,11 +378,11 @@ Phạm Thị D</textarea>
                         return;
                     }
 
-                    // Điền danh sách vào ô textarea (giữ nguyên tất cả tên trùng lặp)
+                    // Điền danh sách vào ô textarea
                     document.getElementById("nameListInput").value = selectedNames.join('\n');
                     alert(`✅ Đã tải thành công ${selectedNames.length} mục từ cột bên phải [${targetKey}] của trang GA vào vòng quay!`);
                 } else {
-                    alert("⚠️ Chưa có dữ liệu GA được lưu trên Cloud. Hãy bấm 'Lưu Cloud' ở trang quản lý GA.");
+                    alert("⚠️ Chưa có dữ liệu GA được lưu trên Cloud. Hãy bấm 'Lưu Cloud' ở trang quản lý GA trước.");
                 }
             } catch (err) {
                 alert("❌ Lỗi kết nối lấy dữ liệu GA: " + err.message);
