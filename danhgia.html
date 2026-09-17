@@ -3,19 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Quản Lý & Đánh Giá Bang Chiến - Nhà Báo</title>
-    <!-- Tailwind CSS -->
+    <meta name="description" content="Hệ thống quản lý và đánh giá hiệu suất Bang Chiến Nhà Báo">
+    <title>Đánh giá hiệu suất - Bang Chiến Nhà Báo</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { color-scheme: dark; }
+        body { background: #020617; }
+        .focus-ring:focus { outline: 2px solid #60a5fa; outline-offset: 2px; }
+        .sort-button { cursor: pointer; user-select: none; }
+        .sort-button:hover { color: #e2e8f0; }
+        .toast { animation: toast-in .22s ease-out; }
+        @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 640px) {
+            .mobile-label { display: block; color: #94a3b8; font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; }
+        }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen">
-
-    <!-- Top Header -->
-    <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 shadow-md">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
+<body class="text-slate-100 font-sans min-h-screen">
+    <header class="bg-slate-900/95 border-b border-slate-800 px-4 sm:px-6 py-4 sticky top-0 z-20 backdrop-blur">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
             <div class="flex items-center space-x-3">
                 <span class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-600/30"><i class="fa-solid fa-shield-halved text-lg"></i></span>
                 <div>
@@ -23,269 +31,167 @@
                     <p class="text-xs text-slate-400">Hệ thống phân tích và quản lý hiệu suất chiến trường</p>
                 </div>
             </div>
-            <div class="flex items-center space-x-3">
+            <div class="flex flex-wrap items-center gap-2">
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span> Phiên làm việc đã xác thực
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span> Dữ liệu lưu trên trình duyệt
                 </span>
-                <button onclick="alert('Đã đăng xuất hệ thống!')" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-lg transition border border-slate-700">
-                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Đăng Xuất
+                <button id="clearAllBtn" type="button" class="text-xs bg-slate-800 hover:bg-red-950/60 text-slate-300 hover:text-red-300 px-3 py-2 rounded-lg transition border border-slate-700 focus-ring">
+                    <i class="fa-solid fa-trash-can mr-1"></i> Xóa dữ liệu
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Content Layout -->
-    <main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-        <!-- CỘT TRÁI: FORM NHẬP CHỈ SỐ THÀNH VIÊN BẰNG TAY (Chiếm 4 cột) -->
-        <section class="lg:col-span-4 bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-2xl h-fit">
-            <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
-                <h2 class="text-sm font-bold text-emerald-400 uppercase tracking-wide">
-                    <i class="fa-solid fa-pen-to-square mr-2"></i>Nhập Chỉ Số Bằng Tay
-                </h2>
-                <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded">Cập nhật nhanh</span>
-            </div>
-
-            <form id="memberForm" class="space-y-3 text-xs" onsubmit="handleFormSubmit(event)">
-                <div>
-                    <label class="block text-slate-400 mb-1 font-medium">Tên Nhân Vật</label>
-                    <input type="text" id="inputName" placeholder="Ví dụ: VixKings" required class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 w-full focus:outline-none focus:border-blue-500 text-slate-200">
-                </div>
-
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-slate-400 mb-1 font-medium">Trận (Số trận)</label>
-                        <input type="number" id="inputMatch" value="1" min="1" required class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 w-full focus:outline-none focus:border-blue-500 text-slate-200">
-                    </div>
-                    <div>
-                        <label class="block text-slate-400 mb-1 font-medium">Giết (Kills)</label>
-                        <input type="number" id="inputKills" value="0" min="0" required class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 w-full focus:outline-none focus:border-blue-500 text-slate-200">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-slate-400 mb-1 font-medium">Hỗ Trợ (Assists)</label>
-                        <input type="number" id="inputAssists" value="0" min="0" required class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 w-full focus:outline-none focus:border-blue-500 text-slate-200">
-                    </div>
-                    <div>
-                        <label class="block text-slate-400 mb-1 font-medium">Vật Tư</label>
-                        <input type="number" id="inputResources" value="0" min="0" required class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 w-full focus:outline-none focus:border-blue-500 text-slate-200">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-slate-400 mb-1 font-medium">Sát Thương</label>
-                    <input type="text" id="inputDamage" placeholder="Ví dụ: 250K" required class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 w-full focus:outline-none focus:border-blue-500 text-slate-200">
-                </div>
-
-                <div>
-                    <label class="block text-slate-400 mb-1 font-medium">Sát Thương Lên Trụ</label>
-                    <input type="text" id="inputTower" placeholder="Ví dụ: 3.5K" required class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 w-full focus:outline-none focus:border-blue-500 text-slate-200">
-                </div>
-
-                <div>
-                    <label class="block text-slate-400 mb-1 font-medium">Trị Liệu (Healing)</label>
-                    <input type="text" id="inputHealing" placeholder="Ví dụ: 10K" required class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 w-full focus:outline-none focus:border-blue-500 text-slate-200">
-                </div>
-
-                <div>
-                    <label class="block text-slate-400 mb-1 font-medium">Chống Chịu</label>
-                    <input type="text" id="inputTank" placeholder="Ví dụ: 50K" required class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 w-full focus:outline-none focus:border-blue-500 text-slate-200">
-                </div>
-
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-slate-400 mb-1 font-medium">Chết (Deaths)</label>
-                        <input type="number" id="inputDeaths" value="0" min="0" required class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 w-full focus:outline-none focus:border-blue-500 text-slate-200">
-                    </div>
-                    <div>
-                        <label class="block text-slate-400 mb-1 font-medium">Hóa Vũ</label>
-                        <input type="number" id="inputSpecial" value="0" min="0" required class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 w-full focus:outline-none focus:border-blue-500 text-slate-200">
-                    </div>
-                </div>
-
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded-lg transition shadow-lg shadow-blue-600/20 mt-3 flex items-center justify-center">
-                    <i class="fa-solid fa-plus mr-2"></i> Thêm vào hệ thống
-                </button>
-            </form>
+    <main class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-3" aria-label="Tổng quan">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4"><p class="text-xs text-slate-400">Thành viên</p><p id="statMembers" class="text-2xl font-bold text-blue-400 mt-1">0</p></div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4"><p class="text-xs text-slate-400">Tổng trận</p><p id="statMatches" class="text-2xl font-bold text-amber-400 mt-1">0</p></div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4"><p class="text-xs text-slate-400">Tổng hạ gục</p><p id="statKills" class="text-2xl font-bold text-emerald-400 mt-1">0</p></div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4"><p class="text-xs text-slate-400">Điểm cao nhất</p><p id="statTop" class="text-lg font-bold text-fuchsia-400 mt-2 truncate">—</p></div>
         </section>
 
-        <!-- CỘT PHẢI: SƠ ĐỒ & BẢNG THỐNG KÊ (Chiếm 8 cột) -->
-        <section class="lg:col-span-8 space-y-6">
-            
-            <!-- Phần trên: Sơ đồ xu hướng phong độ -->
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-2xl">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-sm font-bold text-blue-400 uppercase tracking-wide flex items-center">
-                        <i class="fa-solid fa-chart-line mr-2"></i>Sơ Đồ Biến Động Sát Thương & Hiệu Suất
-                    </h3>
-                    <span class="text-xs text-slate-400">12 Trận gần nhất</span>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <section class="lg:col-span-4 bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-2xl h-fit">
+                <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+                    <h2 id="formTitle" class="text-sm font-bold text-emerald-400 uppercase tracking-wide"><i class="fa-solid fa-pen-to-square mr-2"></i>Nhập chỉ số</h2>
+                    <button id="cancelEditBtn" type="button" class="hidden text-xs text-slate-400 hover:text-white">Hủy sửa</button>
                 </div>
-                <div class="h-52 w-full">
-                    <canvas id="performanceChart"></canvas>
-                </div>
-            </div>
+                <form id="memberForm" class="space-y-3 text-xs" novalidate>
+                    <div><label for="inputName" class="block text-slate-400 mb-1 font-medium">Tên nhân vật</label><input type="text" id="inputName" maxlength="40" placeholder="Ví dụ: VixKings" required class="focus-ring bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 w-full text-slate-200"><p id="nameError" class="text-red-400 mt-1 hidden"></p></div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label for="inputMatch" class="block text-slate-400 mb-1 font-medium">Trận</label><input type="number" id="inputMatch" value="1" min="1" max="9999" required class="focus-ring bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 w-full text-slate-200"></div>
+                        <div><label for="inputKills" class="block text-slate-400 mb-1 font-medium">Giết</label><input type="number" id="inputKills" value="0" min="0" max="999999" required class="focus-ring bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 w-full text-slate-200"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label for="inputAssists" class="block text-slate-400 mb-1 font-medium">Hỗ trợ</label><input type="number" id="inputAssists" value="0" min="0" max="999999" required class="focus-ring bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 w-full text-slate-200"></div>
+                        <div><label for="inputResources" class="block text-slate-400 mb-1 font-medium">Vật tư</label><input type="number" id="inputResources" value="0" min="0" max="99999999" required class="focus-ring bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 w-full text-slate-200"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label for="inputDamage" class="block text-slate-400 mb-1 font-medium">Sát thương</label><input type="number" id="inputDamage" value="0" min="0" max="999999999" required class="focus-ring bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 w-full text-slate-200"></div>
+                        <div><label for="inputTower" class="block text-slate-400 mb-1 font-medium">Sát thương trụ</label><input type="number" id="inputTower" value="0" min="0" max="999999999" required class="focus-ring bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 w-full text-slate-200"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label for="inputHealing" class="block text-slate-400 mb-1 font-medium">Trị liệu</label><input type="number" id="inputHealing" value="0" min="0" max="999999999" required class="focus-ring bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 w-full text-slate-200"></div>
+                        <div><label for="inputTank" class="block text-slate-400 mb-1 font-medium">Chống chịu</label><input type="number" id="inputTank" value="0" min="0" max="999999999" required class="focus-ring bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 w-full text-slate-200"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label for="inputDeaths" class="block text-slate-400 mb-1 font-medium">Chết</label><input type="number" id="inputDeaths" value="0" min="0" max="999999" required class="focus-ring bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 w-full text-slate-200"></div>
+                        <div><label for="inputSpecial" class="block text-slate-400 mb-1 font-medium">Hóa vũ</label><input type="number" id="inputSpecial" value="0" min="0" max="999999" required class="focus-ring bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 w-full text-slate-200"></div>
+                    </div>
+                    <p class="text-[11px] text-slate-500">Các chỉ số số được lưu dưới dạng số để có thể tính điểm và sắp xếp chính xác.</p>
+                    <button id="submitBtn" type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded-lg transition shadow-lg shadow-blue-600/20 mt-3 flex items-center justify-center focus-ring"><i class="fa-solid fa-plus mr-2"></i> Thêm vào hệ thống</button>
+                </form>
+            </section>
 
-            <!-- Phần dưới: Bảng thống kê danh sách thành viên -->
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
-                <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/40">
-                    <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wide flex items-center">
-                        <i class="fa-solid fa-table mr-2 text-amber-400"></i>Danh Sách Thống Kê Thành Viên
-                    </h3>
-                    <div class="text-xs text-slate-400">Tổng số: <span id="totalMembers" class="text-white font-bold">3</span> thành viên</div>
+            <section class="lg:col-span-8 space-y-6">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-2xl">
+                    <div class="flex flex-col sm:flex-row gap-3 justify-between sm:items-center mb-3">
+                        <h3 class="text-sm font-bold text-blue-400 uppercase tracking-wide flex items-center"><i class="fa-solid fa-chart-line mr-2"></i>Biến động điểm hiệu suất</h3>
+                        <select id="chartMetric" class="focus-ring bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300"><option value="score">Điểm hiệu suất</option><option value="kills">Giết</option><option value="assists">Hỗ trợ</option><option value="damage">Sát thương</option></select>
+                    </div>
+                    <div class="h-56 w-full"><canvas id="performanceChart"></canvas></div>
+                    <p class="text-[11px] text-slate-500 mt-2">Điểm hiệu suất tham khảo = Giết × 4 + Hỗ trợ × 2 + Sát thương/10.000 + Trụ/5.000 + Trị liệu/10.000 − Chết × 3.</p>
                 </div>
-                
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-xs">
-                        <thead>
-                            <tr class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[11px]">
-                                <th class="p-3.5">Tên Nhân Vật</th>
-                                <th class="p-3.5 text-center">Trận</th>
-                                <th class="p-3.5 text-center">Giết</th>
-                                <th class="p-3.5 text-center">Hỗ Trợ</th>
-                                <th class="p-3.5 text-center">Vật Tư</th>
-                                <th class="p-3.5 text-center">Sát Thương</th>
-                                <th class="p-3.5 text-center">Trụ</th>
-                                <th class="p-3.5 text-center">Trị Liệu</th>
-                                <th class="p-3.5 text-center">Chống Chịu</th>
-                                <th class="p-3.5 text-center">Chết</th>
-                                <th class="p-3.5 text-center">Hóa Vũ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="memberTableBody" class="divide-y divide-slate-800 text-slate-300">
-                            <tr class="hover:bg-slate-800/40 transition">
-                                <td class="p-3.5 font-bold text-blue-400">VixKings</td>
-                                <td class="p-3.5 text-center">12</td>
-                                <td class="p-3.5 text-center text-emerald-400 font-semibold">144</td>
-                                <td class="p-3.5 text-center">450</td>
-                                <td class="p-3.5 text-center">3,120</td>
-                                <td class="p-3.5 text-center font-semibold text-orange-400">3.2M</td>
-                                <td class="p-3.5 text-center">45.2K</td>
-                                <td class="p-3.5 text-center">12K</td>
-                                <td class="p-3.5 text-center">85K</td>
-                                <td class="p-3.5 text-center text-red-400">82</td>
-                                <td class="p-3.5 text-center">15</td>
-                            </tr>
-                            <tr class="hover:bg-slate-800/40 transition">
-                                <td class="p-3.5 font-bold text-blue-400">iKhateoS</td>
-                                <td class="p-3.5 text-center">12</td>
-                                <td class="p-3.5 text-center text-emerald-400 font-semibold">130</td>
-                                <td class="p-3.5 text-center">410</td>
-                                <td class="p-3.5 text-center">2,950</td>
-                                <td class="p-3.5 text-center font-semibold text-orange-400">2.9M</td>
-                                <td class="p-3.5 text-center">38.0K</td>
-                                <td class="p-3.5 text-center">15K</td>
-                                <td class="p-3.5 text-center">90K</td>
-                                <td class="p-3.5 text-center text-red-400">75</td>
-                                <td class="p-3.5 text-center">12</td>
-                            </tr>
-                            <tr class="hover:bg-slate-800/40 transition">
-                                <td class="p-3.5 font-bold text-blue-400">P O W I E</td>
-                                <td class="p-3.5 text-center">11</td>
-                                <td class="p-3.5 text-center text-emerald-400 font-semibold">115</td>
-                                <td class="p-3.5 text-center">390</td>
-                                <td class="p-3.5 text-center">2,800</td>
-                                <td class="p-3.5 text-center font-semibold text-orange-400">2.7M</td>
-                                <td class="p-3.5 text-center">40.1K</td>
-                                <td class="p-3.5 text-center">9K</td>
-                                <td class="p-3.5 text-center">78K</td>
-                                <td class="p-3.5 text-center text-red-400">68</td>
-                                <td class="p-3.5 text-center">10</td>
-                            </tr>
-                        </tbody>
-                    </table>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
+                    <div class="p-4 border-b border-slate-800 flex flex-col sm:flex-row gap-3 justify-between sm:items-center bg-slate-950/40">
+                        <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wide flex items-center"><i class="fa-solid fa-table mr-2 text-amber-400"></i>Danh sách thống kê</h3>
+                        <div class="flex flex-wrap gap-2 items-center">
+                            <input id="searchInput" type="search" placeholder="Tìm nhân vật..." class="focus-ring bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs w-40 text-slate-200">
+                            <button id="exportBtn" type="button" class="text-xs bg-emerald-700 hover:bg-emerald-600 px-3 py-2 rounded-lg focus-ring"><i class="fa-solid fa-file-export mr-1"></i>CSV</button>
+                        </div>
+                    </div>
+                    <div class="px-4 py-3 text-xs text-slate-400 border-b border-slate-800">Hiển thị <span id="visibleMembers" class="text-white font-bold">0</span> / <span id="totalMembers" class="text-white font-bold">0</span> bản ghi</div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs min-w-[1050px]">
+                            <thead><tr class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 text-[11px]">
+                                <th class="p-3.5 sort-button" data-sort="name">Tên <i class="fa-solid fa-sort ml-1"></i></th><th class="p-3.5 text-center sort-button" data-sort="matches">Trận <i class="fa-solid fa-sort ml-1"></i></th><th class="p-3.5 text-center sort-button" data-sort="kills">Giết <i class="fa-solid fa-sort ml-1"></i></th><th class="p-3.5 text-center">Hỗ trợ</th><th class="p-3.5 text-center">Vật tư</th><th class="p-3.5 text-center">Sát thương</th><th class="p-3.5 text-center">Trụ</th><th class="p-3.5 text-center">Trị liệu</th><th class="p-3.5 text-center">Chống chịu</th><th class="p-3.5 text-center">Chết</th><th class="p-3.5 text-center">Điểm</th><th class="p-3.5 text-center">Thao tác</th>
+                            </tr></thead>
+                            <tbody id="memberTableBody" class="divide-y divide-slate-800 text-slate-300"></tbody>
+                        </table>
+                    </div>
+                    <div id="emptyState" class="hidden text-center py-12 text-slate-500"><i class="fa-solid fa-chart-simple text-3xl mb-3"></i><p>Chưa có dữ liệu phù hợp.</p><p class="text-xs mt-1">Hãy nhập bản ghi đầu tiên ở biểu mẫu bên trái.</p></div>
                 </div>
-            </div>
-
-        </section>
-
+            </section>
+        </div>
     </main>
 
-    <!-- JavaScript Xử Lý Form & Biểu Đồ -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 space-y-2" aria-live="polite"></div>
+
     <script>
-        // Cấu hình Biểu đồ Chart.js
-        const ctx = document.getElementById('performanceChart').getContext('2d');
-        const performanceChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Trận 1', 'Trận 2', 'Trận 3', 'Trận 4', 'Trận 5', 'Trận 6', 'Trận 7', 'Trận 8', 'Trận 9', 'Trận 10', 'Trận 11', 'Trận 12'],
-                datasets: [{
-                    label: 'Điểm hiệu suất trung bình',
-                    data: [65, 82, 70, 88, 75, 80, 95, 86, 92, 78, 96, 90],
-                    borderColor: '#3b82f6',
-                    backgroundColor: 'rgba(59, 130, 246, 0.15)',
-                    borderWidth: 2.5,
-                    fill: true,
-                    tension: 0.35,
-                    pointBackgroundColor: '#3b82f6'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    x: {
-                        grid: { color: 'rgba(255, 255, 255, 0.04)' },
-                        ticks: { color: '#94a3b8', font: { size: 10 } }
-                    },
-                    y: {
-                        grid: { color: 'rgba(255, 255, 255, 0.04)' },
-                        ticks: { color: '#94a3b8', font: { size: 10 } }
-                    }
-                }
-            }
-        });
+        const STORAGE_KEY = 'bang-chien-nha-bao-members-v2';
+        const seedMembers = [
+            { id: crypto.randomUUID(), name: 'VixKings', matches: 12, kills: 144, assists: 450, resources: 3120, damage: 3200000, tower: 45200, healing: 12000, tank: 85000, deaths: 82, special: 15 },
+            { id: crypto.randomUUID(), name: 'iKhateoS', matches: 12, kills: 130, assists: 410, resources: 2950, damage: 2900000, tower: 38000, healing: 15000, tank: 90000, deaths: 75, special: 12 },
+            { id: crypto.randomUUID(), name: 'P O W I E', matches: 11, kills: 115, assists: 390, resources: 2800, damage: 2700000, tower: 40100, healing: 9000, tank: 78000, deaths: 68, special: 10 }
+        ];
+        let members = loadMembers();
+        let editingId = null;
+        let sortKey = 'score';
+        let sortAsc = false;
 
-        // Xử lý sự kiện thêm dữ liệu thủ công vào bảng
-        function handleFormSubmit(event) {
-            event.preventDefault();
-
-            // Lấy giá trị từ form
-            const name = document.getElementById('inputName').value;
-            const match = document.getElementById('inputMatch').value;
-            const kills = document.getElementById('inputKills').value;
-            const assists = document.getElementById('inputAssists').value;
-            const resources = document.getElementById('inputResources').value;
-            const damage = document.getElementById('inputDamage').value;
-            const tower = document.getElementById('inputTower').value;
-            const healing = document.getElementById('inputHealing').value;
-            const tank = document.getElementById('inputTank').value;
-            const deaths = document.getElementById('inputDeaths').value;
-            const special = document.getElementById('inputSpecial').value;
-
-            // Tạo dòng HTML mới chèn vào bảng
-            const tableBody = document.getElementById('memberTableBody');
-            const newRow = document.createElement('tr');
-            newRow.className = 'hover:bg-slate-800/40 transition';
-            newRow.innerHTML = `
-                <td class="p-3.5 font-bold text-blue-400">${name}</td>
-                <td class="p-3.5 text-center">${match}</td>
-                <td class="p-3.5 text-center text-emerald-400 font-semibold">${kills}</td>
-                <td class="p-3.5 text-center">${assists}</td>
-                <td class="p-3.5 text-center">${resources}</td>
-                <td class="p-3.5 text-center font-semibold text-orange-400">${damage}</td>
-                <td class="p-3.5 text-center">${tower}</td>
-                <td class="p-3.5 text-center">${healing}</td>
-                <td class="p-3.5 text-center">${tank}</td>
-                <td class="p-3.5 text-center text-red-400">${deaths}</td>
-                <td class="p-3.5 text-center">${special}</td>
-            `;
-
-            // Thêm lên đầu bảng
-            tableBody.insertBefore(newRow, tableBody.firstChild);
-
-            // Cập nhật lại số lượng thành viên
-            const totalRows = tableBody.getElementsByTagName('tr').length;
-            document.getElementById('totalMembers').innerText = totalRows;
-
-            // Thông báo và reset form
-            alert(`Đã thêm dữ liệu thành công cho nhân vật: ${name}!`);
-            document.getElementById('memberForm').reset();
+        const $ = id => document.getElementById(id);
+        const numberIds = ['inputMatch','inputKills','inputAssists','inputResources','inputDamage','inputTower','inputHealing','inputTank','inputDeaths','inputSpecial'];
+        const fmt = value => new Intl.NumberFormat('vi-VN').format(Number(value) || 0);
+        const compact = value => Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(Number(value) || 0);
+        const score = m => Math.round((m.kills * 4 + m.assists * 2 + m.damage / 10000 + m.tower / 5000 + m.healing / 10000 - m.deaths * 3) * 10) / 10;
+        function loadMembers() {
+            try { const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)); return Array.isArray(saved) ? saved : seedMembers; }
+            catch { return seedMembers; }
         }
+        function persist() { localStorage.setItem(STORAGE_KEY, JSON.stringify(members)); }
+        function showToast(message, type = 'success') {
+            const el = document.createElement('div');
+            el.className = `toast flex items-center gap-2 px-4 py-3 rounded-xl border text-sm shadow-xl ${type === 'error' ? 'bg-red-950 border-red-800 text-red-200' : 'bg-emerald-950 border-emerald-800 text-emerald-200'}`;
+            el.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check'}"></i><span></span>`;
+            el.querySelector('span').textContent = message;
+            $('toastContainer').appendChild(el);
+            setTimeout(() => el.remove(), 3000);
+        }
+        function escapeText(value) { return String(value).replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;' }[char])); }
+        function render() {
+            const query = $('searchInput').value.trim().toLowerCase();
+            let visible = members.filter(m => m.name.toLowerCase().includes(query));
+            visible.sort((a,b) => { const av = sortKey === 'score' ? score(a) : a[sortKey]; const bv = sortKey === 'score' ? score(b) : b[sortKey]; return (av > bv ? 1 : av < bv ? -1 : 0) * (sortAsc ? 1 : -1); });
+            const body = $('memberTableBody'); body.replaceChildren();
+            visible.forEach(m => {
+                const row = document.createElement('tr'); row.className = 'hover:bg-slate-800/40 transition';
+                row.innerHTML = `<td class="p-3.5 font-bold text-blue-400">${escapeText(m.name)}</td><td class="p-3.5 text-center">${fmt(m.matches)}</td><td class="p-3.5 text-center text-emerald-400 font-semibold">${fmt(m.kills)}</td><td class="p-3.5 text-center">${fmt(m.assists)}</td><td class="p-3.5 text-center">${fmt(m.resources)}</td><td class="p-3.5 text-center font-semibold text-orange-400">${compact(m.damage)}</td><td class="p-3.5 text-center">${compact(m.tower)}</td><td class="p-3.5 text-center">${compact(m.healing)}</td><td class="p-3.5 text-center">${compact(m.tank)}</td><td class="p-3.5 text-center text-red-400">${fmt(m.deaths)}</td><td class="p-3.5 text-center text-fuchsia-400 font-bold">${score(m)}</td><td class="p-3.5 text-center whitespace-nowrap"><button data-action="edit" data-id="${m.id}" class="text-blue-400 hover:text-blue-300 mr-3" aria-label="Sửa ${escapeText(m.name)}"><i class="fa-solid fa-pen"></i></button><button data-action="delete" data-id="${m.id}" class="text-red-400 hover:text-red-300" aria-label="Xóa ${escapeText(m.name)}"><i class="fa-solid fa-trash"></i></button></td>`;
+                body.appendChild(row);
+            });
+            $('emptyState').classList.toggle('hidden', visible.length > 0); $('visibleMembers').textContent = visible.length; $('totalMembers').textContent = members.length;
+            updateStats(); updateChart();
+        }
+        function updateStats() {
+            const totals = members.reduce((a,m) => ({ matches:a.matches+m.matches, kills:a.kills+m.kills }), {matches:0,kills:0});
+            const top = [...members].sort((a,b) => score(b)-score(a))[0]; $('statMembers').textContent = members.length; $('statMatches').textContent = fmt(totals.matches); $('statKills').textContent = fmt(totals.kills); $('statTop').textContent = top ? `${top.name} (${score(top)})` : '—';
+        }
+        const chart = new Chart($('performanceChart').getContext('2d'), { type:'line', data:{ labels:[], datasets:[{ label:'Điểm hiệu suất', data:[], borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,.15)', borderWidth:2.5, fill:true, tension:.35, pointBackgroundColor:'#3b82f6' }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#94a3b8',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#94a3b8',font:{size:10}}}} } });
+        function updateChart() {
+            const metric = $('chartMetric').value; const list = [...members].sort((a,b) => score(b)-score(a)).slice(0,12);
+            const values = list.map(m => metric === 'score' ? score(m) : m[metric]); chart.data.labels = list.map(m => m.name); chart.data.datasets[0].label = $('chartMetric').selectedOptions[0].textContent; chart.data.datasets[0].data = values; chart.update();
+        }
+        function getFormData() {
+            const name = $('inputName').value.trim(); const data = { name };
+            numberIds.forEach(id => data[id.replace('input','').toLowerCase()] = Number($(id).value));
+            data.matches = data.match; delete data.match; data.special = data.special || 0; return data;
+        }
+        function validate(data) {
+            $('nameError').classList.add('hidden');
+            if (!data.name) { $('nameError').textContent = 'Vui lòng nhập tên nhân vật.'; $('nameError').classList.remove('hidden'); return false; }
+            if (members.some(m => m.name.toLowerCase() === data.name.toLowerCase() && m.id !== editingId)) { $('nameError').textContent = 'Tên nhân vật đã tồn tại.'; $('nameError').classList.remove('hidden'); return false; }
+            if (numberIds.some(id => !Number.isFinite($(id).valueAsNumber) || $(id).valueAsNumber < 0) || data.matches < 1) { showToast('Vui lòng kiểm tra các chỉ số số.', 'error'); return false; }
+            return true;
+        }
+        $('memberForm').addEventListener('submit', event => { event.preventDefault(); const data = getFormData(); if (!validate(data)) return; if (editingId) { members = members.map(m => m.id === editingId ? {...m, ...data} : m); showToast(`Đã cập nhật ${data.name}.`); } else { members.unshift({id: crypto.randomUUID(), ...data}); showToast(`Đã thêm ${data.name}.`); } persist(); resetForm(); render(); });
+        function resetForm() { editingId = null; $('memberForm').reset(); $('inputMatch').value = 1; $('formTitle').innerHTML = '<i class="fa-solid fa-pen-to-square mr-2"></i>Nhập chỉ số'; $('submitBtn').innerHTML = '<i class="fa-solid fa-plus mr-2"></i> Thêm vào hệ thống'; $('cancelEditBtn').classList.add('hidden'); }
+        function startEdit(id) { const m = members.find(x => x.id === id); if (!m) return; editingId = id; $('inputName').value = m.name; $('inputMatch').value = m.matches; $('inputKills').value = m.kills; $('inputAssists').value = m.assists; $('inputResources').value = m.resources; $('inputDamage').value = m.damage; $('inputTower').value = m.tower; $('inputHealing').value = m.healing; $('inputTank').value = m.tank; $('inputDeaths').value = m.deaths; $('inputSpecial').value = m.special; $('formTitle').innerHTML = '<i class="fa-solid fa-pen mr-2"></i>Chỉnh sửa chỉ số'; $('submitBtn').innerHTML = '<i class="fa-solid fa-floppy-disk mr-2"></i> Lưu thay đổi'; $('cancelEditBtn').classList.remove('hidden'); $('inputName').focus(); }
+        $('memberTableBody').addEventListener('click', event => { const button = event.target.closest('button'); if (!button) return; const id = button.dataset.id; if (button.dataset.action === 'edit') startEdit(id); if (button.dataset.action === 'delete') { const m = members.find(x => x.id === id); if (m && confirm(`Xóa dữ liệu của ${m.name}?`)) { members = members.filter(x => x.id !== id); persist(); render(); showToast(`Đã xóa ${m.name}.`); } } });
+        $('cancelEditBtn').addEventListener('click', resetForm); $('searchInput').addEventListener('input', render); $('chartMetric').addEventListener('change', updateChart);
+        document.querySelectorAll('[data-sort]').forEach(button => button.addEventListener('click', () => { const key = button.dataset.sort; if (sortKey === key) sortAsc = !sortAsc; else { sortKey = key; sortAsc = true; } render(); }));
+        $('clearAllBtn').addEventListener('click', () => { if (members.length && confirm('Xóa toàn bộ dữ liệu đã lưu trên trình duyệt?')) { members = []; persist(); resetForm(); render(); showToast('Đã xóa toàn bộ dữ liệu.'); } });
+        $('exportBtn').addEventListener('click', () => { if (!members.length) return showToast('Chưa có dữ liệu để xuất.', 'error'); const headers = ['Tên','Trận','Giết','Hỗ trợ','Vật tư','Sát thương','Sát thương trụ','Trị liệu','Chống chịu','Chết','Hóa vũ','Điểm hiệu suất']; const rows = members.map(m => [m.name,m.matches,m.kills,m.assists,m.resources,m.damage,m.tower,m.healing,m.tank,m.deaths,m.special,score(m)]); const csv = '\ufeff' + [headers,...rows].map(row => row.map(v => `"${String(v).replaceAll('"','""')}"`).join(',')).join('\n'); const url = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'})); const a = document.createElement('a'); a.href=url; a.download='bao-cao-hieu-suat.csv'; a.click(); URL.revokeObjectURL(url); showToast('Đã xuất báo cáo CSV.'); });
+        render();
     </script>
 </body>
 </html>
