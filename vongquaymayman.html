@@ -304,7 +304,7 @@ Phạm Thị D</textarea>
             }
         });
 
-        // Hàm lấy TOÀN BỘ danh sách từ cơ sở dữ liệu Supabase mà không bị bỏ sót
+        // Hàm lấy TOÀN BỘ danh sách y hệt xuất Excel từ Supabase
         async function loadListFromGA() {
             if (!supabaseClient) {
                 alert("⚠️ Chưa kết nối được tới cơ sở dữ liệu Supabase!");
@@ -354,24 +354,24 @@ Phạm Thị D</textarea>
                     }
 
                     const currentSessionData = sessions[targetKey] || [];
-                    let extractedNames = [];
+                    let exportedNames = [];
 
-                    // Lấy đầy đủ tất cả các dòng hiện có trong danh sách của buổi đó (Giữ nguyên số lượng dòng)
+                    // Lấy toàn bộ mọi dòng dữ liệu có sẵn trong buổi đó (giống hệt logic xuất Excel)
                     currentSessionData.forEach(item => {
                         const memberName = item.name ? item.name.trim() : "";
                         if (memberName) {
-                            extractedNames.push(memberName);
+                            exportedNames.push(memberName);
                         }
                     });
 
-                    if (extractedNames.length === 0) {
-                        alert(`⚠️ Không có thành viên nào trong danh sách "${targetKey}"!`);
+                    if (exportedNames.length === 0) {
+                        alert(`⚠️ Không có dữ liệu trong danh sách "${targetKey}"!`);
                         return;
                     }
 
-                    // Điền toàn bộ danh sách vào ô textarea
-                    document.getElementById("nameListInput").value = extractedNames.join('\n');
-                    alert(`✅ Đã tải thành công toàn bộ ${extractedNames.length} mục từ [${targetKey}] vào vòng quay!`);
+                    // Đổ toàn bộ danh sách ra textarea
+                    document.getElementById("nameListInput").value = exportedNames.join('\n');
+                    alert(`✅ Đã tải thành công toàn bộ ${exportedNames.length} dòng từ [${targetKey}] vào vòng quay!`);
                 } else {
                     alert("⚠️ Chưa có dữ liệu GA được lưu trên Cloud.");
                 }
