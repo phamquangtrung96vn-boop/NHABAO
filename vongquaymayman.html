@@ -37,7 +37,7 @@
 
         textarea {
             width: 90%;
-            height: 120px;
+            height: 140px;
             padding: 10px;
             font-size: 15px;
             border-radius: 5px;
@@ -51,7 +51,6 @@
             display: none;
         }
 
-        /* Bố cục chia giao diện chính: Vòng quay ở giữa, bảng bên phải */
         .main-layout {
             display: flex;
             justify-content: center;
@@ -69,7 +68,6 @@
             position: relative;
         }
 
-        /* Bảng danh sách trúng thưởng bên phải */
         .winner-board {
             background: rgba(0, 0, 0, 0.4);
             border: 2px solid #ffd700;
@@ -296,7 +294,6 @@ Phạm Thị D</textarea>
 
         let supabaseClient = null;
 
-        // Khởi tạo Supabase kết nối chung cơ sở dữ liệu
         window.addEventListener('DOMContentLoaded', () => {
             try {
                 const SUPABASE_URL = 'https://shblqenkrzjuklzrvoie.supabase.co';
@@ -307,7 +304,7 @@ Phạm Thị D</textarea>
             }
         });
 
-        // Hàm lấy trực tiếp danh sách các trận đấu ở cột bên phải từ trang GA (Tự động lấy buổi mới nhất)
+        // Hàm lấy TOÀN BỘ danh sách từ cơ sở dữ liệu Supabase mà không bị bỏ sót
         async function loadListFromGA() {
             if (!supabaseClient) {
                 alert("⚠️ Chưa kết nối được tới cơ sở dữ liệu Supabase!");
@@ -329,7 +326,6 @@ Phạm Thị D</textarea>
                 if (gaData && gaData.content) {
                     const content = gaData.content;
                     const sessions = content.sessions || {};
-                    const checkedState = content.checkedState || {};
                     const sessionKeys = Object.keys(sessions);
 
                     if (sessionKeys.length === 0) {
@@ -338,9 +334,9 @@ Phạm Thị D</textarea>
                     }
 
                     // Tự động trỏ sẵn vào buổi mới nhất (ở cuối danh sách)
-                    let targetKey = sessionKeys[sessionKeys.length - 1];
+                    let targetKey = sessionKeys[sessionKeys.length - 1]; 
                     
-                    let promptMsg = "Danh sách các buổi:\n" + sessionKeys.map((k, idx) => `${idx + 1}. ${k}`).join("\n") + "\n\nNhập tên hoặc số thứ tự buổi bạn muốn lấy:";
+                    let promptMsg = "Danh sách các buổi trong GA:\n" + sessionKeys.map((k, idx) => `${idx + 1}. ${k}`).join("\n") + "\n\nNhập tên hoặc số thứ tự buổi bạn muốn lấy:";
                     let choice = prompt(promptMsg, targetKey);
                     if (!choice) return;
                     
@@ -358,31 +354,26 @@ Phạm Thị D</textarea>
                     }
 
                     const currentSessionData = sessions[targetKey] || [];
-                    let selectedNames = [];
+                    let extractedNames = [];
 
-                    // Quét qua toàn bộ danh sách ở cột bên phải và lấy chính xác các dòng được hiển thị
+                    // Lấy đầy đủ tất cả các dòng hiện có trong danh sách của buổi đó (Giữ nguyên số lượng dòng)
                     currentSessionData.forEach(item => {
                         const memberName = item.name ? item.name.trim() : "";
                         if (memberName) {
-                            const memberChecks = checkedState[memberName] || {};
-                            const matchType = item.type; // 'scrim1', 'scrim2', 'scrim3', 'bc'
-                            
-                            if (matchType && memberChecks[matchType]) {
-                                selectedNames.push(memberName);
-                            }
+                            extractedNames.push(memberName);
                         }
                     });
 
-                    if (selectedNames.length === 0) {
-                        alert(`⚠️ Không có thành viên nào được tích chọn trong danh sách "${targetKey}"!`);
+                    if (extractedNames.length === 0) {
+                        alert(`⚠️ Không có thành viên nào trong danh sách "${targetKey}"!`);
                         return;
                     }
 
-                    // Điền danh sách vào ô textarea
-                    document.getElementById("nameListInput").value = selectedNames.join('\n');
-                    alert(`✅ Đã tải thành công ${selectedNames.length} mục từ cột bên phải [${targetKey}] của trang GA vào vòng quay!`);
+                    // Điền toàn bộ danh sách vào ô textarea
+                    document.getElementById("nameListInput").value = extractedNames.join('\n');
+                    alert(`✅ Đã tải thành công toàn bộ ${extractedNames.length} mục từ [${targetKey}] vào vòng quay!`);
                 } else {
-                    alert("⚠️ Chưa có dữ liệu GA được lưu trên Cloud. Hãy bấm 'Lưu Cloud' ở trang quản lý GA trước.");
+                    alert("⚠️ Chưa có dữ liệu GA được lưu trên Cloud.");
                 }
             } catch (err) {
                 alert("❌ Lỗi kết nối lấy dữ liệu GA: " + err.message);
